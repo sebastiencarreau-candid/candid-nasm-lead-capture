@@ -42,7 +42,10 @@ exports.handler = async function(event) {
     if (data.error) throw new Error(data.error.message);
 
     const text = data.content.map(i => i.text || '').join('');
-    const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No valid JSON found in response');
+    const parsed = JSON.parse(jsonMatch[0]);
 
     return {
       statusCode: 200,
