@@ -208,7 +208,7 @@
     <div class="card">
       <div class="card-title">Contact info — collected in conversation</div>
       <div class="field-group"><label>Email address</label><input type="email" id="trEmail" placeholder="name@pattersondental.com"></div>
-      <div class="field-group"><label>Mobile phone</label><input type="tel" id="trPhone" placeholder="+1 (555) 000-0000"></div>
+      <div class="field-group"><label>Mobile phone</label><input type="tel" id="trPhone" placeholder="+1 (555) 000-0000" oninput="formatPhone(this)" maxlength="17"></div>
     </div>
     <div id="step2Error"></div>
     <button class="btn-primary" onclick="matchAE()">Match to AE & continue →</button>
