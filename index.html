@@ -25,16 +25,14 @@
   body { font-family: 'DM Sans', sans-serif; background: var(--gray-light); min-height: 100vh; }
   .app { max-width: 460px; margin: 0 auto; min-height: 100vh; background: var(--white); box-shadow: 0 0 40px rgba(0,0,0,0.08); }
 
-  /* HEADER */
   .header { background: var(--gray-light); padding: 20px 24px 16px; border-bottom: 1px solid var(--border); text-align: center; }
   .logo-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
   .logo-candid { height: 18px; object-fit: contain; }
-  .logo-divider { width: 1px; height: 24px; background: var(--border); }
+  .logo-divider { width: 1px; height: 28px; background: var(--border); }
   .logo-patterson { height: 38px; object-fit: contain; }
   .header-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); line-height: 1.2; margin-bottom: 4px; }
   .header-sub { font-size: 12px; color: var(--gray); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
 
-  /* PROGRESS */
   .progress-wrap { padding: 16px 24px 0; background: var(--white); }
   .progress-labels { display: flex; margin-bottom: 8px; }
   .progress-label { flex: 1; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--border); transition: color 0.3s; }
@@ -45,18 +43,15 @@
   .progress-step.done { background: var(--navy); }
   .progress-step.active { background: var(--red); }
 
-  /* RESTART */
   .restart-bar { padding: 10px 24px 0; text-align: right; }
   .restart-btn { background: none; border: none; font-size: 12px; color: var(--gray); cursor: pointer; font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; }
   .restart-btn:hover { color: var(--red); }
 
-  /* STEPS */
   .step { display: none; padding: 20px 24px 40px; }
   .step.active { display: block; }
   .step-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; }
   .step-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); margin-bottom: 20px; line-height: 1.3; }
 
-  /* UPLOAD */
   .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 36px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--gray-light); }
   .upload-zone:hover { border-color: var(--red); background: var(--red-light); }
   .upload-icon { font-size: 36px; margin-bottom: 12px; display: block; }
@@ -64,11 +59,9 @@
   .upload-zone p { font-size: 13px; color: var(--gray); }
   .preview-img { width: 100%; border-radius: 12px; margin-bottom: 16px; max-height: 260px; object-fit: contain; border: 1px solid var(--border); background: var(--gray-light); }
 
-  /* CARDS */
   .card { background: var(--gray-light); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
   .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); margin-bottom: 14px; }
 
-  /* FIELDS */
   .field-group { margin-bottom: 12px; }
   .field-group:last-child { margin-bottom: 0; }
   .field-group label { display: block; font-size: 11px; font-weight: 600; color: var(--gray); margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase; }
@@ -78,7 +71,12 @@
   .field-group input::placeholder { color: #C4C9D4; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  /* BUTTONS */
+  .branch-wrap { position: relative; }
+  .branch-dropdown { display: none; position: absolute; z-index: 100; background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; max-height: 200px; overflow-y: auto; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-top: 4px; }
+  .branch-option { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--navy); border-bottom: 1px solid var(--border); }
+  .branch-option:last-child { border-bottom: none; }
+  .branch-option:hover { background: var(--red-light); color: var(--red); }
+
   .btn-primary { width: 100%; padding: 15px; font-size: 15px; font-weight: 600; border-radius: 12px; cursor: pointer; border: none; background: var(--red); color: white; font-family: 'DM Sans', sans-serif; transition: background 0.2s, transform 0.1s; }
   .btn-primary:hover { background: var(--red-dark); }
   .btn-primary:active { transform: scale(0.98); }
@@ -86,21 +84,17 @@
   .btn-ghost { width: 100%; background: none; border: none; font-size: 13px; color: var(--gray); cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
   .btn-ghost:hover { color: var(--navy); }
 
-  /* AI BADGE */
   .ai-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--red); background: var(--red-light); padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; border: 1px solid rgba(232,40,30,0.2); }
 
-  /* SPINNER */
   .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 7px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* AE MATCH */
   .ae-match-card { background: var(--navy); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
   .ae-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
   .ae-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 4px; }
   .ae-branch { font-size: 12px; color: rgba(255,255,255,0.6); }
   .ae-unmatched { font-size: 12px; color: #FCA5A5; margin-top: 4px; }
 
-  /* TR SUMMARY */
   .tr-card { background: var(--gray-light); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; border-left: 3px solid var(--red); }
   .tr-name { font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
   .tr-role { font-size: 13px; color: var(--gray); margin-bottom: 8px; }
@@ -110,7 +104,6 @@
   .tag-navy { background: var(--navy-light); color: var(--navy); }
   .tag-green { background: var(--success-bg); color: var(--success); font-weight: 600; }
 
-  /* NOTIF OPTIONS */
   .notif-option { border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: var(--white); display: flex; align-items: center; gap: 14px; }
   .notif-option:hover { border-color: var(--navy); }
   .notif-option.selected { border-color: var(--red); background: var(--red-light); }
@@ -122,19 +115,14 @@
   .notif-option.selected .notif-check { background: var(--red); border-color: var(--red); }
   .notif-option.selected .notif-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
 
-  /* MESSAGE PREVIEW */
   .preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; margin-top: 16px; }
   .message-box { background: var(--gray-light); border-radius: 12px; padding: 14px; font-size: 12px; line-height: 1.7; color: var(--navy); white-space: pre-wrap; border: 1px solid var(--border); margin-bottom: 16px; max-height: 180px; overflow-y: auto; }
 
-  /* STATUS */
   .error-msg { color: #991B1B; font-size: 13px; padding: 10px 14px; background: #FEE2E2; border-radius: 10px; margin-bottom: 12px; border-left: 3px solid var(--red); }
   .status-success { font-size: 13px; color: var(--success); background: var(--success-bg); border-radius: 10px; padding: 12px 16px; border-left: 3px solid var(--success); }
   .status-warn { font-size: 13px; color: var(--warning); background: var(--warning-bg); border-radius: 10px; padding: 12px 16px; }
-
-  /* DIVIDER */
   .divider { height: 1px; background: var(--border); margin: 16px 0; }
 
-  /* SUCCESS */
   .success-wrap { text-align: center; padding: 20px 0 32px; }
   .success-ring { width: 72px; height: 72px; border-radius: 50%; background: var(--success-bg); border: 2px solid var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
   .success-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 8px; }
@@ -144,7 +132,6 @@
 <body>
 <div class="app">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="logo-row">
       <img class="logo-candid" src="https://cdn.prod.website-files.com/601a0e7f102ff5b24874c42b/63d9b5ce58edcf6bdd0be3ce_CandidProLogo-red%20(1).png" alt="CandidPro" onerror="this.style.display='none';document.getElementById('logo-text').style.display='block'">
@@ -157,7 +144,6 @@
     <div class="header-sub">Interested TR Intake Form · 2026</div>
   </div>
 
-  <!-- PROGRESS -->
   <div class="progress-wrap">
     <div class="progress-labels">
       <span class="progress-label active" id="pl1">Photo</span>
@@ -173,7 +159,6 @@
     </div>
   </div>
 
-  <!-- RESTART -->
   <div class="restart-bar">
     <button class="restart-btn" onclick="resetApp()">↺ Start over</button>
   </div>
@@ -207,8 +192,17 @@
       </div>
       <div class="field-group"><label>Title / role</label><input type="text" id="trRole"></div>
       <div class="two-col">
-        <div class="field-group"><label>Branch</label><input type="text" id="branchName"></div>
-        <div class="field-group"><label>Region</label><input type="text" id="region"></div>
+        <div class="field-group">
+          <label>Branch</label>
+          <div class="branch-wrap">
+            <input type="text" id="branchName" placeholder="Type to search..." autocomplete="off"
+              oninput="filterBranches(this.value)"
+              onfocus="showDropdown()"
+              onblur="setTimeout(hideDropdown, 150)">
+            <div class="branch-dropdown" id="branchDropdown"></div>
+          </div>
+        </div>
+        <div class="field-group"><label>Region</label><input type="text" id="region" placeholder="Auto-filled"></div>
       </div>
     </div>
     <div class="card">
@@ -262,63 +256,77 @@
 const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 
 const AE_MAP = [
-  {city:"Cincinnati",branch:"OH - Mid-South Ohio",ae:"Adam Young",disposition:"Satellite"},
-  {city:"Cleveland",branch:"OH - Cleveland",ae:"Adam Young",disposition:"Primary"},
-  {city:"Columbus",branch:"OH - Mid-South Ohio",ae:"Adam Young",disposition:"Primary"},
-  {city:"Louisville",branch:"KY - Louisville",ae:"Adam Young",disposition:"Primary"},
-  {city:"East Bay",branch:"CA - East Bay",ae:"Alex Cagle-Sanchez",disposition:"Primary"},
-  {city:"Sacramento",branch:"CA - Sacramento",ae:"Alex Cagle-Sanchez",disposition:"Primary"},
-  {city:"South Florida",branch:"FL - Fort Lauderdale",ae:"Anthony Sena",disposition:"Primary"},
-  {city:"Atlanta",branch:"GA - Atlanta",ae:"Ashley Klanac",disposition:"Primary"},
-  {city:"Nashville",branch:"TN - Nashville",ae:"Ashley Klanac",disposition:"Primary"},
-  {city:"Denver",branch:"CO - Denver",ae:"Bailey Binnebose",disposition:"Primary"},
-  {city:"Albuquerque",branch:"NM - Albuquerque",ae:"Bailey Binnebose",disposition:"Primary"},
-  {city:"Salt Lake City",branch:"UT - Salt Lake City",ae:"Bobbie Holmes",disposition:"Primary"},
-  {city:"Raleigh",branch:"NC - Raleigh",ae:"Caity Rutty",disposition:"Primary"},
-  {city:"New England",branch:"MA - New England",ae:"Chris Rocci",disposition:"Primary"},
-  {city:"Portland",branch:"OR - Portland",ae:"Christa Skinner",disposition:"Primary"},
-  {city:"Medford",branch:"OR - Medford",ae:"Christa Skinner",disposition:"Satellite"},
-  {city:"Spokane",branch:"WA - Spokane",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Las Vegas",branch:"NV - Las Vegas",ae:"Greg Haskins",disposition:"Satellite"},
-  {city:"San Diego",branch:"CA - San Diego",ae:"Greg Haskins",disposition:"Primary"},
-  {city:"Grand Rapids",branch:"MI - Greater Michigan",ae:"Hunter Ackerman",disposition:"Primary"},
-  {city:"Detroit",branch:"MI - Greater Michigan",ae:"Hunter Ackerman",disposition:"Satellite"},
-  {city:"Indianapolis",branch:"IN - Indianapolis",ae:"Hunter Ackerman",disposition:"Primary"},
-  {city:"Baltimore",branch:"MD - Baltimore",ae:"Jess Parker",disposition:"Primary"},
-  {city:"Richmond",branch:"VA - Richmond",ae:"Jess Parker",disposition:"Primary"},
-  {city:"Austin",branch:"TX - Austin",ae:"Jill Straetker",disposition:"Primary"},
-  {city:"San Antonio",branch:"TX - San Antonio",ae:"Jill Straetker",disposition:"Primary"},
-  {city:"Philadelphia",branch:"PA - Philadelphia",ae:"Jim DiQuattro",disposition:"Primary"},
-  {city:"Pittsburgh",branch:"PA - Pittsburgh",ae:"Jim DiQuattro",disposition:"Primary"},
-  {city:"St Louis",branch:"MO - St Louis",ae:"Kate Quaka",disposition:"Primary"},
-  {city:"Kansas City",branch:"KS - Kansas City",ae:"Kate Quaka",disposition:"Primary"},
-  {city:"Tampa",branch:"FL - Tampa",ae:"Kelley Richardson",disposition:"Primary"},
-  {city:"Orlando",branch:"FL - Orlando",ae:"Kelley Richardson",disposition:"Primary"},
-  {city:"Dallas",branch:"TX - Dallas Ft Worth",ae:"Kendra Curry",disposition:"Primary"},
-  {city:"Oklahoma City",branch:"OK - Oklahoma City",ae:"Kendra Curry",disposition:"Primary"},
-  {city:"Minnesota",branch:"MN - Eagan",ae:"Kyle Walker",disposition:"Primary"},
-  {city:"Fargo",branch:"ND - Fargo",ae:"Kyle Walker",disposition:"Primary"},
-  {city:"Seattle",branch:"WA - Seattle",ae:"Landon Moeller",disposition:"Primary"},
-  {city:"Los Angeles",branch:"CA - Los Angeles",ae:"Leah Maiman",disposition:"Primary"},
-  {city:"Milwaukee",branch:"WI - Milwaukee",ae:"Linda Ehlers",disposition:"Primary"},
-  {city:"Chicago",branch:"IL - Chicago",ae:"Linda Ehlers",disposition:"Primary"},
-  {city:"Omaha",branch:"NE - Omaha",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Des Moines",branch:"IA - Des Moines",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Birmingham",branch:"AL-Birmingham",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Hawaii",branch:"HI - Kapolei",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Jackson",branch:"MS - Jackson",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Little Rock",branch:"AR - Little Rock",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Memphis",branch:"TN - Memphis",ae:"Josh Marks",disposition:"Primary"},
-  {city:"New Orleans",branch:"LA - New Orleans",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Rochester",branch:"NY - Rochester",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Shreveport",branch:"LA - Shreveport",ae:"Josh Marks",disposition:"Primary"},
-  {city:"Houston",branch:"TX - Houston",ae:"Sam Moore",disposition:"Primary"},
-  {city:"Charlotte",branch:"NC - Charlotte",ae:"Shara Hamrick",disposition:"Primary"},
-  {city:"Charleston",branch:"SC - Charleston",ae:"Shara Hamrick",disposition:"Primary"},
-  {city:"Greenville",branch:"SC - Greenville",ae:"Shara Hamrick",disposition:"Primary"},
-  {city:"Columbia",branch:"SC - Columbia",ae:"Shara Hamrick",disposition:"Primary"},
-  {city:"Mesa",branch:"AZ-Mesa",ae:"Ryan Serrano",disposition:"Primary"},
-  {city:"Metro NY/NJ",branch:"NJ - Totowa",ae:"TBD",disposition:"Primary"},
+  {city:"Louisville",branch:"KY - Louisville",ae:"Adam Young",region:"Ohio Valley"},
+  {city:"Cleveland",branch:"OH - Cleveland",ae:"Adam Young",region:"Ohio Valley"},
+  {city:"Columbus",branch:"OH - Mid-South Ohio",ae:"Adam Young",region:"Ohio Valley"},
+  {city:"East Bay",branch:"CA - East Bay",ae:"Alex Cagle-Sanchez",region:"Western"},
+  {city:"Sacramento",branch:"CA - Sacramento",ae:"Alex Cagle-Sanchez",region:"Western"},
+  {city:"South Florida",branch:"FL - Fort Lauderdale",ae:"Anthony Sena",region:"Southeast"},
+  {city:"Atlanta",branch:"GA - Atlanta",ae:"Ashley Klanac",region:"Southeast"},
+  {city:"Nashville",branch:"TN - Nashville",ae:"Ashley Klanac",region:"Southeast"},
+  {city:"Denver",branch:"CO - Denver",ae:"Bailey Binnebose",region:"Mountain West"},
+  {city:"Albuquerque",branch:"NM - Albuquerque",ae:"Bailey Binnebose",region:"South Central"},
+  {city:"Salt Lake City",branch:"UT - Salt Lake City",ae:"Bobbie Holmes",region:"Western"},
+  {city:"Raleigh",branch:"NC - Raleigh",ae:"Caity Rutty",region:"Southeast"},
+  {city:"New England",branch:"MA - New England",ae:"Chris Rocci",region:"Northeast"},
+  {city:"Medford",branch:"OR - Medford",ae:"Christa Skinner",region:"Mountain West"},
+  {city:"Portland",branch:"OR - Portland",ae:"Christa Skinner",region:"Mountain West"},
+  {city:"Spokane",branch:"WA - Spokane",ae:"Josh Marks",region:"Mountain West"},
+  {city:"San Diego",branch:"CA - San Diego",ae:"Greg Haskins",region:"Western"},
+  {city:"Las Vegas",branch:"NV - Las Vegas",ae:"Greg Haskins",region:"Western"},
+  {city:"Indianapolis",branch:"IN - Indianapolis",ae:"Hunter Ackerman",region:"Ohio Valley"},
+  {city:"Greater Michigan",branch:"MI - Greater Michigan",ae:"Hunter Ackerman",region:"Ohio Valley"},
+  {city:"Baltimore",branch:"MD - Baltimore",ae:"Jess Parker",region:"Northeast"},
+  {city:"Richmond",branch:"VA - Richmond",ae:"Jess Parker",region:"Northeast"},
+  {city:"Austin",branch:"TX - Austin",ae:"Jill Straetker",region:"South Central"},
+  {city:"San Antonio",branch:"TX - San Antonio",ae:"Jill Straetker",region:"South Central"},
+  {city:"Philadelphia",branch:"PA - Philadelphia",ae:"Jim DiQuattro",region:"Northeast"},
+  {city:"Pittsburgh",branch:"PA - Pittsburgh",ae:"Jim DiQuattro",region:"Northeast"},
+  {city:"Birmingham",branch:"AL-Birmingham",ae:"Josh Marks",region:"South Central"},
+  {city:"Little Rock",branch:"AR - Little Rock",ae:"Josh Marks",region:"South Central"},
+  {city:"Hawaii",branch:"HI - Kapolei",ae:"Josh Marks",region:"Western"},
+  {city:"Des Moines",branch:"IA - Des Moines",ae:"Josh Marks",region:"Mountain West"},
+  {city:"New Orleans",branch:"LA - New Orleans",ae:"Josh Marks",region:"South Central"},
+  {city:"Shreveport",branch:"LA - Shreveport",ae:"Josh Marks",region:"South Central"},
+  {city:"Jackson",branch:"MS - Jackson",ae:"Josh Marks",region:"South Central"},
+  {city:"Omaha",branch:"NE - Omaha",ae:"Josh Marks",region:"Mountain West"},
+  {city:"Rochester",branch:"NY - Rochester",ae:"Josh Marks",region:"Northeast"},
+  {city:"Memphis",branch:"TN - Memphis",ae:"Josh Marks",region:"Southeast"},
+  {city:"Kansas City",branch:"KS - Kansas City",ae:"Kate Quaka",region:"South Central"},
+  {city:"St Louis",branch:"MO - St Louis",ae:"Kate Quaka",region:"Ohio Valley"},
+  {city:"Orlando",branch:"FL - Orlando",ae:"Kelley Richardson",region:"Southeast"},
+  {city:"Tampa",branch:"FL - Tampa",ae:"Kelley Richardson",region:"Southeast"},
+  {city:"Oklahoma City",branch:"OK - Oklahoma City",ae:"Kendra Curry",region:"South Central"},
+  {city:"Dallas",branch:"TX - Dallas Ft Worth",ae:"Kendra Curry",region:"South Central"},
+  {city:"Minnesota",branch:"MN - Eagan",ae:"Kyle Walker",region:"Mountain West"},
+  {city:"Fargo",branch:"ND - Fargo",ae:"Kyle Walker",region:"Mountain West"},
+  {city:"Seattle",branch:"WA - Seattle",ae:"Landon Moeller",region:"Mountain West"},
+  {city:"Los Angeles",branch:"CA - Los Angeles",ae:"Leah Maiman",region:"Western"},
+  {city:"Chicago",branch:"IL - Chicago",ae:"Linda Ehlers",region:"Ohio Valley"},
+  {city:"Milwaukee",branch:"WI - Milwaukee",ae:"Linda Ehlers",region:"Ohio Valley"},
+  {city:"Houston",branch:"TX - Houston",ae:"Sam Moore",region:"South Central"},
+  {city:"Charlotte",branch:"NC - Charlotte",ae:"Shara Hamrick",region:"Southeast"},
+  {city:"Charleston",branch:"SC - Charleston",ae:"Shara Hamrick",region:"Southeast"},
+  {city:"Columbia",branch:"SC - Columbia",ae:"Shara Hamrick",region:"Southeast"},
+  {city:"Greenville",branch:"SC - Greenville",ae:"Shara Hamrick",region:"Southeast"},
+  {city:"Mesa",branch:"AZ-Mesa",ae:"Ryan Serrano",region:"Western"},
+  {city:"Metro NY/NJ",branch:"NJ - Totowa",ae:"TBD",region:"Northeast"},
+  {city:"Corporate",branch:"Corporate",ae:"Sebastien Carreau",region:"Corporate"},
+];
+
+const BRANCH_LIST = [
+  "AL-Birmingham","AR - Little Rock","AZ-Mesa","CA - East Bay","CA - Los Angeles",
+  "CA - Sacramento","CA - San Diego","CO - Denver","FL - Fort Lauderdale","FL - Orlando",
+  "FL - Tampa","GA - Atlanta","HI - Kapolei","IA - Des Moines","IL - Chicago",
+  "IN - Indianapolis","KS - Kansas City","KY - Louisville","LA - New Orleans",
+  "LA - Shreveport","MA - New England","MD - Baltimore","MI - Greater Michigan",
+  "MN - Eagan","MO - St Louis","MS - Jackson","NC - Charlotte","NC - Raleigh",
+  "ND - Fargo","NE - Omaha","NJ - Totowa","NM - Albuquerque","NV - Las Vegas",
+  "NY - Rochester","OH - Cleveland","OH - Mid-South Ohio","OK - Oklahoma City",
+  "OR - Medford","OR - Portland","PA - Philadelphia","PA - Pittsburgh","SC - Charleston",
+  "SC - Columbia","SC - Greenville","TN - Memphis","TN - Nashville","TX - Austin",
+  "TX - Dallas Ft Worth","TX - Houston","TX - San Antonio","UT - Salt Lake City",
+  "VA - Richmond","WA - Seattle","WA - Spokane","WI - Milwaukee","Corporate"
 ];
 
 let state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
@@ -380,8 +388,10 @@ async function analyzeImage() {
     document.getElementById('firstName').value = parsed.firstName || '';
     document.getElementById('lastName').value = parsed.lastName || '';
     document.getElementById('trRole').value = parsed.role || '';
-    document.getElementById('branchName').value = parsed.branchName || '';
-    document.getElementById('region').value = parsed.region || '';
+
+    const branchVal = parsed.branchName || '';
+    document.getElementById('branchName').value = branchVal;
+    autofillRegion(branchVal);
     ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
     document.getElementById('aiBadge').style.display = 'inline-flex';
     goStep(2);
@@ -391,6 +401,47 @@ async function analyzeImage() {
   }
   btn.innerHTML = 'Extract badge info with AI';
   btn.disabled = false;
+}
+
+function autofillRegion(branchVal) {
+  const bl = branchVal.toLowerCase();
+  const match = AE_MAP.find(r => r.branch.toLowerCase() === bl)
+    || AE_MAP.find(r => bl.includes(r.branch.toLowerCase()) || r.branch.toLowerCase().includes(bl));
+  if (match && match.region) {
+    const regionField = document.getElementById('region');
+    regionField.value = match.region;
+    regionField.classList.add('ai-filled');
+  }
+}
+
+function filterBranches(val) {
+  const filtered = val.length === 0
+    ? BRANCH_LIST
+    : BRANCH_LIST.filter(b => b.toLowerCase().includes(val.toLowerCase()));
+  renderDropdown(filtered);
+}
+
+function renderDropdown(list) {
+  const dropdown = document.getElementById('branchDropdown');
+  if (list.length === 0) { dropdown.style.display = 'none'; return; }
+  dropdown.innerHTML = list.map(b =>
+    `<div class="branch-option" onmousedown="selectBranch('${b}')">${b}</div>`
+  ).join('');
+  dropdown.style.display = 'block';
+}
+
+function selectBranch(branch) {
+  document.getElementById('branchName').value = branch;
+  autofillRegion(branch);
+  hideDropdown();
+}
+
+function showDropdown() {
+  filterBranches(document.getElementById('branchName').value);
+}
+
+function hideDropdown() {
+  document.getElementById('branchDropdown').style.display = 'none';
 }
 
 function matchAE() {
@@ -404,19 +455,21 @@ function matchAE() {
   if (!firstName || !lastName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least a first and last name.</div>'; return; }
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
   document.getElementById('step2Error').innerHTML = '';
+
   const bl = branchName.toLowerCase();
-  const rl = region.toLowerCase();
   let match = AE_MAP.find(r => r.branch.toLowerCase() === bl);
-  if (!match) match = AE_MAP.find(r => bl.includes(r.city.toLowerCase()) || rl.includes(r.city.toLowerCase()));
+  if (!match) match = AE_MAP.find(r => bl.includes(r.city.toLowerCase()) || r.city.toLowerCase().includes(bl));
   if (!match) match = AE_MAP.find(r => { const p = bl.split(' - ').pop(); return r.branch.toLowerCase().includes(p) || bl.includes(r.branch.toLowerCase().split(' - ').pop()); });
+
   state.matchedAE = match ? match.ae : 'Unassigned';
-  state.currentLead = { firstName, lastName, role, branchName, region, email, phone };
+  state.matchedRegion = match ? match.region : region;
+  state.currentLead = { firstName, lastName, role, branchName, region: match ? match.region : region, email, phone };
 
   document.getElementById('trSummaryBlock').innerHTML = `
     <div class="tr-card">
       <div class="tr-name">${firstName} ${lastName}</div>
       <div class="tr-role">${role}</div>
-      <div class="tr-branch">${branchName}${region ? ' · ' + region : ''}</div>
+      <div class="tr-branch">${branchName}${state.matchedRegion ? ' · ' + state.matchedRegion : ''}</div>
       <div class="contact-tags">
         ${email ? '<span class="tag tag-navy">✉ ' + email + '</span>' : ''}
         ${phone ? '<span class="tag tag-navy">📱 ' + phone + '</span>' : ''}
@@ -428,7 +481,7 @@ function matchAE() {
       <div class="ae-label">Assigned CandidPro AE</div>
       <div class="ae-name">${state.matchedAE}</div>
       ${match
-        ? '<div class="ae-branch">' + match.branch + ' · ' + match.disposition + '</div>'
+        ? '<div class="ae-branch">' + match.branch + ' · ' + match.region + '</div>'
         : '<div class="ae-unmatched">⚠ Branch not matched — please verify</div>'}
     </div>`;
 
