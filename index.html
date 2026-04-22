@@ -462,7 +462,7 @@ function matchAE() {
 
   if (!firstName || !lastName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least a first and last name.</div>'; return; }
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
-  if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list.</div>'; return; }
+  if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
 
   const validBranch = BRANCH_LIST.includes(branchName);
   if (!validBranch) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Branch must match the provided list. Please select from the dropdown or choose "N/A".</div>'; return; }
