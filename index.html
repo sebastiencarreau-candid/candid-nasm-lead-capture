@@ -175,8 +175,14 @@
     <input type="file" id="badgeInput" accept="image/*" onchange="handleImage(event)" style="display:none;">
     <img id="previewImg" class="preview-img" style="display:none;">
     <div id="step1Error"></div>
-    <button class="btn-primary" id="analyzeBtn" style="display:none;margin-top:16px;" onclick="analyzeImage()">Extract badge info with AI</button>
+    <button class="btn-primary" id="analyzeBtn" style="display:none;margin-top:16px;" onclick="analyzeImage()">Extract badge Info</button>
     <button class="btn-ghost" id="skipBtn" style="display:none;margin-top:4px;" onclick="skipToManual()">Enter info manually instead</button>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:16px;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <span style="font-size:12px;color:var(--gray);">or</span>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+    <button class="btn-ghost" style="margin-top:8px;" onclick="skipToManual()">Enter info manually instead</button>
   </div>
 
   <!-- STEP 2 -->
@@ -312,6 +318,7 @@ const AE_MAP = [
   {city:"Mesa",branch:"AZ-Mesa",ae:"Ryan Serrano",region:"Western"},
   {city:"Metro NY/NJ",branch:"NJ - Totowa",ae:"TBD",region:"Northeast"},
   {city:"Corporate",branch:"Corporate",ae:"Sebastien Carreau",region:"Corporate"},
+  {city:"N/A",branch:"N/A",ae:"Sebastien Carreau",region:"N/A"},
 ];
 
 const BRANCH_LIST = [
@@ -326,7 +333,7 @@ const BRANCH_LIST = [
   "OR - Medford","OR - Portland","PA - Philadelphia","PA - Pittsburgh","SC - Charleston",
   "SC - Columbia","SC - Greenville","TN - Memphis","TN - Nashville","TX - Austin",
   "TX - Dallas Ft Worth","TX - Houston","TX - San Antonio","UT - Salt Lake City",
-  "VA - Richmond","WA - Seattle","WA - Spokane","WI - Milwaukee","Corporate"
+  "VA - Richmond","WA - Seattle","WA - Spokane","WI - Milwaukee","Corporate","N/A"
 ];
 
 let state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
@@ -452,8 +459,14 @@ function matchAE() {
   const region = document.getElementById('region').value.trim();
   const email = document.getElementById('trEmail').value.trim();
   const phone = document.getElementById('trPhone').value.trim();
+
   if (!firstName || !lastName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least a first and last name.</div>'; return; }
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
+  if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list.</div>'; return; }
+
+  const validBranch = BRANCH_LIST.includes(branchName);
+  if (!validBranch) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Branch must match the provided list. Please select from the dropdown or choose "N/A".</div>'; return; }
+
   document.getElementById('step2Error').innerHTML = '';
 
   const bl = branchName.toLowerCase();
@@ -461,7 +474,7 @@ function matchAE() {
   if (!match) match = AE_MAP.find(r => bl.includes(r.city.toLowerCase()) || r.city.toLowerCase().includes(bl));
   if (!match) match = AE_MAP.find(r => { const p = bl.split(' - ').pop(); return r.branch.toLowerCase().includes(p) || bl.includes(r.branch.toLowerCase().split(' - ').pop()); });
 
-  state.matchedAE = match ? match.ae : 'Unassigned';
+  state.matchedAE = match ? match.ae : 'Sebastien Carreau';
   state.matchedRegion = match ? match.region : region;
   state.currentLead = { firstName, lastName, role, branchName, region: match ? match.region : region, email, phone };
 
