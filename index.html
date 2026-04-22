@@ -3,162 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>CandidPro NASM Lead Capture</title>
+<title>NASM - CandidPro Intake</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --red: #E8281E;
+    --red-dark: #C41F16;
+    --red-light: #FFF0EF;
+    --navy: #1A2B4A;
+    --navy-light: #EEF1F6;
+    --gray: #6B7280;
+    --gray-light: #F7F8FA;
+    --border: #E5E7EB;
+    --white: #FFFFFF;
+    --success: #0A7C4E;
+    --success-bg: #ECFDF5;
+    --warning-bg: #FFFBEB;
+    --warning: #92400E;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; }
-  .app { max-width: 480px; margin: 0 auto; padding: 1rem; background: #f5f5f5; min-height: 100vh; }
-  .header { text-align: center; background: white; margin: -1rem -1rem 1.5rem; padding: 1.5rem 1rem 1rem; border-bottom: 1px solid #e5e5e5; }
-  .header h1 { font-size: 18px; font-weight: 600; color: #111; }
-  .header p { font-size: 13px; color: #888; margin-top: 4px; }
-  .logo-bar { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
-  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: #0066CC; }
-  .logo-text { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; color: #555; text-transform: uppercase; }
-  .restart-bar { text-align: right; margin-bottom: 8px; }
-  .step { display: none; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--gray-light); min-height: 100vh; }
+  .app { max-width: 460px; margin: 0 auto; min-height: 100vh; background: var(--white); box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+
+  /* HEADER */
+  .header { background: var(--gray-light); padding: 20px 24px 16px; border-bottom: 1px solid var(--border); text-align: center; }
+  .logo-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
+  .logo-candid { height: 24px; object-fit: contain; }
+  .logo-divider { width: 1px; height: 24px; background: var(--border); }
+  .logo-patterson { height: 24px; object-fit: contain; }
+  .header-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); line-height: 1.2; margin-bottom: 4px; }
+  .header-sub { font-size: 12px; color: var(--gray); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
+
+  /* PROGRESS */
+  .progress-wrap { padding: 16px 24px 0; background: var(--white); }
+  .progress-labels { display: flex; margin-bottom: 8px; }
+  .progress-label { flex: 1; text-align: center; font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--border); transition: color 0.3s; }
+  .progress-label.active { color: var(--red); }
+  .progress-label.done { color: var(--navy); }
+  .progress-bar { display: flex; gap: 4px; }
+  .progress-step { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+  .progress-step.done { background: var(--navy); }
+  .progress-step.active { background: var(--red); }
+
+  /* RESTART */
+  .restart-bar { padding: 10px 24px 0; text-align: right; }
+  .restart-btn { background: none; border: none; font-size: 12px; color: var(--gray); cursor: pointer; font-family: 'DM Sans', sans-serif; display: inline-flex; align-items: center; gap: 4px; padding: 4px 0; }
+  .restart-btn:hover { color: var(--red); }
+
+  /* STEPS */
+  .step { display: none; padding: 20px 24px 40px; }
   .step.active { display: block; }
-  .step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #999; text-transform: uppercase; margin-bottom: 1rem; }
-  .card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
-  .upload-zone { border: 2px dashed #ccc; border-radius: 12px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; background: white; }
-  .upload-zone:hover { background: #f9f9f9; }
-  .upload-icon { font-size: 40px; margin-bottom: 12px; }
-  .upload-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #111; }
-  .upload-zone p { font-size: 13px; color: #888; }
-  .preview-img { width: 100%; border-radius: 10px; margin-bottom: 1rem; max-height: 280px; object-fit: contain; border: 1px solid #e5e5e5; background: white; }
-  .field-group { margin-bottom: 1rem; }
-  .field-group label { display: block; font-size: 11px; font-weight: 600; color: #888; margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
-  .field-group input { width: 100%; padding: 12px 14px; font-size: 15px; border: 1px solid #ddd; border-radius: 10px; background: white; color: #111; -webkit-appearance: none; }
-  .field-group input:focus { outline: none; border-color: #0066CC; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
-  .field-group input.ai-filled { background: #EBF4FF; border-color: #90C0F0; }
-  .badge-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .btn { width: 100%; padding: 15px; font-size: 16px; font-weight: 600; border-radius: 12px; cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s; -webkit-appearance: none; }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { background: #0066CC; color: white; }
-  .btn-primary:hover { opacity: 0.9; }
-  .btn-ghost { background: transparent; color: #888; font-size: 14px; padding: 10px; border: none; cursor: pointer; width: 100%; font-weight: 500; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .progress-bar { display: flex; gap: 6px; margin-bottom: 1.5rem; }
-  .progress-step { flex: 1; height: 4px; border-radius: 2px; background: #e5e5e5; }
-  .progress-step.done { background: #0066CC; }
-  .progress-step.active { background: #90C0F0; }
-  .ai-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #0066CC; background: #EBF4FF; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; }
-  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.35); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  .step-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; }
+  .step-title { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--navy); margin-bottom: 20px; line-height: 1.3; }
+
+  /* UPLOAD */
+  .upload-zone { border: 2px dashed var(--border); border-radius: 16px; padding: 36px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--gray-light); }
+  .upload-zone:hover { border-color: var(--red); background: var(--red-light); }
+  .upload-icon { font-size: 36px; margin-bottom: 12px; display: block; }
+  .upload-zone h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+  .upload-zone p { font-size: 13px; color: var(--gray); }
+  .preview-img { width: 100%; border-radius: 12px; margin-bottom: 16px; max-height: 260px; object-fit: contain; border: 1px solid var(--border); background: var(--gray-light); }
+
+  /* CARDS */
+  .card { background: var(--gray-light); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); margin-bottom: 14px; }
+
+  /* FIELDS */
+  .field-group { margin-bottom: 12px; }
+  .field-group:last-child { margin-bottom: 0; }
+  .field-group label { display: block; font-size: 11px; font-weight: 600; color: var(--gray); margin-bottom: 5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .field-group input { width: 100%; padding: 11px 14px; font-size: 15px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; }
+  .field-group input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,40,30,0.08); }
+  .field-group input.ai-filled { background: var(--red-light); border-color: rgba(232,40,30,0.3); }
+  .field-group input::placeholder { color: #C4C9D4; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* BUTTONS */
+  .btn-primary { width: 100%; padding: 15px; font-size: 15px; font-weight: 600; border-radius: 12px; cursor: pointer; border: none; background: var(--red); color: white; font-family: 'DM Sans', sans-serif; transition: background 0.2s, transform 0.1s; }
+  .btn-primary:hover { background: var(--red-dark); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-ghost { width: 100%; background: none; border: none; font-size: 13px; color: var(--gray); cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+  .btn-ghost:hover { color: var(--navy); }
+
+  /* AI BADGE */
+  .ai-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--red); background: var(--red-light); padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; border: 1px solid rgba(232,40,30,0.2); }
+
+  /* SPINNER */
+  .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 7px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .match-card { background: #f9f9f9; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; border: 1px solid #e5e5e5; }
-  .match-card .ae-name { font-size: 18px; font-weight: 600; color: #111; }
-  .match-card .ae-label { font-size: 11px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
-  .tr-summary { border: 1px solid #e5e5e5; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; background: white; }
-  .tr-summary .name { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: #111; }
-  .tr-summary .role { font-size: 13px; color: #888; }
-  .notif-option { border: 1px solid #e5e5e5; border-radius: 10px; padding: 1rem; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: white; }
-  .notif-option.selected { border-color: #0066CC; background: #EBF4FF; }
-  .notif-option h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; color: #111; }
-  .notif-option p { font-size: 12px; color: #888; }
-  .message-preview { background: #f9f9f9; border-radius: 10px; padding: 1rem; font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; border: 1px solid #e5e5e5; margin-bottom: 1rem; max-height: 200px; overflow-y: auto; }
-  .success-icon { width: 64px; height: 64px; border-radius: 50%; background: #D4EDDA; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 28px; }
-  .tag { display: inline-block; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
-  .tag-blue { background: #EBF4FF; color: #0055AA; }
-  .tag-green { background: #D4EDDA; color: #1A6B30; }
-  .error-msg { color: #B91C1C; font-size: 13px; padding: 10px 12px; background: #FEE2E2; border-radius: 10px; margin-bottom: 10px; }
-  .section-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #333; }
-  .status-success { font-size: 13px; color: #1A6B30; background: #D4EDDA; border-radius: 10px; padding: 10px 14px; }
-  .status-warn { font-size: 13px; color: #92400E; background: #FEF3C7; border-radius: 10px; padding: 10px 14px; }
+
+  /* AE MATCH */
+  .ae-match-card { background: var(--navy); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+  .ae-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+  .ae-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 4px; }
+  .ae-branch { font-size: 12px; color: rgba(255,255,255,0.6); }
+  .ae-unmatched { font-size: 12px; color: #FCA5A5; margin-top: 4px; }
+
+  /* TR SUMMARY */
+  .tr-card { background: var(--gray-light); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; border-left: 3px solid var(--red); }
+  .tr-name { font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .tr-role { font-size: 13px; color: var(--gray); margin-bottom: 8px; }
+  .tr-branch { font-size: 12px; font-weight: 600; color: var(--red); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .contact-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+  .tag-navy { background: var(--navy-light); color: var(--navy); }
+  .tag-green { background: var(--success-bg); color: var(--success); font-weight: 600; }
+
+  /* NOTIF OPTIONS */
+  .notif-option { border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: var(--white); display: flex; align-items: center; gap: 14px; }
+  .notif-option:hover { border-color: var(--navy); }
+  .notif-option.selected { border-color: var(--red); background: var(--red-light); }
+  .notif-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .notif-option.selected .notif-icon { background: rgba(232,40,30,0.12); }
+  .notif-text h4 { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .notif-text p { font-size: 12px; color: var(--gray); }
+  .notif-check { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .notif-option.selected .notif-check { background: var(--red); border-color: var(--red); }
+  .notif-option.selected .notif-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+
+  /* MESSAGE PREVIEW */
+  .preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; margin-top: 16px; }
+  .message-box { background: var(--gray-light); border-radius: 12px; padding: 14px; font-size: 12px; line-height: 1.7; color: var(--navy); white-space: pre-wrap; border: 1px solid var(--border); margin-bottom: 16px; max-height: 180px; overflow-y: auto; }
+
+  /* STATUS */
+  .error-msg { color: #991B1B; font-size: 13px; padding: 10px 14px; background: #FEE2E2; border-radius: 10px; margin-bottom: 12px; border-left: 3px solid var(--red); }
+  .status-success { font-size: 13px; color: var(--success); background: var(--success-bg); border-radius: 10px; padding: 12px 16px; border-left: 3px solid var(--success); }
+  .status-warn { font-size: 13px; color: var(--warning); background: var(--warning-bg); border-radius: 10px; padding: 12px 16px; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* SUCCESS */
+  .success-wrap { text-align: center; padding: 20px 0 32px; }
+  .success-ring { width: 72px; height: 72px; border-radius: 50%; background: var(--success-bg); border: 2px solid var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
+  .success-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: var(--gray); margin-bottom: 28px; line-height: 1.6; }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="restart-bar">
-    <button class="btn-ghost" onclick="resetApp()" style="width:auto;padding:6px 12px;font-size:12px;">↺ Start over</button>
-  </div>
+
+  <!-- HEADER -->
   <div class="header">
-    <div class="logo-bar">
-      <div class="logo-dot"></div>
-      <span class="logo-text">CandidPro</span>
+    <div class="logo-row">
+      <img class="logo-candid" src="https://cdn.prod.website-files.com/601a0e7f102ff5b24874c42b/63d9b5ce58edcf6bdd0be3ce_CandidProLogo-red%20(1).png" alt="CandidPro" onerror="this.style.display='none';document.getElementById('logo-text').style.display='block'">
+      <span id="logo-text" style="display:none;color:var(--navy);font-weight:700;font-size:16px;">CandidPro</span>
+      <div class="logo-divider"></div>
+      <img class="logo-patterson" src="https://cdn.prod.website-files.com/601a0e7f102ff5b24874c42b/6917895ec0ea6dc198853eba_Patterson-Logo_216_160.png" alt="Patterson" onerror="this.style.display='none';document.getElementById('patterson-text').style.display='block'">
+      <span id="patterson-text" style="display:none;color:var(--gray);font-size:13px;font-weight:500;">Patterson</span>
     </div>
-    <h1>NASM Lead Capture</h1>
-    <p>Patterson Territory Representative intake</p>
+    <div class="header-title">NASM Lead Capture</div>
+    <div class="header-sub">Territory Representative Intake · 2026</div>
   </div>
 
-  <div class="progress-bar">
-    <div class="progress-step active" id="ps1"></div>
-    <div class="progress-step" id="ps2"></div>
-    <div class="progress-step" id="ps3"></div>
-    <div class="progress-step" id="ps4"></div>
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-labels">
+      <span class="progress-label active" id="pl1">Photo</span>
+      <span class="progress-label" id="pl2">Details</span>
+      <span class="progress-label" id="pl3">Match</span>
+      <span class="progress-label" id="pl4">Done</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-step active" id="ps1"></div>
+      <div class="progress-step" id="ps2"></div>
+      <div class="progress-step" id="ps3"></div>
+      <div class="progress-step" id="ps4"></div>
+    </div>
+  </div>
+
+  <!-- RESTART -->
+  <div class="restart-bar">
+    <button class="restart-btn" onclick="resetApp()">↺ Start over</button>
   </div>
 
   <!-- STEP 1 -->
   <div class="step active" id="step1">
-    <div class="step-label">Step 1 — Badge photo</div>
+    <div class="step-eyebrow">Step 1 of 3</div>
+    <div class="step-title">Scan the badge</div>
     <div class="upload-zone" id="uploadZone" onclick="document.getElementById('badgeInput').click()">
-      <div class="upload-icon">📷</div>
+      <span class="upload-icon">📷</span>
       <h3>Take or upload badge photo</h3>
       <p>Tap to open camera or choose from library</p>
     </div>
     <input type="file" id="badgeInput" accept="image/*" onchange="handleImage(event)" style="display:none;">
     <img id="previewImg" class="preview-img" style="display:none;">
     <div id="step1Error"></div>
-    <button class="btn btn-primary" id="analyzeBtn" style="display:none;margin-top:1rem;" onclick="analyzeImage()">Extract badge info with AI</button>
-    <button class="btn btn-ghost" id="skipBtn" style="display:none;margin-top:8px;" onclick="skipToManual()">Enter info manually instead</button>
+    <button class="btn-primary" id="analyzeBtn" style="display:none;margin-top:16px;" onclick="analyzeImage()">Extract badge info with AI</button>
+    <button class="btn-ghost" id="skipBtn" style="display:none;margin-top:4px;" onclick="skipToManual()">Enter info manually instead</button>
   </div>
 
   <!-- STEP 2 -->
   <div class="step" id="step2">
-    <div class="step-label">Step 2 — Review & contact info</div>
-    <div class="ai-badge" id="aiBadge">✦ AI extracted — review and confirm</div>
+    <div class="step-eyebrow">Step 2 of 3</div>
+    <div class="step-title">Review & add contact info</div>
+    <div class="ai-pill" id="aiBadge">✦ AI extracted — please confirm</div>
     <div class="card">
-      <div class="badge-row">
+      <div class="card-title">Badge information</div>
+      <div class="two-col">
         <div class="field-group"><label>First name</label><input type="text" id="firstName"></div>
         <div class="field-group"><label>Last name</label><input type="text" id="lastName"></div>
       </div>
       <div class="field-group"><label>Title / role</label><input type="text" id="trRole"></div>
-      <div class="badge-row">
-        <div class="field-group"><label>Branch name</label><input type="text" id="branchName"></div>
+      <div class="two-col">
+        <div class="field-group"><label>Branch</label><input type="text" id="branchName"></div>
         <div class="field-group"><label>Region</label><input type="text" id="region"></div>
       </div>
     </div>
     <div class="card">
-      <div class="section-title">Contact info (collected in conversation)</div>
-      <div class="field-group"><label>Email address</label><input type="email" id="trEmail" placeholder="tr@pattersondental.com"></div>
+      <div class="card-title">Contact info — collected in conversation</div>
+      <div class="field-group"><label>Email address</label><input type="email" id="trEmail" placeholder="name@pattersondental.com"></div>
       <div class="field-group"><label>Mobile phone</label><input type="tel" id="trPhone" placeholder="+1 (555) 000-0000"></div>
     </div>
     <div id="step2Error"></div>
-    <button class="btn btn-primary" onclick="matchAE()">Match to AE & continue</button>
-    <button class="btn btn-ghost" style="margin-top:8px;" onclick="goStep(1)">← Retake photo</button>
+    <button class="btn-primary" onclick="matchAE()">Match to AE & continue →</button>
+    <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1)">← Retake photo</button>
   </div>
 
   <!-- STEP 3 -->
   <div class="step" id="step3">
-    <div class="step-label">Step 3 — AE match & outreach</div>
+    <div class="step-eyebrow">Step 3 of 3</div>
+    <div class="step-title">Confirm & send</div>
     <div id="trSummaryBlock"></div>
     <div id="matchBlock"></div>
-    <div class="section-title" style="margin-top:4px;">Send notification via</div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Notify via</div>
     <div id="notifEmail" class="notif-option selected" onclick="toggleNotif('email')">
-      <h4>✉ Email</h4>
-      <p>Intro email draft for AE to send to TR</p>
+      <div class="notif-icon">✉️</div>
+      <div class="notif-text"><h4>Email</h4><p>Intro email draft for AE → TR</p></div>
+      <div class="notif-check"></div>
     </div>
     <div id="notifSMS" class="notif-option" onclick="toggleNotif('sms')">
-      <h4>💬 Text message</h4>
-      <p>SMS summary to AE with TR details</p>
+      <div class="notif-icon">💬</div>
+      <div class="notif-text"><h4>Text message</h4><p>SMS to AE with TR details</p></div>
+      <div class="notif-check"></div>
     </div>
-    <div id="messagePreviewBlock" style="margin-top:1rem;"></div>
+    <div id="messagePreviewBlock"></div>
     <div id="step3Error"></div>
-    <button class="btn btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & log to Sheets</button>
-    <button class="btn btn-ghost" style="margin-top:8px;" onclick="goStep(2)">← Edit info</button>
+    <button class="btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & log to Sheets</button>
+    <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(2)">← Edit info</button>
   </div>
 
   <!-- STEP 4 -->
   <div class="step" id="step4">
-    <div style="text-align:center;padding:2rem 0;">
-      <div class="success-icon">✓</div>
-      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#111;">Lead captured!</h2>
-      <p id="successMsg" style="font-size:14px;color:#888;margin-bottom:2rem;line-height:1.6;"></p>
-      <div id="leadSummaryCard" style="margin-bottom:1rem;"></div>
-      <div id="sheetStatus" style="margin-bottom:1.5rem;"></div>
-      <button class="btn btn-primary" onclick="resetApp()">Capture another lead</button>
+    <div class="success-wrap">
+      <div class="success-ring">✓</div>
+      <div class="success-title">Lead captured!</div>
+      <p class="success-sub" id="successMsg"></p>
+      <div id="leadSummaryCard" style="margin-bottom:14px;text-align:left;"></div>
+      <div id="sheetStatus" style="margin-bottom:24px;text-align:left;"></div>
+      <button class="btn-primary" onclick="resetApp()">Capture another lead</button>
     </div>
   </div>
-</div>
 
+</div>
 <script>
 const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 
@@ -230,8 +329,9 @@ function goStep(n) {
   window.scrollTo(0, 0);
   for (let i = 1; i <= 4; i++) {
     const ps = document.getElementById('ps' + i);
-    if (!ps) continue;
-    ps.className = 'progress-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    const pl = document.getElementById('pl' + i);
+    if (ps) ps.className = 'progress-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (pl) pl.className = 'progress-label' + (i < n ? ' done' : i === n ? ' active' : '');
   }
 }
 
@@ -311,8 +411,27 @@ function matchAE() {
   if (!match) match = AE_MAP.find(r => { const p = bl.split(' - ').pop(); return r.branch.toLowerCase().includes(p) || bl.includes(r.branch.toLowerCase().split(' - ').pop()); });
   state.matchedAE = match ? match.ae : 'Unassigned';
   state.currentLead = { firstName, lastName, role, branchName, region, email, phone };
-  document.getElementById('trSummaryBlock').innerHTML = `<div class="tr-summary"><div class="name">${firstName} ${lastName}</div><div class="role">${role}</div><div style="font-size:13px;color:#0066CC;margin-top:6px;">${branchName}${region ? ' · ' + region : ''}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">${email ? '<span class="tag tag-blue">✉ ' + email + '</span>' : ''}${phone ? '<span class="tag tag-blue">📱 ' + phone + '</span>' : ''}</div></div>`;
-  document.getElementById('matchBlock').innerHTML = `<div class="match-card"><div class="ae-label">Assigned CandidPro AE</div><div class="ae-name">${state.matchedAE}</div>${match ? '<div style="font-size:12px;color:#888;margin-top:4px;">' + match.branch + ' · ' + match.disposition + '</div>' : '<div style="font-size:12px;color:#B91C1C;margin-top:4px;">Branch not matched — please verify</div>'}</div>`;
+
+  document.getElementById('trSummaryBlock').innerHTML = `
+    <div class="tr-card">
+      <div class="tr-name">${firstName} ${lastName}</div>
+      <div class="tr-role">${role}</div>
+      <div class="tr-branch">${branchName}${region ? ' · ' + region : ''}</div>
+      <div class="contact-tags">
+        ${email ? '<span class="tag tag-navy">✉ ' + email + '</span>' : ''}
+        ${phone ? '<span class="tag tag-navy">📱 ' + phone + '</span>' : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('matchBlock').innerHTML = `
+    <div class="ae-match-card">
+      <div class="ae-label">Assigned CandidPro AE</div>
+      <div class="ae-name">${state.matchedAE}</div>
+      ${match
+        ? '<div class="ae-branch">' + match.branch + ' · ' + match.disposition + '</div>'
+        : '<div class="ae-unmatched">⚠ Branch not matched — please verify</div>'}
+    </div>`;
+
   updateMessagePreview();
   goStep(3);
 }
@@ -330,7 +449,9 @@ function updateMessagePreview() {
   const content = state.notifMode === 'email'
     ? `Subject: New Patterson TR Introduction — ${l.firstName} ${l.lastName}\n\nHi ${ae},\n\nGreat news! We connected with ${l.firstName} ${l.lastName} (${l.role}) from the ${l.branchName} branch at NASM.\n\n${l.firstName} is interested in partnering with CandidPro and has been matched to you as their AE contact.\n\nContact details:\n${l.email ? '  Email: ' + l.email + '\n' : ''}${l.phone ? '  Phone: ' + l.phone + '\n' : ''}\nPlease reach out to ${l.firstName} to kick off the introduction and next steps.\n\nGo CandidPro!\nNASM Booth Team`
     : `Hey ${ae}! New Patterson TR match from NASM:\n\n${l.firstName} ${l.lastName}\n${l.role} — ${l.branchName}\n${l.email ? 'Email: ' + l.email + '\n' : ''}${l.phone ? 'Phone: ' + l.phone : ''}\n\nThey're interested in working with CandidPro — you're their assigned AE. Reach out soon!`;
-  document.getElementById('messagePreviewBlock').innerHTML = `<div class="section-title">Message preview</div><div class="message-preview">${content}</div>`;
+  document.getElementById('messagePreviewBlock').innerHTML = `
+    <div class="preview-label">Message preview</div>
+    <div class="message-box">${content}</div>`;
 }
 
 async function submitLead() {
@@ -345,11 +466,20 @@ async function submitLead() {
     const data = await res.json();
     sheetSuccess = data.status === 'success';
   } catch(err) { sheetSuccess = false; }
+
   document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been captured and ${state.matchedAE} is queued for notification via ${state.notifMode === 'email' ? 'email' : 'text message'}.`;
-  document.getElementById('leadSummaryCard').innerHTML = `<div class="tr-summary" style="text-align:left;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div class="name">${l.firstName} ${l.lastName}</div><span class="tag tag-green">Logged</span></div><div class="role">${l.role} · ${l.branchName}</div><div style="margin-top:8px;font-size:13px;color:#888;">Assigned to <strong style="color:#111;">${state.matchedAE}</strong></div></div>`;
+  document.getElementById('leadSummaryCard').innerHTML = `
+    <div class="tr-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div class="tr-name">${l.firstName} ${l.lastName}</div>
+        <span class="tag tag-green">✓ Logged</span>
+      </div>
+      <div class="tr-role">${l.role} · ${l.branchName}</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--gray);">Assigned to <strong style="color:var(--navy);">${state.matchedAE}</strong></div>
+    </div>`;
   document.getElementById('sheetStatus').innerHTML = sheetSuccess
     ? '<div class="status-success">✓ Row added to Google Sheets via Zapier</div>'
-    : '<div class="status-warn">⚠ Could not reach Zapier — check connection.</div>';
+    : '<div class="status-warn">⚠ Could not reach Zapier — check your connection.</div>';
   btn.innerHTML = 'Submit lead & log to Sheets';
   btn.disabled = false;
   goStep(4);
@@ -364,7 +494,10 @@ function resetApp() {
   document.getElementById('uploadZone').style.display = 'block';
   document.getElementById('badgeInput').value = '';
   document.getElementById('aiBadge').style.display = 'inline-flex';
-  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone'].forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('ai-filled'); } });
+  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('ai-filled'); }
+  });
   document.getElementById('notifEmail').classList.add('selected');
   document.getElementById('notifSMS').classList.remove('selected');
   goStep(1);
