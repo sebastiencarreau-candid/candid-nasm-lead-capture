@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CandidPro NASM Lead Capture</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; }
+  .app { max-width: 480px; margin: 0 auto; padding: 1rem; background: #f5f5f5; min-height: 100vh; }
+  .header { text-align: center; background: white; margin: -1rem -1rem 1.5rem; padding: 1.5rem 1rem 1rem; border-bottom: 1px solid #e5e5e5; }
+  .header h1 { font-size: 18px; font-weight: 600; color: #111; }
+  .header p { font-size: 13px; color: #888; margin-top: 4px; }
+  .logo-bar { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: #0066CC; }
+  .logo-text { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; color: #555; text-transform: uppercase; }
+  .restart-bar { text-align: right; margin-bottom: 8px; }
+  .step { display: none; }
+  .step.active { display: block; }
+  .step-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; color: #999; text-transform: uppercase; margin-bottom: 1rem; }
+  .card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .upload-zone { border: 2px dashed #ccc; border-radius: 12px; padding: 2.5rem 1rem; text-align: center; cursor: pointer; background: white; }
+  .upload-zone:hover { background: #f9f9f9; }
+  .upload-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-zone h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: #111; }
+  .upload-zone p { font-size: 13px; color: #888; }
+  .preview-img { width: 100%; border-radius: 10px; margin-bottom: 1rem; max-height: 280px; object-fit: contain; border: 1px solid #e5e5e5; background: white; }
+  .field-group { margin-bottom: 1rem; }
+  .field-group label { display: block; font-size: 11px; font-weight: 600; color: #888; margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .field-group input { width: 100%; padding: 12px 14px; font-size: 15px; border: 1px solid #ddd; border-radius: 10px; background: white; color: #111; -webkit-appearance: none; }
+  .field-group input:focus { outline: none; border-color: #0066CC; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
+  .field-group input.ai-filled { background: #EBF4FF; border-color: #90C0F0; }
+  .badge-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn { width: 100%; padding: 15px; font-size: 16px; font-weight: 600; border-radius: 12px; cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s; -webkit-appearance: none; }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: #0066CC; color: white; }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-ghost { background: transparent; color: #888; font-size: 14px; padding: 10px; border: none; cursor: pointer; width: 100%; font-weight: 500; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .progress-bar { display: flex; gap: 6px; margin-bottom: 1.5rem; }
+  .progress-step { flex: 1; height: 4px; border-radius: 2px; background: #e5e5e5; }
+  .progress-step.done { background: #0066CC; }
+  .progress-step.active { background: #90C0F0; }
+  .ai-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #0066CC; background: #EBF4FF; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; }
+  .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.35); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .match-card { background: #f9f9f9; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; border: 1px solid #e5e5e5; }
+  .match-card .ae-name { font-size: 18px; font-weight: 600; color: #111; }
+  .match-card .ae-label { font-size: 11px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+  .tr-summary { border: 1px solid #e5e5e5; border-radius: 10px; padding: 1rem; margin-bottom: 1rem; background: white; }
+  .tr-summary .name { font-size: 18px; font-weight: 600; margin-bottom: 2px; color: #111; }
+  .tr-summary .role { font-size: 13px; color: #888; }
+  .notif-option { border: 1px solid #e5e5e5; border-radius: 10px; padding: 1rem; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: white; }
+  .notif-option.selected { border-color: #0066CC; background: #EBF4FF; }
+  .notif-option h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; color: #111; }
+  .notif-option p { font-size: 12px; color: #888; }
+  .message-preview { background: #f9f9f9; border-radius: 10px; padding: 1rem; font-size: 13px; line-height: 1.6; color: #333; white-space: pre-wrap; border: 1px solid #e5e5e5; margin-bottom: 1rem; max-height: 200px; overflow-y: auto; }
+  .success-icon { width: 64px; height: 64px; border-radius: 50%; background: #D4EDDA; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 28px; }
+  .tag { display: inline-block; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+  .tag-blue { background: #EBF4FF; color: #0055AA; }
+  .tag-green { background: #D4EDDA; color: #1A6B30; }
+  .error-msg { color: #B91C1C; font-size: 13px; padding: 10px 12px; background: #FEE2E2; border-radius: 10px; margin-bottom: 10px; }
+  .section-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #333; }
+  .status-success { font-size: 13px; color: #1A6B30; background: #D4EDDA; border-radius: 10px; padding: 10px 14px; }
+  .status-warn { font-size: 13px; color: #92400E; background: #FEF3C7; border-radius: 10px; padding: 10px 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="restart-bar">
+    <button class="btn-ghost" onclick="resetApp()" style="width:auto;padding:6px 12px;font-size:12px;">↺ Start over</button>
+  </div>
+  <div class="header">
+    <div class="logo-bar">
+      <div class="logo-dot"></div>
+      <span class="logo-text">CandidPro</span>
+    </div>
+    <h1>NASM Lead Capture</h1>
+    <p>Patterson Territory Representative intake</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-step active" id="ps1"></div>
+    <div class="progress-step" id="ps2"></div>
+    <div class="progress-step" id="ps3"></div>
+    <div class="progress-step" id="ps4"></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step1">
+    <div class="step-label">Step 1 — Badge photo</div>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('badgeInput').click()">
+      <div class="upload-icon">📷</div>
+      <h3>Take or upload badge photo</h3>
+      <p>Tap to open camera or choose from library</p>
+    </div>
+    <input type="file" id="badgeInput" accept="image/*" onchange="handleImage(event)" style="display:none;">
+    <img id="previewImg" class="preview-img" style="display:none;">
+    <div id="step1Error"></div>
+    <button class="btn btn-primary" id="analyzeBtn" style="display:none;margin-top:1rem;" onclick="analyzeImage()">Extract badge info with AI</button>
+    <button class="btn btn-ghost" id="skipBtn" style="display:none;margin-top:8px;" onclick="skipToManual()">Enter info manually instead</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="step-label">Step 2 — Review & contact info</div>
+    <div class="ai-badge" id="aiBadge">✦ AI extracted — review and confirm</div>
+    <div class="card">
+      <div class="badge-row">
+        <div class="field-group"><label>First name</label><input type="text" id="firstName"></div>
+        <div class="field-group"><label>Last name</label><input type="text" id="lastName"></div>
+      </div>
+      <div class="field-group"><label>Title / role</label><input type="text" id="trRole"></div>
+      <div class="badge-row">
+        <div class="field-group"><label>Branch name</label><input type="text" id="branchName"></div>
+        <div class="field-group"><label>Region</label><input type="text" id="region"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Contact info (collected in conversation)</div>
+      <div class="field-group"><label>Email address</label><input type="email" id="trEmail" placeholder="tr@pattersondental.com"></div>
+      <div class="field-group"><label>Mobile phone</label><input type="tel" id="trPhone" placeholder="+1 (555) 000-0000"></div>
+    </div>
+    <div id="step2Error"></div>
+    <button class="btn btn-primary" onclick="matchAE()">Match to AE & continue</button>
+    <button class="btn btn-ghost" style="margin-top:8px;" onclick="goStep(1)">← Retake photo</button>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step3">
+    <div class="step-label">Step 3 — AE match & outreach</div>
+    <div id="trSummaryBlock"></div>
+    <div id="matchBlock"></div>
+    <div class="section-title" style="margin-top:4px;">Send notification via</div>
+    <div id="notifEmail" class="notif-option selected" onclick="toggleNotif('email')">
+      <h4>✉ Email</h4>
+      <p>Intro email draft for AE to send to TR</p>
+    </div>
+    <div id="notifSMS" class="notif-option" onclick="toggleNotif('sms')">
+      <h4>💬 Text message</h4>
+      <p>SMS summary to AE with TR details</p>
+    </div>
+    <div id="messagePreviewBlock" style="margin-top:1rem;"></div>
+    <div id="step3Error"></div>
+    <button class="btn btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & log to Sheets</button>
+    <button class="btn btn-ghost" style="margin-top:8px;" onclick="goStep(2)">← Edit info</button>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step4">
+    <div style="text-align:center;padding:2rem 0;">
+      <div class="success-icon">✓</div>
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;color:#111;">Lead captured!</h2>
+      <p id="successMsg" style="font-size:14px;color:#888;margin-bottom:2rem;line-height:1.6;"></p>
+      <div id="leadSummaryCard" style="margin-bottom:1rem;"></div>
+      <div id="sheetStatus" style="margin-bottom:1.5rem;"></div>
+      <button class="btn btn-primary" onclick="resetApp()">Capture another lead</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
+
+const AE_MAP = [
+  {city:"Cincinnati",branch:"OH - Mid-South Ohio",ae:"Adam Young",disposition:"Satellite"},
+  {city:"Cleveland",branch:"OH - Cleveland",ae:"Adam Young",disposition:"Primary"},
+  {city:"Columbus",branch:"OH - Mid-South Ohio",ae:"Adam Young",disposition:"Primary"},
+  {city:"Louisville",branch:"KY - Louisville",ae:"Adam Young",disposition:"Primary"},
+  {city:"East Bay",branch:"CA - East Bay",ae:"Alex Cagle-Sanchez",disposition:"Primary"},
+  {city:"Sacramento",branch:"CA - Sacramento",ae:"Alex Cagle-Sanchez",disposition:"Primary"},
+  {city:"South Florida",branch:"FL - Fort Lauderdale",ae:"Anthony Sena",disposition:"Primary"},
+  {city:"Atlanta",branch:"GA - Atlanta",ae:"Ashley Klanac",disposition:"Primary"},
+  {city:"Nashville",branch:"TN - Nashville",ae:"Ashley Klanac",disposition:"Primary"},
+  {city:"Denver",branch:"CO - Denver",ae:"Bailey Binnebose",disposition:"Primary"},
+  {city:"Albuquerque",branch:"NM - Albuquerque",ae:"Bailey Binnebose",disposition:"Primary"},
+  {city:"Salt Lake City",branch:"UT - Salt Lake City",ae:"Bobbie Holmes",disposition:"Primary"},
+  {city:"Raleigh",branch:"NC - Raleigh",ae:"Caity Rutty",disposition:"Primary"},
+  {city:"New England",branch:"MA - New England",ae:"Chris Rocci",disposition:"Primary"},
+  {city:"Portland",branch:"OR - Portland",ae:"Christa Skinner",disposition:"Primary"},
+  {city:"Medford",branch:"OR - Medford",ae:"Christa Skinner",disposition:"Satellite"},
+  {city:"Spokane",branch:"WA - Spokane",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Las Vegas",branch:"NV - Las Vegas",ae:"Greg Haskins",disposition:"Satellite"},
+  {city:"San Diego",branch:"CA - San Diego",ae:"Greg Haskins",disposition:"Primary"},
+  {city:"Grand Rapids",branch:"MI - Greater Michigan",ae:"Hunter Ackerman",disposition:"Primary"},
+  {city:"Detroit",branch:"MI - Greater Michigan",ae:"Hunter Ackerman",disposition:"Satellite"},
+  {city:"Indianapolis",branch:"IN - Indianapolis",ae:"Hunter Ackerman",disposition:"Primary"},
+  {city:"Baltimore",branch:"MD - Baltimore",ae:"Jess Parker",disposition:"Primary"},
+  {city:"Richmond",branch:"VA - Richmond",ae:"Jess Parker",disposition:"Primary"},
+  {city:"Austin",branch:"TX - Austin",ae:"Jill Straetker",disposition:"Primary"},
+  {city:"San Antonio",branch:"TX - San Antonio",ae:"Jill Straetker",disposition:"Primary"},
+  {city:"Philadelphia",branch:"PA - Philadelphia",ae:"Jim DiQuattro",disposition:"Primary"},
+  {city:"Pittsburgh",branch:"PA - Pittsburgh",ae:"Jim DiQuattro",disposition:"Primary"},
+  {city:"St Louis",branch:"MO - St Louis",ae:"Kate Quaka",disposition:"Primary"},
+  {city:"Kansas City",branch:"KS - Kansas City",ae:"Kate Quaka",disposition:"Primary"},
+  {city:"Tampa",branch:"FL - Tampa",ae:"Kelley Richardson",disposition:"Primary"},
+  {city:"Orlando",branch:"FL - Orlando",ae:"Kelley Richardson",disposition:"Primary"},
+  {city:"Dallas",branch:"TX - Dallas Ft Worth",ae:"Kendra Curry",disposition:"Primary"},
+  {city:"Oklahoma City",branch:"OK - Oklahoma City",ae:"Kendra Curry",disposition:"Primary"},
+  {city:"Minnesota",branch:"MN - Eagan",ae:"Kyle Walker",disposition:"Primary"},
+  {city:"Fargo",branch:"ND - Fargo",ae:"Kyle Walker",disposition:"Primary"},
+  {city:"Seattle",branch:"WA - Seattle",ae:"Landon Moeller",disposition:"Primary"},
+  {city:"Los Angeles",branch:"CA - Los Angeles",ae:"Leah Maiman",disposition:"Primary"},
+  {city:"Milwaukee",branch:"WI - Milwaukee",ae:"Linda Ehlers",disposition:"Primary"},
+  {city:"Chicago",branch:"IL - Chicago",ae:"Linda Ehlers",disposition:"Primary"},
+  {city:"Omaha",branch:"NE - Omaha",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Des Moines",branch:"IA - Des Moines",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Birmingham",branch:"AL-Birmingham",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Hawaii",branch:"HI - Kapolei",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Jackson",branch:"MS - Jackson",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Little Rock",branch:"AR - Little Rock",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Memphis",branch:"TN - Memphis",ae:"Josh Marks",disposition:"Primary"},
+  {city:"New Orleans",branch:"LA - New Orleans",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Rochester",branch:"NY - Rochester",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Shreveport",branch:"LA - Shreveport",ae:"Josh Marks",disposition:"Primary"},
+  {city:"Houston",branch:"TX - Houston",ae:"Sam Moore",disposition:"Primary"},
+  {city:"Charlotte",branch:"NC - Charlotte",ae:"Shara Hamrick",disposition:"Primary"},
+  {city:"Charleston",branch:"SC - Charleston",ae:"Shara Hamrick",disposition:"Primary"},
+  {city:"Greenville",branch:"SC - Greenville",ae:"Shara Hamrick",disposition:"Primary"},
+  {city:"Columbia",branch:"SC - Columbia",ae:"Shara Hamrick",disposition:"Primary"},
+  {city:"Mesa",branch:"AZ-Mesa",ae:"Ryan Serrano",disposition:"Primary"},
+  {city:"Metro NY/NJ",branch:"NJ - Totowa",ae:"TBD",disposition:"Primary"},
+];
+
+let state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  window.scrollTo(0, 0);
+  for (let i = 1; i <= 4; i++) {
+    const ps = document.getElementById('ps' + i);
+    if (!ps) continue;
+    ps.className = 'progress-step' + (i < n ? ' done' : i === n ? ' active' : '');
+  }
+}
+
+function handleImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const mediaType = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
+  state.imageMediaType = mediaType === 'image/heic' ? 'image/jpeg' : mediaType;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    state.imageBase64 = ev.target.result.split(',')[1];
+    const img = document.getElementById('previewImg');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('analyzeBtn').style.display = 'block';
+    document.getElementById('skipBtn').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function skipToManual() {
+  document.getElementById('aiBadge').style.display = 'none';
+  ['firstName','lastName','trRole','branchName','region'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('ai-filled');
+  });
+  goStep(2);
+}
+
+async function analyzeImage() {
+  const btn = document.getElementById('analyzeBtn');
+  btn.innerHTML = '<span class="spinner"></span>Analyzing badge...';
+  btn.disabled = true;
+  document.getElementById('skipBtn').style.display = 'none';
+  document.getElementById('step1Error').innerHTML = '';
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: state.imageBase64, mediaType: state.imageMediaType })
+    });
+    const parsed = await response.json();
+    if (parsed.error) throw new Error(parsed.error);
+    document.getElementById('firstName').value = parsed.firstName || '';
+    document.getElementById('lastName').value = parsed.lastName || '';
+    document.getElementById('trRole').value = parsed.role || '';
+    document.getElementById('branchName').value = parsed.branchName || '';
+    document.getElementById('region').value = parsed.region || '';
+    ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
+    document.getElementById('aiBadge').style.display = 'inline-flex';
+    goStep(2);
+  } catch(err) {
+    document.getElementById('step1Error').innerHTML = '<div class="error-msg">Could not analyze image: ' + err.message + '. Try manually instead.</div>';
+    document.getElementById('skipBtn').style.display = 'block';
+  }
+  btn.innerHTML = 'Extract badge info with AI';
+  btn.disabled = false;
+}
+
+function matchAE() {
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const role = document.getElementById('trRole').value.trim();
+  const branchName = document.getElementById('branchName').value.trim();
+  const region = document.getElementById('region').value.trim();
+  const email = document.getElementById('trEmail').value.trim();
+  const phone = document.getElementById('trPhone').value.trim();
+  if (!firstName || !lastName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least a first and last name.</div>'; return; }
+  if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
+  document.getElementById('step2Error').innerHTML = '';
+  const bl = branchName.toLowerCase();
+  const rl = region.toLowerCase();
+  let match = AE_MAP.find(r => r.branch.toLowerCase() === bl);
+  if (!match) match = AE_MAP.find(r => bl.includes(r.city.toLowerCase()) || rl.includes(r.city.toLowerCase()));
+  if (!match) match = AE_MAP.find(r => { const p = bl.split(' - ').pop(); return r.branch.toLowerCase().includes(p) || bl.includes(r.branch.toLowerCase().split(' - ').pop()); });
+  state.matchedAE = match ? match.ae : 'Unassigned';
+  state.currentLead = { firstName, lastName, role, branchName, region, email, phone };
+  document.getElementById('trSummaryBlock').innerHTML = `<div class="tr-summary"><div class="name">${firstName} ${lastName}</div><div class="role">${role}</div><div style="font-size:13px;color:#0066CC;margin-top:6px;">${branchName}${region ? ' · ' + region : ''}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">${email ? '<span class="tag tag-blue">✉ ' + email + '</span>' : ''}${phone ? '<span class="tag tag-blue">📱 ' + phone + '</span>' : ''}</div></div>`;
+  document.getElementById('matchBlock').innerHTML = `<div class="match-card"><div class="ae-label">Assigned CandidPro AE</div><div class="ae-name">${state.matchedAE}</div>${match ? '<div style="font-size:12px;color:#888;margin-top:4px;">' + match.branch + ' · ' + match.disposition + '</div>' : '<div style="font-size:12px;color:#B91C1C;margin-top:4px;">Branch not matched — please verify</div>'}</div>`;
+  updateMessagePreview();
+  goStep(3);
+}
+
+function toggleNotif(mode) {
+  state.notifMode = mode;
+  document.getElementById('notifEmail').classList.toggle('selected', mode === 'email');
+  document.getElementById('notifSMS').classList.toggle('selected', mode === 'sms');
+  updateMessagePreview();
+}
+
+function updateMessagePreview() {
+  const l = state.currentLead || {};
+  const ae = state.matchedAE || 'AE';
+  const content = state.notifMode === 'email'
+    ? `Subject: New Patterson TR Introduction — ${l.firstName} ${l.lastName}\n\nHi ${ae},\n\nGreat news! We connected with ${l.firstName} ${l.lastName} (${l.role}) from the ${l.branchName} branch at NASM.\n\n${l.firstName} is interested in partnering with CandidPro and has been matched to you as their AE contact.\n\nContact details:\n${l.email ? '  Email: ' + l.email + '\n' : ''}${l.phone ? '  Phone: ' + l.phone + '\n' : ''}\nPlease reach out to ${l.firstName} to kick off the introduction and next steps.\n\nGo CandidPro!\nNASM Booth Team`
+    : `Hey ${ae}! New Patterson TR match from NASM:\n\n${l.firstName} ${l.lastName}\n${l.role} — ${l.branchName}\n${l.email ? 'Email: ' + l.email + '\n' : ''}${l.phone ? 'Phone: ' + l.phone : ''}\n\nThey're interested in working with CandidPro — you're their assigned AE. Reach out soon!`;
+  document.getElementById('messagePreviewBlock').innerHTML = `<div class="section-title">Message preview</div><div class="message-preview">${content}</div>`;
+}
+
+async function submitLead() {
+  const btn = document.getElementById('submitBtn');
+  btn.innerHTML = '<span class="spinner"></span>Logging to Sheets...';
+  btn.disabled = true;
+  const l = state.currentLead;
+  const payload = { timestamp: new Date().toLocaleString(), firstName: l.firstName, lastName: l.lastName, role: l.role, branch: l.branchName, region: l.region, email: l.email, phone: l.phone, assignedAE: state.matchedAE, notifSent: state.notifMode };
+  let sheetSuccess = false;
+  try {
+    const res = await fetch(ZAPIER_WEBHOOK, { method: 'POST', body: JSON.stringify(payload) });
+    const data = await res.json();
+    sheetSuccess = data.status === 'success';
+  } catch(err) { sheetSuccess = false; }
+  document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been captured and ${state.matchedAE} is queued for notification via ${state.notifMode === 'email' ? 'email' : 'text message'}.`;
+  document.getElementById('leadSummaryCard').innerHTML = `<div class="tr-summary" style="text-align:left;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><div class="name">${l.firstName} ${l.lastName}</div><span class="tag tag-green">Logged</span></div><div class="role">${l.role} · ${l.branchName}</div><div style="margin-top:8px;font-size:13px;color:#888;">Assigned to <strong style="color:#111;">${state.matchedAE}</strong></div></div>`;
+  document.getElementById('sheetStatus').innerHTML = sheetSuccess
+    ? '<div class="status-success">✓ Row added to Google Sheets via Zapier</div>'
+    : '<div class="status-warn">⚠ Could not reach Zapier — check connection.</div>';
+  btn.innerHTML = 'Submit lead & log to Sheets';
+  btn.disabled = false;
+  goStep(4);
+}
+
+function resetApp() {
+  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
+  document.getElementById('previewImg').style.display = 'none';
+  document.getElementById('previewImg').src = '';
+  document.getElementById('analyzeBtn').style.display = 'none';
+  document.getElementById('skipBtn').style.display = 'none';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('badgeInput').value = '';
+  document.getElementById('aiBadge').style.display = 'inline-flex';
+  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone'].forEach(id => { const el = document.getElementById(id); if (el) { el.value = ''; el.classList.remove('ai-filled'); } });
+  document.getElementById('notifEmail').classList.add('selected');
+  document.getElementById('notifSMS').classList.remove('selected');
+  goStep(1);
+}
+</script>
+</body>
+</html>
