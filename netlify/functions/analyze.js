@@ -4,7 +4,10 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { imageBase64, mediaType } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    console.log('Media type:', body.mediaType);
+    console.log('Image data length:', body.imageBase64 ? body.imageBase64.length : 'MISSING');
+    console.log('API Key present:', !!process.env.ANTHROPIC_API_KEY);
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -21,7 +24,7 @@ exports.handler = async function(event) {
           content: [
             {
               type: 'image',
-              source: { type: 'base64', media_type: mediaType || 'image/jpeg', data: imageBase64 }
+              source: { type: 'base64', media_type: body.mediaType || 'image/jpeg', data: body.imageBase64 }
             },
             {
               type: 'text',
@@ -32,7 +35,12 @@ exports.handler = async function(event) {
       })
     });
 
+    console.log('Anthropic response status:', response.status);
     const data = await response.json();
+    console.log('Anthropic response body:', JSON.stringify(data));
+
+    if (data.error) throw new Error(data.error.message);
+
     const text = data.content.map(i => i.text || '').join('');
     const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
 
@@ -42,6 +50,7 @@ exports.handler = async function(event) {
       body: JSON.stringify(parsed)
     };
   } catch(err) {
+    console.log('CAUGHT ERROR:', err.message);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
