@@ -114,9 +114,23 @@
   .field-group input { width: 100%; padding: 11px 14px; font-size: 15px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; }
   .field-group input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,40,30,0.08); }
   .field-group input.ai-filled { background: var(--red-light); border-color: rgba(232,40,30,0.3); }
+  .field-group input.sheet-filled { background: #F0FDF4; border-color: #86EFAC; }
   .field-group input::placeholder { color: #C4C9D4; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+  /* TR SEARCH */
+  .search-wrap { position: relative; }
+  .search-dropdown { display: none; position: absolute; z-index: 100; background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; max-height: 240px; overflow-y: auto; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-top: 4px; }
+  .search-option { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--navy); border-bottom: 1px solid var(--border); }
+  .search-option:last-child { border-bottom: none; }
+  .search-option:hover { background: var(--red-light); color: var(--red); }
+  .search-option .opt-name { font-weight: 600; font-size: 14px; }
+  .search-option .opt-branch { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .search-option .opt-notfound { font-size: 13px; color: var(--gray); font-style: italic; }
+  .search-spinner { display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .sheet-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--success); background: var(--success-bg); padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; border: 1px solid rgba(10,124,78,0.2); }
+
+  /* BRANCH DROPDOWN */
   .branch-wrap { position: relative; }
   .branch-dropdown { display: none; position: absolute; z-index: 100; background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; max-height: 200px; overflow-y: auto; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-top: 4px; }
   .branch-option { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--navy); border-bottom: 1px solid var(--border); }
@@ -272,9 +286,29 @@
   <div class="step" id="step2">
     <div class="step-eyebrow">Step 2 of 3</div>
     <div class="step-title">Review & add contact info</div>
-    <div class="ai-pill" id="aiBadge">✦ AI extracted — please confirm</div>
+
+    <!-- Source pill — swaps between AI extracted and sheet matched -->
+    <div class="ai-pill" id="aiBadge" style="display:none;">✦ AI extracted — please confirm</div>
+    <div class="sheet-pill" id="sheetBadge" style="display:none;">✓ Matched from TR list — please confirm</div>
+
     <div class="card">
-      <div class="card-title">Badge information</div>
+      <div class="card-title">Search TR roster or enter manually</div>
+
+      <!-- TR NAME SEARCH -->
+      <div class="field-group">
+        <label>Search TR name</label>
+        <div class="search-wrap">
+          <input type="text" id="trSearch" placeholder="Type name to search roster..." autocomplete="off"
+            oninput="handleTRSearch(this.value)"
+            onblur="setTimeout(hideSearchDropdown, 150)">
+          <div class="search-spinner" id="searchSpinner"></div>
+          <div class="search-dropdown" id="searchDropdown"></div>
+        </div>
+      </div>
+
+      <div class="divider" style="margin:8px 0 12px;"></div>
+      <div class="card-title" style="margin-bottom:10px;">Badge information — editable</div>
+
       <div class="two-col">
         <div class="field-group"><label>First name</label><input type="text" id="firstName"></div>
         <div class="field-group"><label>Last name</label><input type="text" id="lastName"></div>
@@ -286,19 +320,21 @@
           <div class="branch-wrap">
             <input type="text" id="branchName" placeholder="Type to search..." autocomplete="off"
               oninput="filterBranches(this.value)"
-              onfocus="showDropdown()"
-              onblur="setTimeout(hideDropdown, 150)">
+              onfocus="showBranchDropdown()"
+              onblur="setTimeout(hideBranchDropdown, 150)">
             <div class="branch-dropdown" id="branchDropdown"></div>
           </div>
         </div>
         <div class="field-group"><label>Region</label><input type="text" id="region" placeholder="Auto-filled"></div>
       </div>
     </div>
+
     <div class="card">
-      <div class="card-title">Contact info — collected in conversation</div>
+      <div class="card-title">Contact info</div>
       <div class="field-group"><label>Email address</label><input type="email" id="trEmail" placeholder="name@pattersondental.com"></div>
       <div class="field-group"><label>Mobile phone</label><input type="tel" id="trPhone" placeholder="+1 (555) 000-0000" oninput="formatPhone(this)" maxlength="17"></div>
     </div>
+
     <div id="step2Error"></div>
     <button class="btn-primary" onclick="matchAE()">Match to AE & continue →</button>
     <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1)">← Retake photo</button>
@@ -359,66 +395,8 @@
 <script>
 const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 const LEADS_KEY = 'nasm_leads';
-
-const AE_MAP = [
-  {city:"Louisville",branch:"KY - Louisville",ae:"Adam Young",region:"Ohio Valley"},
-  {city:"Cleveland",branch:"OH - Cleveland",ae:"Adam Young",region:"Ohio Valley"},
-  {city:"Columbus",branch:"OH - Mid-South Ohio",ae:"Adam Young",region:"Ohio Valley"},
-  {city:"East Bay",branch:"CA - East Bay",ae:"Alex Cagle-Sanchez",region:"Western"},
-  {city:"Sacramento",branch:"CA - Sacramento",ae:"Alex Cagle-Sanchez",region:"Western"},
-  {city:"South Florida",branch:"FL - Fort Lauderdale",ae:"Anthony Sena",region:"Southeast"},
-  {city:"Atlanta",branch:"GA - Atlanta",ae:"Ashley Klanac",region:"Southeast"},
-  {city:"Nashville",branch:"TN - Nashville",ae:"Ashley Klanac",region:"Southeast"},
-  {city:"Denver",branch:"CO - Denver",ae:"Bailey Binnebose",region:"Mountain West"},
-  {city:"Albuquerque",branch:"NM - Albuquerque",ae:"Bailey Binnebose",region:"South Central"},
-  {city:"Salt Lake City",branch:"UT - Salt Lake City",ae:"Bobbie Holmes",region:"Western"},
-  {city:"Raleigh",branch:"NC - Raleigh",ae:"Caity Rutty",region:"Southeast"},
-  {city:"New England",branch:"MA - New England",ae:"Chris Rocci",region:"Northeast"},
-  {city:"Medford",branch:"OR - Medford",ae:"Christa Skinner",region:"Mountain West"},
-  {city:"Portland",branch:"OR - Portland",ae:"Christa Skinner",region:"Mountain West"},
-  {city:"Spokane",branch:"WA - Spokane",ae:"Josh Marks",region:"Mountain West"},
-  {city:"San Diego",branch:"CA - San Diego",ae:"Greg Haskins",region:"Western"},
-  {city:"Las Vegas",branch:"NV - Las Vegas",ae:"Greg Haskins",region:"Western"},
-  {city:"Indianapolis",branch:"IN - Indianapolis",ae:"Hunter Ackerman",region:"Ohio Valley"},
-  {city:"Greater Michigan",branch:"MI - Greater Michigan",ae:"Hunter Ackerman",region:"Ohio Valley"},
-  {city:"Baltimore",branch:"MD - Baltimore",ae:"Jess Parker",region:"Northeast"},
-  {city:"Richmond",branch:"VA - Richmond",ae:"Jess Parker",region:"Northeast"},
-  {city:"Austin",branch:"TX - Austin",ae:"Jill Straetker",region:"South Central"},
-  {city:"San Antonio",branch:"TX - San Antonio",ae:"Jill Straetker",region:"South Central"},
-  {city:"Philadelphia",branch:"PA - Philadelphia",ae:"Jim DiQuattro",region:"Northeast"},
-  {city:"Pittsburgh",branch:"PA - Pittsburgh",ae:"Jim DiQuattro",region:"Northeast"},
-  {city:"Birmingham",branch:"AL-Birmingham",ae:"Josh Marks",region:"South Central"},
-  {city:"Little Rock",branch:"AR - Little Rock",ae:"Josh Marks",region:"South Central"},
-  {city:"Hawaii",branch:"HI - Kapolei",ae:"Josh Marks",region:"Western"},
-  {city:"Des Moines",branch:"IA - Des Moines",ae:"Josh Marks",region:"Mountain West"},
-  {city:"New Orleans",branch:"LA - New Orleans",ae:"Josh Marks",region:"South Central"},
-  {city:"Shreveport",branch:"LA - Shreveport",ae:"Josh Marks",region:"South Central"},
-  {city:"Jackson",branch:"MS - Jackson",ae:"Josh Marks",region:"South Central"},
-  {city:"Omaha",branch:"NE - Omaha",ae:"Josh Marks",region:"Mountain West"},
-  {city:"Rochester",branch:"NY - Rochester",ae:"Josh Marks",region:"Northeast"},
-  {city:"Memphis",branch:"TN - Memphis",ae:"Josh Marks",region:"Southeast"},
-  {city:"Kansas City",branch:"KS - Kansas City",ae:"Kate Quaka",region:"South Central"},
-  {city:"St Louis",branch:"MO - St Louis",ae:"Kate Quaka",region:"Ohio Valley"},
-  {city:"Orlando",branch:"FL - Orlando",ae:"Kelley Richardson",region:"Southeast"},
-  {city:"Tampa",branch:"FL - Tampa",ae:"Kelley Richardson",region:"Southeast"},
-  {city:"Oklahoma City",branch:"OK - Oklahoma City",ae:"Kendra Curry",region:"South Central"},
-  {city:"Dallas",branch:"TX - Dallas Ft Worth",ae:"Kendra Curry",region:"South Central"},
-  {city:"Minnesota",branch:"MN - Eagan",ae:"Kyle Walker",region:"Mountain West"},
-  {city:"Fargo",branch:"ND - Fargo",ae:"Kyle Walker",region:"Mountain West"},
-  {city:"Seattle",branch:"WA - Seattle",ae:"Landon Moeller",region:"Mountain West"},
-  {city:"Los Angeles",branch:"CA - Los Angeles",ae:"Leah Maiman",region:"Western"},
-  {city:"Chicago",branch:"IL - Chicago",ae:"Linda Ehlers",region:"Ohio Valley"},
-  {city:"Milwaukee",branch:"WI - Milwaukee",ae:"Linda Ehlers",region:"Ohio Valley"},
-  {city:"Houston",branch:"TX - Houston",ae:"Sam Moore",region:"South Central"},
-  {city:"Charlotte",branch:"NC - Charlotte",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Charleston",branch:"SC - Charleston",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Columbia",branch:"SC - Columbia",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Greenville",branch:"SC - Greenville",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Mesa",branch:"AZ-Mesa",ae:"Ryan Serrano",region:"Western"},
-  {city:"Metro NY/NJ",branch:"NJ - Totowa",ae:"TBD",region:"Northeast"},
-  {city:"Corporate",branch:"Corporate",ae:"Sebastien Carreau",region:"Corporate"},
-  {city:"N/A",branch:"N/A",ae:"Sebastien Carreau",region:"N/A"},
-];
+const FALLBACK_AE = 'Sebastien Carreau';
+const FALLBACK_AE_EMAIL = 'sebastien.carreau@candidco.com';
 
 const BRANCH_LIST = [
   "AL-Birmingham","AR - Little Rock","AZ-Mesa","CA - East Bay","CA - Los Angeles",
@@ -435,7 +413,12 @@ const BRANCH_LIST = [
   "VA - Richmond","WA - Seattle","WA - Spokane","WI - Milwaukee","Corporate","N/A"
 ];
 
-let state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
+let state = {
+  imageBase64: null, imageMediaType: 'image/jpeg',
+  matchedAE: null, matchedAEEmail: null,
+  notifMode: 'email', currentLead: null,
+  searchTimeout: null
+};
 
 // ─── STORAGE ─────────────────────────────────────────────────
 function getLeads() {
@@ -504,7 +487,8 @@ async function syncLead(lead) {
   const payload = {
     timestamp: lead.timestamp, firstName: lead.firstName || '', lastName: lead.lastName || '',
     role: lead.role || '', branch: lead.branch || '', region: lead.region || '',
-    email: lead.email || '', phone: lead.phone || '', assignedAE: lead.assignedAE || '',
+    email: lead.email || '', phone: lead.phone || '',
+    assignedAE: lead.assignedAE || '', aeEmail: lead.aeEmail || '',
     notifSent: lead.notifSent || '',
     captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced'
   };
@@ -536,13 +520,31 @@ async function retryOfflineCapture(lead) {
     });
     const parsed = await response.json();
     if (!parsed.error) {
-      const bl = (parsed.branchName || '').toLowerCase();
-      const match = AE_MAP.find(r => r.branch.toLowerCase() === bl)
-        || AE_MAP.find(r => bl.includes(r.city.toLowerCase()) || r.city.toLowerCase().includes(bl));
+      const branchVal = parsed.branchName || '';
+      const matchedBranch = BRANCH_LIST.find(b => b.toLowerCase() === branchVal.toLowerCase())
+        || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
+        || 'N/A';
+
+      // Try to lookup TR from sheet
+      let aeInfo = { assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL, region: '', email: lead.email };
+      try {
+        const lookupRes = await fetch('/api/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: `${parsed.firstName} ${parsed.lastName}` })
+        });
+        const lookupData = await lookupRes.json();
+        if (lookupData.results && lookupData.results.length > 0) {
+          const match = lookupData.results[0];
+          aeInfo = { assignedAE: match.assignedAE, aeEmail: match.aeEmail, region: match.region, email: match.email || lead.email };
+        }
+      } catch {}
+
       const extraData = {
         firstName: parsed.firstName || '', lastName: parsed.lastName || '',
-        role: parsed.role || '', branch: parsed.branchName || '',
-        region: match ? match.region : '', assignedAE: match ? match.ae : 'Sebastien Carreau',
+        role: parsed.role || '', branch: matchedBranch,
+        region: aeInfo.region, assignedAE: aeInfo.assignedAE,
+        aeEmail: aeInfo.aeEmail, email: aeInfo.email,
         status: 'pending'
       };
       updateLeadStatus(lead.id, 'pending', extraData);
@@ -589,6 +591,81 @@ async function autoRetryPending() {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
+// ─── TR SEARCH ───────────────────────────────────────────────
+let searchTimeout = null;
+
+function handleTRSearch(val) {
+  clearTimeout(searchTimeout);
+  const dropdown = document.getElementById('searchDropdown');
+  const spinner = document.getElementById('searchSpinner');
+  if (val.length < 2) { dropdown.style.display = 'none'; return; }
+  spinner.style.display = 'block';
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch('/api/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: val })
+      });
+      const data = await res.json();
+      spinner.style.display = 'none';
+      renderSearchDropdown(data.results || [], val);
+    } catch {
+      spinner.style.display = 'none';
+      dropdown.style.display = 'none';
+    }
+  }, 300);
+}
+
+function renderSearchDropdown(results, query) {
+  const dropdown = document.getElementById('searchDropdown');
+  if (results.length === 0) {
+    dropdown.innerHTML = `<div class="search-option"><div class="opt-notfound">No match for "${query}" — fill in manually below</div></div>`;
+    dropdown.style.display = 'block';
+    return;
+  }
+  dropdown.innerHTML = results.map((r, i) => `
+    <div class="search-option" onmousedown="selectTR(${i})">
+      <div class="opt-name">${r.name}${r.altName ? ' <span style="color:var(--gray);font-weight:400;font-size:12px;">(${r.altName})</span>' : ''}</div>
+      <div class="opt-branch">${r.branch} · ${r.region}</div>
+    </div>`).join('');
+  dropdown.style.display = 'block';
+  window._searchResults = results;
+}
+
+function selectTR(idx) {
+  const results = window._searchResults || [];
+  const tr = results[idx];
+  if (!tr) return;
+
+  const nameParts = tr.name.trim().split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+
+  document.getElementById('trSearch').value = tr.name;
+  document.getElementById('firstName').value = firstName;
+  document.getElementById('lastName').value = lastName;
+  document.getElementById('trEmail').value = tr.email || '';
+  document.getElementById('branchName').value = tr.branch || '';
+  document.getElementById('region').value = tr.region || '';
+
+  state.matchedAE = tr.assignedAE || FALLBACK_AE;
+  state.matchedAEEmail = tr.aeEmail || FALLBACK_AE_EMAIL;
+
+  ['firstName','lastName','trEmail','branchName','region'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
+  });
+
+  document.getElementById('aiBadge').style.display = 'none';
+  document.getElementById('sheetBadge').style.display = 'inline-flex';
+  hideSearchDropdown();
+}
+
+function hideSearchDropdown() {
+  document.getElementById('searchDropdown').style.display = 'none';
+}
+
 // ─── OFFLINE CAPTURE ─────────────────────────────────────────
 function handleAnalyzeClick() {
   if (!navigator.onLine) { showOfflineCaptureStep(); }
@@ -616,13 +693,13 @@ function submitOfflineCapture() {
   const lead = {
     id: leadId, timestamp: new Date().toLocaleString(),
     firstName: '', lastName: '', role: '', branch: '', region: '',
-    email, phone, assignedAE: '', notifSent: '',
-    status: 'offline_capture',
+    email, phone, assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL,
+    notifSent: '', status: 'offline_capture',
     imageBase64: state.imageBase64, imageMediaType: state.imageMediaType
   };
   addLead(lead);
   document.getElementById('successTitle').textContent = 'Contact saved!';
-  document.getElementById('successMsg').textContent = "Badge photo and contact info have been saved. Details will be extracted and synced automatically when you're back online.";
+  document.getElementById('successMsg').textContent = "Badge photo and contact info saved. Details will be extracted and synced automatically when you're back online.";
   document.getElementById('leadSummaryCard').innerHTML = `
     <div class="tr-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -690,10 +767,10 @@ function resetStep1() {
 
 function skipToManual() {
   document.getElementById('aiBadge').style.display = 'none';
-  ['firstName','lastName','trRole','branchName','region'].forEach(id => {
+  document.getElementById('sheetBadge').style.display = 'none';
+  ['firstName','lastName','trRole','branchName','region','trEmail','trSearch'].forEach(id => {
     const el = document.getElementById(id);
-    el.value = '';
-    el.classList.remove('ai-filled');
+    if (el) { el.value = ''; el.classList.remove('ai-filled'); el.classList.remove('sheet-filled'); }
   });
   goStep(2);
 }
@@ -712,17 +789,54 @@ async function analyzeImage() {
     });
     const parsed = await response.json();
     if (parsed.error) throw new Error(parsed.error);
-    document.getElementById('firstName').value = parsed.firstName || '';
-    document.getElementById('lastName').value = parsed.lastName || '';
+
+    const firstName = parsed.firstName || '';
+    const lastName = parsed.lastName || '';
+    document.getElementById('firstName').value = firstName;
+    document.getElementById('lastName').value = lastName;
     document.getElementById('trRole').value = parsed.role || '';
+
     const branchVal = parsed.branchName || '';
     const matchedBranch = BRANCH_LIST.find(b => b.toLowerCase() === branchVal.toLowerCase())
-      || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()));
-    const finalBranch = matchedBranch || 'N/A';
-    document.getElementById('branchName').value = finalBranch;
-    autofillRegion(finalBranch);
-    ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
-    document.getElementById('aiBadge').style.display = 'inline-flex';
+      || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
+      || 'N/A';
+    document.getElementById('branchName').value = matchedBranch;
+
+    // Try sheet lookup to get email + AE
+    if (firstName || lastName) {
+      try {
+        const lookupRes = await fetch('/api/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: `${firstName} ${lastName}`.trim() })
+        });
+        const lookupData = await lookupRes.json();
+        if (lookupData.results && lookupData.results.length > 0) {
+          const match = lookupData.results[0];
+          document.getElementById('trEmail').value = match.email || '';
+          document.getElementById('region').value = match.region || '';
+          if (match.branch) document.getElementById('branchName').value = match.branch;
+          state.matchedAE = match.assignedAE;
+          state.matchedAEEmail = match.aeEmail;
+          document.getElementById('trSearch').value = match.name;
+          ['firstName','lastName','trRole','branchName','region','trEmail'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
+          });
+          document.getElementById('aiBadge').style.display = 'none';
+          document.getElementById('sheetBadge').style.display = 'inline-flex';
+        } else {
+          autofillRegionFromBranch(matchedBranch);
+          ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
+          document.getElementById('aiBadge').style.display = 'inline-flex';
+          document.getElementById('sheetBadge').style.display = 'none';
+        }
+      } catch {
+        autofillRegionFromBranch(matchedBranch);
+        ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
+        document.getElementById('aiBadge').style.display = 'inline-flex';
+      }
+    }
     goStep(2);
   } catch(err) {
     document.getElementById('step1Error').innerHTML = '<div class="error-msg">Could not analyze image: ' + err.message + '. Try manually instead.</div>';
@@ -732,30 +846,49 @@ async function analyzeImage() {
   btn.disabled = false;
 }
 
-function autofillRegion(branchVal) {
-  const bl = branchVal.toLowerCase();
-  const match = AE_MAP.find(r => r.branch.toLowerCase() === bl)
-    || AE_MAP.find(r => bl.includes(r.branch.toLowerCase()) || r.branch.toLowerCase().includes(bl));
-  if (match && match.region) {
-    const regionField = document.getElementById('region');
-    regionField.value = match.region;
-    regionField.classList.add('ai-filled');
-  }
+function autofillRegionFromBranch(branchVal) {
+  const regionMap = {
+    "AL-Birmingham":"South Central","AR - Little Rock":"South Central","AZ-Mesa":"Western",
+    "CA - East Bay":"Western","CA - Los Angeles":"Western","CA - Sacramento":"Western",
+    "CA - San Diego":"Western","CO - Denver":"Mountain West","FL - Fort Lauderdale":"Southeast",
+    "FL - Orlando":"Southeast","FL - Tampa":"Southeast","GA - Atlanta":"Southeast",
+    "HI - Kapolei":"Western","IA - Des Moines":"Mountain West","IL - Chicago":"Ohio Valley",
+    "IN - Indianapolis":"Ohio Valley","KS - Kansas City":"South Central","KY - Louisville":"Ohio Valley",
+    "LA - New Orleans":"South Central","LA - Shreveport":"South Central","MA - New England":"Northeast",
+    "MD - Baltimore":"Northeast","MI - Greater Michigan":"Ohio Valley","MN - Eagan":"Mountain West",
+    "MO - St Louis":"Ohio Valley","MS - Jackson":"South Central","NC - Charlotte":"Southeast",
+    "NC - Raleigh":"Southeast","ND - Fargo":"Mountain West","NE - Omaha":"Mountain West",
+    "NJ - Totowa":"Northeast","NM - Albuquerque":"South Central","NV - Las Vegas":"Western",
+    "NY - Rochester":"Northeast","OH - Cleveland":"Ohio Valley","OH - Mid-South Ohio":"Ohio Valley",
+    "OK - Oklahoma City":"South Central","OR - Medford":"Mountain West","OR - Portland":"Mountain West",
+    "PA - Philadelphia":"Northeast","PA - Pittsburgh":"Northeast","SC - Charleston":"Southeast",
+    "SC - Columbia":"Southeast","SC - Greenville":"Southeast","TN - Memphis":"Southeast",
+    "TN - Nashville":"Southeast","TX - Austin":"South Central","TX - Dallas Ft Worth":"South Central",
+    "TX - Houston":"South Central","TX - San Antonio":"South Central","UT - Salt Lake City":"Western",
+    "VA - Richmond":"Northeast","WA - Seattle":"Mountain West","WA - Spokane":"Mountain West",
+    "WI - Milwaukee":"Ohio Valley","Corporate":"Corporate","N/A":"N/A"
+  };
+  const region = regionMap[branchVal] || '';
+  if (region) { document.getElementById('region').value = region; }
 }
 
 function filterBranches(val) {
   const filtered = val.length === 0 ? BRANCH_LIST : BRANCH_LIST.filter(b => b.toLowerCase().includes(val.toLowerCase()));
-  renderDropdown(filtered);
+  renderBranchDropdown(filtered);
 }
-function renderDropdown(list) {
+function renderBranchDropdown(list) {
   const dropdown = document.getElementById('branchDropdown');
   if (list.length === 0) { dropdown.style.display = 'none'; return; }
   dropdown.innerHTML = list.map(b => `<div class="branch-option" onmousedown="selectBranch('${b}')">${b}</div>`).join('');
   dropdown.style.display = 'block';
 }
-function selectBranch(branch) { document.getElementById('branchName').value = branch; autofillRegion(branch); hideDropdown(); }
-function showDropdown() { filterBranches(document.getElementById('branchName').value); }
-function hideDropdown() { document.getElementById('branchDropdown').style.display = 'none'; }
+function selectBranch(branch) {
+  document.getElementById('branchName').value = branch;
+  autofillRegionFromBranch(branch);
+  hideBranchDropdown();
+}
+function showBranchDropdown() { filterBranches(document.getElementById('branchName').value); }
+function hideBranchDropdown() { document.getElementById('branchDropdown').style.display = 'none'; }
 
 function matchAE() {
   const firstName = document.getElementById('firstName').value.trim();
@@ -770,33 +903,39 @@ function matchAE() {
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
   if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
   if (!BRANCH_LIST.includes(branchName)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the dropdown. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
+
+  // Validate email format if provided
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>';
+    return;
+  }
+
   document.getElementById('step2Error').innerHTML = '';
 
-  const bl = branchName.toLowerCase();
-  let match = AE_MAP.find(r => r.branch.toLowerCase() === bl);
-  if (!match) match = AE_MAP.find(r => bl.includes(r.city.toLowerCase()) || r.city.toLowerCase().includes(bl));
-  if (!match) match = AE_MAP.find(r => { const p = bl.split(' - ').pop(); return r.branch.toLowerCase().includes(p) || bl.includes(r.branch.toLowerCase().split(' - ').pop()); });
+  // Use sheet-matched AE if available, otherwise fallback
+  const assignedAE = state.matchedAE || FALLBACK_AE;
+  const assignedAEEmail = state.matchedAEEmail || FALLBACK_AE_EMAIL;
 
-  state.matchedAE = match ? match.ae : 'Sebastien Carreau';
-  state.matchedRegion = match ? match.region : region;
-  state.currentLead = { firstName, lastName, role, branchName, region: match ? match.region : region, email, phone };
+  state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail };
 
   document.getElementById('trSummaryBlock').innerHTML = `
     <div class="tr-card">
       <div class="tr-name">${firstName} ${lastName}</div>
       <div class="tr-role">${role}</div>
-      <div class="tr-branch">${branchName}${state.matchedRegion ? ' · ' + state.matchedRegion : ''}</div>
+      <div class="tr-branch">${branchName}${region ? ' · ' + region : ''}</div>
       <div class="contact-tags">
         ${email ? '<span class="tag tag-navy">✉ ' + email + '</span>' : ''}
         ${phone ? '<span class="tag tag-navy">📱 ' + phone + '</span>' : ''}
       </div>
     </div>`;
+
   document.getElementById('matchBlock').innerHTML = `
     <div class="ae-match-card">
       <div class="ae-label">Assigned CandidPro AE</div>
-      <div class="ae-name">${state.matchedAE}</div>
-      ${match ? '<div class="ae-branch">' + match.branch + ' · ' + match.region + '</div>' : '<div class="ae-unmatched">⚠ Branch not matched — please verify</div>'}
+      <div class="ae-name">${assignedAE}</div>
+      <div class="ae-branch">${branchName}${region ? ' · ' + region : ''}</div>
     </div>`;
+
   updateMessagePreview();
   goStep(3);
 }
@@ -810,7 +949,7 @@ function toggleNotif(mode) {
 
 function updateMessagePreview() {
   const l = state.currentLead || {};
-  const ae = state.matchedAE || 'AE';
+  const ae = l.assignedAE || FALLBACK_AE;
   const content = state.notifMode === 'email'
     ? `Subject: New Patterson TR Introduction — ${l.firstName} ${l.lastName}\n\nHi ${ae},\n\nGreat news! We connected with ${l.firstName} ${l.lastName} (${l.role}) from the ${l.branchName} branch at NASM.\n\n${l.firstName} is interested in partnering with CandidPro and has been matched to you as their AE contact.\n\nContact details:\n${l.email ? '  Email: ' + l.email + '\n' : ''}${l.phone ? '  Phone: ' + l.phone + '\n' : ''}\nPlease reach out to ${l.firstName} to kick off the introduction and next steps.\n\nGo CandidPro!\nNASM Booth Team`
     : `Hey ${ae}! New Patterson TR match from NASM:\n\n${l.firstName} ${l.lastName}\n${l.role} — ${l.branchName}\n${l.email ? 'Email: ' + l.email + '\n' : ''}${l.phone ? 'Phone: ' + l.phone : ''}\n\nThey're interested in working with CandidPro — you're their assigned AE. Reach out soon!`;
@@ -827,7 +966,8 @@ async function submitLead() {
     id: leadId, timestamp: new Date().toLocaleString(),
     firstName: l.firstName, lastName: l.lastName, role: l.role,
     branch: l.branchName, region: l.region, email: l.email, phone: l.phone,
-    assignedAE: state.matchedAE, notifSent: state.notifMode, status: 'pending'
+    assignedAE: l.assignedAE, aeEmail: l.assignedAEEmail,
+    notifSent: state.notifMode, status: 'pending'
   };
   addLead(lead);
   let sheetSuccess = false;
@@ -836,7 +976,7 @@ async function submitLead() {
     catch { updateLeadStatus(leadId, 'failed'); }
   }
   document.getElementById('successTitle').textContent = 'Lead captured!';
-  document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been captured and ${state.matchedAE} is queued for notification via ${state.notifMode === 'email' ? 'email' : 'text message'}.`;
+  document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been captured and ${l.assignedAE} is queued for notification via ${state.notifMode === 'email' ? 'email' : 'text message'}.`;
   document.getElementById('leadSummaryCard').innerHTML = `
     <div class="tr-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -844,7 +984,7 @@ async function submitLead() {
         <span class="tag tag-green">✓ Captured</span>
       </div>
       <div class="tr-role">${l.role} · ${l.branchName}</div>
-      <div style="margin-top:8px;font-size:12px;color:var(--gray);">Assigned to <strong style="color:var(--navy);">${state.matchedAE}</strong></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--gray);">Assigned to <strong style="color:var(--navy);">${l.assignedAE}</strong></div>
     </div>`;
   if (!navigator.onLine) {
     document.getElementById('sheetStatus').innerHTML = '<div class="status-queued">📶 No connection — saved locally and will sync when reconnected.</div>';
@@ -859,7 +999,7 @@ async function submitLead() {
 }
 
 function resetApp() {
-  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
+  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, matchedAEEmail: null, notifMode: 'email', currentLead: null, searchTimeout: null };
   document.getElementById('previewImg').style.display = 'none';
   document.getElementById('previewImg').src = '';
   document.getElementById('previewImgOffline').style.display = 'none';
@@ -868,11 +1008,12 @@ function resetApp() {
   document.getElementById('skipBtn').style.display = 'none';
   document.getElementById('uploadZone').style.display = 'block';
   document.getElementById('badgeInput').value = '';
-  document.getElementById('aiBadge').style.display = 'inline-flex';
+  document.getElementById('aiBadge').style.display = 'none';
+  document.getElementById('sheetBadge').style.display = 'none';
   document.getElementById('successTitle').textContent = 'Lead captured!';
-  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone','offlineEmail','offlinePhone'].forEach(id => {
+  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone','offlineEmail','offlinePhone','trSearch'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.value = ''; el.classList.remove('ai-filled'); }
+    if (el) { el.value = ''; el.classList.remove('ai-filled'); el.classList.remove('sheet-filled'); }
   });
   document.getElementById('notifEmail').classList.add('selected');
   document.getElementById('notifSMS').classList.remove('selected');
