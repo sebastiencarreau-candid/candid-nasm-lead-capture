@@ -7,7 +7,7 @@ exports.handler = async function(event) {
     const { query } = JSON.parse(event.body);
 
     const SHEET_ID = '1OBliAy-otDBDF8Xnwa1nR2R1X6pnIoTSj9x9qL_L688';
-    const API_KEY = process.env.GOOGLE_SHEETS_API_KEY;
+    const API_KEY = process.env.GSHEETS_API_KEY;
     const RANGE = 'Sheet1!A2:G1000';
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
