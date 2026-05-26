@@ -960,7 +960,12 @@ async function submitLead() {
   btn.innerHTML = '<span class="spinner"></span>Submitting...';
   btn.disabled = true;
 
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 1 — function started</div>';
+
   const l = state.currentLead;
+
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 2 — lead object created</div>';
+
   const emailSubject = document.getElementById('emailSubject').value;
   const emailBody = document.getElementById('emailBody').value;
   const leadId = 'lead_' + Date.now();
@@ -974,8 +979,11 @@ async function submitLead() {
     status: 'pending'
   };
 
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 3 — about to addLead</div>';
+
   addLead(lead);
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: lead saved, attempting Zapier sync...</div>';
+
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 4 — addLead done, checking online status: ' + navigator.onLine + '</div>';
 
   let sheetSuccess = false;
   if (navigator.onLine) {
