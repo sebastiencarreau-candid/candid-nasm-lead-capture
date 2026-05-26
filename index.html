@@ -960,6 +960,8 @@ async function submitLead() {
   btn.innerHTML = '<span class="spinner"></span>Submitting...';
   btn.disabled = true;
 
+  console.log('submitLead started');
+
   const l = state.currentLead;
   const emailSubject = document.getElementById('emailSubject').value;
   const emailBody = document.getElementById('emailBody').value;
@@ -973,13 +975,29 @@ async function submitLead() {
     notifSent: l.email ? 'email' : 'none',
     status: 'pending'
   };
+
+  console.log('Lead created, adding to storage');
   addLead(lead);
+  console.log('Lead added to storage');
 
   let sheetSuccess = false;
   if (navigator.onLine) {
-    try { sheetSuccess = await syncLead(lead); updateLeadStatus(leadId, sheetSuccess ? 'synced' : 'failed'); }
-    catch { updateLeadStatus(leadId, 'failed'); }
+    console.log('Online, attempting Zapier sync');
+    try {
+      const syncPromise = syncLead(lead);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+      sheetSuccess = await Promise.race([syncPromise, timeoutPromise]);
+      console.log('Sync result:', sheetSuccess);
+      updateLeadStatus(leadId, sheetSuccess ? 'synced' : 'failed');
+    } catch(err) {
+      console.log('Sync error:', err.message);
+      updateLeadStatus(leadId, 'failed');
+    }
+  } else {
+    console.log('Offline, skipping sync');
   }
+
+  console.log('Moving to success screen');
 
   document.getElementById('successTitle').textContent = 'Lead captured!';
   document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been logged and ${l.assignedAE} has been notified via email.`;
@@ -1001,7 +1019,6 @@ async function submitLead() {
     document.getElementById('sheetStatus').innerHTML = '<div class="status-warn">⚠ Could not reach Zapier — saved locally. Tap the menu to retry.</div>';
   }
 
-  // Show group text button if phone captured
   if (l.phone) {
     document.getElementById('openTextBtn').style.display = 'block';
   } else {
@@ -1010,6 +1027,7 @@ async function submitLead() {
 
   btn.innerHTML = 'Submit lead & send email';
   btn.disabled = false;
+  console.log('goStep 4');
   goStep(4);
 }
 
