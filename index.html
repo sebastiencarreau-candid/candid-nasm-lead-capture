@@ -452,7 +452,17 @@ function getLeads() {
   catch { return []; }
 }
 function saveLeads(leads) { localStorage.setItem(LEADS_KEY, JSON.stringify(leads)); }
-function addLead(lead) { const leads = getLeads(); leads.unshift(lead); saveLeads(leads); updateMenuBadge(); }
+function addLead(lead) {
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — getLeads</div>';
+  const leads = getLeads();
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — unshift</div>';
+  leads.unshift(lead);
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — saveLeads</div>';
+  saveLeads(leads);
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — updateMenuBadge</div>';
+  updateMenuBadge();
+  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — done</div>';
+}
 function updateLeadStatus(id, status, extraData) {
   const leads = getLeads();
   const idx = leads.findIndex(l => l.id === id);
