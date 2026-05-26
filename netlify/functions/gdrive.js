@@ -39,7 +39,7 @@ exports.handler = async function(event) {
       `--${boundary}--`
     ].join('\r\n');
 
-    const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
+    const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink&supportsAllDrives=true', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -55,7 +55,7 @@ exports.handler = async function(event) {
     }
 
     // Make file viewable by anyone with the link
-    await fetch(`https://www.googleapis.com/drive/v3/files/${uploadData.id}/permissions`, {
+    await fetch(`https://www.googleapis.com/drive/v3/files/${uploadData.id}/permissions?supportsAllDrives=true`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
