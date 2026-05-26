@@ -951,17 +951,17 @@ function matchAE() {
 
   state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail, assignedAEPhone };
 
-  const emailSubject = `CandidPro x Patterson — Introduction`;
-  const emailBody = `Hi ${assignedAEFirstName} & ${firstName},\n\n[Email body placeholder — to be updated]\n\nBest,\nNASM Booth Team`;
-  document.getElementById('emailSubject').value = emailSubject;
-  document.getElementById('emailBody').value = emailBody;
+  const emailSubject = `CandidPro x Patterson - NASM Introduction`;
+const emailBody = `Hi ${assignedAEFirstName} and ${firstName},\n\n${firstName} from the ${branchName} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${assignedAEFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
+document.getElementById('emailSubject').value = emailSubject;
+document.getElementById('emailBody').value = emailBody;
 
-  if (phone) {
-    document.getElementById('smsTemplateCard').style.display = 'block';
-    document.getElementById('smsBody').value = `Hi ${assignedAEFirstName} & ${firstName}!\n\n[SMS body placeholder — to be updated]\n\n— CandidPro NASM Team`;
-  } else {
-    document.getElementById('smsTemplateCard').style.display = 'none';
-  }
+if (phone) {
+  document.getElementById('smsTemplateCard').style.display = 'block';
+  document.getElementById('smsBody').value = `Hi ${firstName} and ${assignedAEFirstName}! ${firstName} stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro. Wanted to connect you both to get started!`;
+} else {
+  document.getElementById('smsTemplateCard').style.display = 'none';
+}
 
   document.getElementById('trSummaryBlock').innerHTML = `
     <div class="tr-card">
