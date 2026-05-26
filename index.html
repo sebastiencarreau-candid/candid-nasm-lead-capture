@@ -442,7 +442,7 @@ const REGION_MAP = {
 
 let state = {
   imageBase64: null, imageMediaType: 'image/jpeg',
-  matchedAE: null, matchedAEEmail: null, matchedAEPhone: null,
+  matchedAE: null, matchedAEEmail: null, matchedAEPhone: null, matchedAEFirstName: null,
   notifMode: 'email', currentLead: null, searchTimeout: null
 };
 
@@ -665,6 +665,7 @@ function selectTR(idx) {
   state.matchedAE = tr.assignedAE || FALLBACK_AE;
   state.matchedAEEmail = tr.aeEmail || FALLBACK_AE_EMAIL;
   state.matchedAEPhone = tr.aePhone || null;
+  state.matchedAEFirstName = tr.aeFirstName || null;
   ['firstName','lastName','trEmail','branchName','region'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
@@ -837,6 +838,7 @@ async function analyzeImage() {
           state.matchedAE = match.assignedAE;
           state.matchedAEEmail = match.aeEmail;
           state.matchedAEPhone = match.aePhone || null;
+          state.matchedAEFirstName = match.aeFirstName || null;
           document.getElementById('trSearch').value = match.name;
           ['firstName','lastName','trRole','branchName','region','trEmail'].forEach(id => {
             const el = document.getElementById(id);
@@ -902,19 +904,20 @@ function matchAE() {
   const assignedAE = state.matchedAE || FALLBACK_AE;
   const assignedAEEmail = state.matchedAEEmail || FALLBACK_AE_EMAIL;
   const assignedAEPhone = state.matchedAEPhone || null;
+  const assignedAEFirstName = state.matchedAEFirstName || assignedAE.split(' ')[0];
 
   state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail, assignedAEPhone };
 
   // Populate email template
   const emailSubject = `CandidPro x Patterson — Introduction`;
-  const emailBody = `Hi ${assignedAE} & ${firstName},\n\n[Email body placeholder — to be updated]\n\nBest,\nNASM Booth Team`;
+  const emailBody = `Hi ${assignedAEFirstName} & ${firstName},\n\n[Email body placeholder — to be updated]\n\nBest,\nNASM Booth Team`;
   document.getElementById('emailSubject').value = emailSubject;
   document.getElementById('emailBody').value = emailBody;
 
   // Populate SMS template if phone exists
   if (phone) {
     document.getElementById('smsTemplateCard').style.display = 'block';
-    document.getElementById('smsBody').value = `Hi ${assignedAE} & ${firstName}!\n\n[SMS body placeholder — to be updated]\n\n— CandidPro NASM Team`;
+    document.getElementById('smsBody').value = `Hi ${assignedAEFirstName} & ${firstName}!\n\n[SMS body placeholder — to be updated]\n\n— CandidPro NASM Team`;
   } else {
     document.getElementById('smsTemplateCard').style.display = 'none';
   }
@@ -1013,7 +1016,7 @@ async function submitLead() {
 }
 
 function resetApp() {
-  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, matchedAEEmail: null, matchedAEPhone: null, notifMode: 'email', currentLead: null, searchTimeout: null };
+  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, matchedAEEmail: null, matchedAEPhone: null, matchedAEFirstName: null, notifMode: 'email', currentLead: null, searchTimeout: null };
   document.getElementById('previewImg').style.display = 'none';
   document.getElementById('previewImg').src = '';
   document.getElementById('previewImgOffline').style.display = 'none';
