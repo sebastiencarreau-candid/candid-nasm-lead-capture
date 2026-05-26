@@ -116,9 +116,10 @@
   .field-group input.ai-filled { background: var(--red-light); border-color: rgba(232,40,30,0.3); }
   .field-group input.sheet-filled { background: #F0FDF4; border-color: #86EFAC; }
   .field-group input::placeholder { color: #C4C9D4; }
+  .field-group textarea { width: 100%; padding: 11px 14px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; line-height: 1.6; resize: vertical; min-height: 120px; }
+  .field-group textarea:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,40,30,0.08); }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  /* TR SEARCH */
   .search-wrap { position: relative; }
   .search-dropdown { display: none; position: absolute; z-index: 100; background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; max-height: 240px; overflow-y: auto; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-top: 4px; }
   .search-option { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--navy); border-bottom: 1px solid var(--border); }
@@ -130,7 +131,6 @@
   .search-spinner { display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; }
   .sheet-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--success); background: var(--success-bg); padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; border: 1px solid rgba(10,124,78,0.2); }
 
-  /* BRANCH DROPDOWN */
   .branch-wrap { position: relative; }
   .branch-dropdown { display: none; position: absolute; z-index: 100; background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; max-height: 200px; overflow-y: auto; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-top: 4px; }
   .branch-option { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--navy); border-bottom: 1px solid var(--border); }
@@ -141,6 +141,9 @@
   .btn-primary:hover { background: var(--red-dark); }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-secondary { width: 100%; padding: 13px; font-size: 14px; font-weight: 600; border-radius: 12px; cursor: pointer; border: 1.5px solid var(--navy); background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .btn-secondary:hover { background: var(--navy); color: white; }
+  .btn-secondary:active { transform: scale(0.98); }
   .btn-ghost { width: 100%; background: none; border: none; font-size: 13px; color: var(--gray); cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
   .btn-ghost:hover { color: var(--navy); }
 
@@ -153,7 +156,6 @@
   .ae-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
   .ae-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 4px; }
   .ae-branch { font-size: 12px; color: rgba(255,255,255,0.6); }
-  .ae-unmatched { font-size: 12px; color: #FCA5A5; margin-top: 4px; }
 
   .tr-card { background: var(--gray-light); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; border-left: 3px solid var(--red); }
   .tr-name { font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
@@ -165,19 +167,16 @@
   .tag-green { background: var(--success-bg); color: var(--success); font-weight: 600; }
   .tag-offline { background: var(--offline-bg); color: var(--offline); font-weight: 600; }
 
-  .notif-option { border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: var(--white); display: flex; align-items: center; gap: 14px; }
-  .notif-option:hover { border-color: var(--navy); }
-  .notif-option.selected { border-color: var(--red); background: var(--red-light); }
-  .notif-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .notif-option.selected .notif-icon { background: rgba(232,40,30,0.12); }
-  .notif-text h4 { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
-  .notif-text p { font-size: 12px; color: var(--gray); }
-  .notif-check { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .notif-option.selected .notif-check { background: var(--red); border-color: var(--red); }
-  .notif-option.selected .notif-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
-
-  .preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; margin-top: 16px; }
-  .message-box { background: var(--gray-light); border-radius: 12px; padding: 14px; font-size: 12px; line-height: 1.7; color: var(--navy); white-space: pre-wrap; border: 1px solid var(--border); margin-bottom: 16px; max-height: 180px; overflow-y: auto; }
+  /* MESSAGE TEMPLATES */
+  .template-card { background: var(--gray-light); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .template-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .template-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); }
+  .template-icon { font-size: 16px; }
+  .subject-input { width: 100%; padding: 9px 12px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; margin-bottom: 8px; }
+  .subject-input:focus { outline: none; border-color: var(--red); }
+  .template-body { width: 100%; padding: 11px 14px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; line-height: 1.6; resize: vertical; min-height: 140px; }
+  .template-body:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,40,30,0.08); }
+  .template-note { font-size: 11px; color: var(--gray); margin-top: 6px; font-style: italic; }
 
   .error-msg { color: #991B1B; font-size: 13px; padding: 10px 14px; background: #FEE2E2; border-radius: 10px; margin-bottom: 12px; border-left: 3px solid var(--red); }
   .status-success { font-size: 13px; color: var(--success); background: var(--success-bg); border-radius: 10px; padding: 12px 16px; border-left: 3px solid var(--success); }
@@ -193,6 +192,10 @@
 
   .offline-banner { background: var(--pending-bg); border-bottom: 1px solid #FDE68A; padding: 8px 20px; font-size: 12px; color: var(--pending); font-weight: 600; text-align: center; display: none; }
   .offline-banner.visible { display: block; }
+
+  .sms-btn { width: 100%; padding: 15px; font-size: 15px; font-weight: 600; border-radius: 12px; cursor: pointer; border: none; background: #22C55E; color: white; font-family: 'DM Sans', sans-serif; transition: background 0.2s, transform 0.1s; margin-top: 10px; }
+  .sms-btn:hover { background: #16A34A; }
+  .sms-btn:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
@@ -286,15 +289,10 @@
   <div class="step" id="step2">
     <div class="step-eyebrow">Step 2 of 3</div>
     <div class="step-title">Review & add contact info</div>
-
-    <!-- Source pill — swaps between AI extracted and sheet matched -->
     <div class="ai-pill" id="aiBadge" style="display:none;">✦ AI extracted — please confirm</div>
     <div class="sheet-pill" id="sheetBadge" style="display:none;">✓ Matched from TR list — please confirm</div>
-
     <div class="card">
       <div class="card-title">Search TR roster or enter manually</div>
-
-      <!-- TR NAME SEARCH -->
       <div class="field-group">
         <label>Search TR name</label>
         <div class="search-wrap">
@@ -305,10 +303,8 @@
           <div class="search-dropdown" id="searchDropdown"></div>
         </div>
       </div>
-
       <div class="divider" style="margin:8px 0 12px;"></div>
       <div class="card-title" style="margin-bottom:10px;">Badge information — editable</div>
-
       <div class="two-col">
         <div class="field-group"><label>First name</label><input type="text" id="firstName"></div>
         <div class="field-group"><label>Last name</label><input type="text" id="lastName"></div>
@@ -328,39 +324,45 @@
         <div class="field-group"><label>Region</label><input type="text" id="region" placeholder="Auto-filled"></div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">Contact info</div>
       <div class="field-group"><label>Email address</label><input type="email" id="trEmail" placeholder="name@pattersondental.com"></div>
       <div class="field-group"><label>Mobile phone</label><input type="tel" id="trPhone" placeholder="+1 (555) 000-0000" oninput="formatPhone(this)" maxlength="17"></div>
     </div>
-
     <div id="step2Error"></div>
     <button class="btn-primary" onclick="matchAE()">Match to AE & continue →</button>
     <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1)">← Retake photo</button>
   </div>
 
-  <!-- STEP 3: CONFIRM + SEND -->
+  <!-- STEP 3: CONFIRM + TEMPLATES -->
   <div class="step" id="step3">
     <div class="step-eyebrow">Step 3 of 3</div>
     <div class="step-title">Confirm & send</div>
     <div id="trSummaryBlock"></div>
     <div id="matchBlock"></div>
     <div class="divider"></div>
-    <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Notify via</div>
-    <div id="notifEmail" class="notif-option selected" onclick="toggleNotif('email')">
-      <div class="notif-icon">✉️</div>
-      <div class="notif-text"><h4>Email</h4><p>Intro email draft for AE → TR</p></div>
-      <div class="notif-check"></div>
+
+    <!-- EMAIL TEMPLATE -->
+    <div class="template-card">
+      <div class="template-header">
+        <div class="template-title">✉ Intro email — sent automatically</div>
+      </div>
+      <input type="text" class="subject-input" id="emailSubject" placeholder="Email subject">
+      <textarea class="template-body" id="emailBody"></textarea>
+      <div class="template-note">This email will be sent automatically via Zapier when you submit.</div>
     </div>
-    <div id="notifSMS" class="notif-option" onclick="toggleNotif('sms')">
-      <div class="notif-icon">💬</div>
-      <div class="notif-text"><h4>Text message</h4><p>SMS to AE with TR details</p></div>
-      <div class="notif-check"></div>
+
+    <!-- SMS TEMPLATE (only if phone captured) -->
+    <div class="template-card" id="smsTemplateCard" style="display:none;">
+      <div class="template-header">
+        <div class="template-title">💬 Group text — you'll send this</div>
+      </div>
+      <textarea class="template-body" id="smsBody" style="min-height:100px;"></textarea>
+      <div class="template-note">Tap "Open Group Text" after submitting to send from your phone.</div>
     </div>
-    <div id="messagePreviewBlock"></div>
+
     <div id="step3Error"></div>
-    <button class="btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & log to Sheets</button>
+    <button class="btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & send email</button>
     <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(2)">← Edit info</button>
   </div>
 
@@ -371,8 +373,11 @@
       <div class="success-title" id="successTitle">Lead captured!</div>
       <p class="success-sub" id="successMsg"></p>
       <div id="leadSummaryCard" style="margin-bottom:14px;text-align:left;"></div>
-      <div id="sheetStatus" style="margin-bottom:24px;text-align:left;"></div>
-      <button class="btn-primary" onclick="resetApp()">Capture another lead</button>
+      <div id="sheetStatus" style="margin-bottom:16px;text-align:left;"></div>
+      <button class="sms-btn" id="openTextBtn" style="display:none;" onclick="openGroupText()">💬 Open Group Text</button>
+      <div style="margin-top:16px;">
+        <button class="btn-primary" onclick="resetApp()">Capture another lead</button>
+      </div>
     </div>
   </div>
 
@@ -413,11 +418,32 @@ const BRANCH_LIST = [
   "VA - Richmond","WA - Seattle","WA - Spokane","WI - Milwaukee","Corporate","N/A"
 ];
 
+const REGION_MAP = {
+  "AL-Birmingham":"South Central","AR - Little Rock":"South Central","AZ-Mesa":"Western",
+  "CA - East Bay":"Western","CA - Los Angeles":"Western","CA - Sacramento":"Western",
+  "CA - San Diego":"Western","CO - Denver":"Mountain West","FL - Fort Lauderdale":"Southeast",
+  "FL - Orlando":"Southeast","FL - Tampa":"Southeast","GA - Atlanta":"Southeast",
+  "HI - Kapolei":"Western","IA - Des Moines":"Mountain West","IL - Chicago":"Ohio Valley",
+  "IN - Indianapolis":"Ohio Valley","KS - Kansas City":"South Central","KY - Louisville":"Ohio Valley",
+  "LA - New Orleans":"South Central","LA - Shreveport":"South Central","MA - New England":"Northeast",
+  "MD - Baltimore":"Northeast","MI - Greater Michigan":"Ohio Valley","MN - Eagan":"Mountain West",
+  "MO - St Louis":"Ohio Valley","MS - Jackson":"South Central","NC - Charlotte":"Southeast",
+  "NC - Raleigh":"Southeast","ND - Fargo":"Mountain West","NE - Omaha":"Mountain West",
+  "NJ - Totowa":"Northeast","NM - Albuquerque":"South Central","NV - Las Vegas":"Western",
+  "NY - Rochester":"Northeast","OH - Cleveland":"Ohio Valley","OH - Mid-South Ohio":"Ohio Valley",
+  "OK - Oklahoma City":"South Central","OR - Medford":"Mountain West","OR - Portland":"Mountain West",
+  "PA - Philadelphia":"Northeast","PA - Pittsburgh":"Northeast","SC - Charleston":"Southeast",
+  "SC - Columbia":"Southeast","SC - Greenville":"Southeast","TN - Memphis":"Southeast",
+  "TN - Nashville":"Southeast","TX - Austin":"South Central","TX - Dallas Ft Worth":"South Central",
+  "TX - Houston":"South Central","TX - San Antonio":"South Central","UT - Salt Lake City":"Western",
+  "VA - Richmond":"Northeast","WA - Seattle":"Mountain West","WA - Spokane":"Mountain West",
+  "WI - Milwaukee":"Ohio Valley","Corporate":"Corporate","N/A":"N/A"
+};
+
 let state = {
   imageBase64: null, imageMediaType: 'image/jpeg',
-  matchedAE: null, matchedAEEmail: null,
-  notifMode: 'email', currentLead: null,
-  searchTimeout: null
+  matchedAE: null, matchedAEEmail: null, matchedAEPhone: null,
+  notifMode: 'email', currentLead: null, searchTimeout: null
 };
 
 // ─── STORAGE ─────────────────────────────────────────────────
@@ -431,8 +457,7 @@ function updateLeadStatus(id, status, extraData) {
   const leads = getLeads();
   const idx = leads.findIndex(l => l.id === id);
   if (idx !== -1) { leads[idx].status = status; if (extraData) Object.assign(leads[idx], extraData); saveLeads(leads); }
-  updateMenuBadge();
-  renderPanel();
+  updateMenuBadge(); renderPanel();
 }
 function updateMenuBadge() {
   const leads = getLeads();
@@ -490,6 +515,8 @@ async function syncLead(lead) {
     email: lead.email || '', phone: lead.phone || '',
     assignedAE: lead.assignedAE || '', aeEmail: lead.aeEmail || '',
     notifSent: lead.notifSent || '',
+    emailSubject: lead.emailSubject || '',
+    emailBody: lead.emailBody || '',
     captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced'
   };
   const res = await fetch(ZAPIER_WEBHOOK, { method: 'POST', body: JSON.stringify(payload) });
@@ -524,8 +551,6 @@ async function retryOfflineCapture(lead) {
       const matchedBranch = BRANCH_LIST.find(b => b.toLowerCase() === branchVal.toLowerCase())
         || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
         || 'N/A';
-
-      // Try to lookup TR from sheet
       let aeInfo = { assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL, region: '', email: lead.email };
       try {
         const lookupRes = await fetch('/api/lookup', {
@@ -539,13 +564,11 @@ async function retryOfflineCapture(lead) {
           aeInfo = { assignedAE: match.assignedAE, aeEmail: match.aeEmail, region: match.region, email: match.email || lead.email };
         }
       } catch {}
-
       const extraData = {
         firstName: parsed.firstName || '', lastName: parsed.lastName || '',
         role: parsed.role || '', branch: matchedBranch,
         region: aeInfo.region, assignedAE: aeInfo.assignedAE,
-        aeEmail: aeInfo.aeEmail, email: aeInfo.email,
-        status: 'pending'
+        aeEmail: aeInfo.aeEmail, email: aeInfo.email, status: 'pending'
       };
       updateLeadStatus(lead.id, 'pending', extraData);
       const updatedLeads = getLeads();
@@ -555,24 +578,20 @@ async function retryOfflineCapture(lead) {
         updateLeadStatus(lead.id, ok ? 'synced' : 'failed');
       }
     }
-  } catch { /* stay as offline_capture */ }
+  } catch {}
 }
 
 async function retryAll() {
   const leads = getLeads();
   const toRetry = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture');
   for (const lead of toRetry) {
-    if (lead.status === 'offline_capture' && lead.imageBase64) {
-      await retryOfflineCapture(lead);
-    } else {
-      try { const ok = await syncLead(lead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); }
-      catch { updateLeadStatus(lead.id, 'failed'); }
-    }
+    if (lead.status === 'offline_capture' && lead.imageBase64) { await retryOfflineCapture(lead); }
+    else { try { const ok = await syncLead(lead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); } catch {} }
   }
   renderPanel();
 }
 
-// ─── OFFLINE DETECTION ───────────────────────────────────────
+// ─── OFFLINE ─────────────────────────────────────────────────
 function updateOnlineStatus() {
   const banner = document.getElementById('offlineBanner');
   if (!navigator.onLine) { banner.classList.add('visible'); }
@@ -593,7 +612,6 @@ window.addEventListener('offline', updateOnlineStatus);
 
 // ─── TR SEARCH ───────────────────────────────────────────────
 let searchTimeout = null;
-
 function handleTRSearch(val) {
   clearTimeout(searchTimeout);
   const dropdown = document.getElementById('searchDropdown');
@@ -626,7 +644,7 @@ function renderSearchDropdown(results, query) {
   }
   dropdown.innerHTML = results.map((r, i) => `
     <div class="search-option" onmousedown="selectTR(${i})">
-      <div class="opt-name">${r.name}${r.altName ? ' <span style="color:var(--gray);font-weight:400;font-size:12px;">(${r.altName})</span>' : ''}</div>
+      <div class="opt-name">${r.name}${r.altName ? ' <span style="color:var(--gray);font-weight:400;font-size:12px;">('+r.altName+')</span>' : ''}</div>
       <div class="opt-branch">${r.branch} · ${r.region}</div>
     </div>`).join('');
   dropdown.style.display = 'block';
@@ -637,41 +655,31 @@ function selectTR(idx) {
   const results = window._searchResults || [];
   const tr = results[idx];
   if (!tr) return;
-
   const nameParts = tr.name.trim().split(' ');
-  const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
-
   document.getElementById('trSearch').value = tr.name;
-  document.getElementById('firstName').value = firstName;
-  document.getElementById('lastName').value = lastName;
+  document.getElementById('firstName').value = nameParts[0] || '';
+  document.getElementById('lastName').value = nameParts.slice(1).join(' ') || '';
   document.getElementById('trEmail').value = tr.email || '';
   document.getElementById('branchName').value = tr.branch || '';
   document.getElementById('region').value = tr.region || '';
-
   state.matchedAE = tr.assignedAE || FALLBACK_AE;
   state.matchedAEEmail = tr.aeEmail || FALLBACK_AE_EMAIL;
-
+  state.matchedAEPhone = tr.aePhone || null;
   ['firstName','lastName','trEmail','branchName','region'].forEach(id => {
     const el = document.getElementById(id);
     if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
   });
-
   document.getElementById('aiBadge').style.display = 'none';
   document.getElementById('sheetBadge').style.display = 'inline-flex';
   hideSearchDropdown();
 }
-
-function hideSearchDropdown() {
-  document.getElementById('searchDropdown').style.display = 'none';
-}
+function hideSearchDropdown() { document.getElementById('searchDropdown').style.display = 'none'; }
 
 // ─── OFFLINE CAPTURE ─────────────────────────────────────────
 function handleAnalyzeClick() {
   if (!navigator.onLine) { showOfflineCaptureStep(); }
   else { analyzeImage(); }
 }
-
 function showOfflineCaptureStep() {
   const offlineImg = document.getElementById('previewImgOffline');
   const mainImg = document.getElementById('previewImg');
@@ -681,14 +689,10 @@ function showOfflineCaptureStep() {
   document.getElementById('step1bError').innerHTML = '';
   showStep('step1b');
 }
-
 function submitOfflineCapture() {
   const email = document.getElementById('offlineEmail').value.trim();
   const phone = document.getElementById('offlinePhone').value.trim();
-  if (!email && !phone) {
-    document.getElementById('step1bError').innerHTML = '<div class="error-msg">Please provide at least an email or phone number.</div>';
-    return;
-  }
+  if (!email && !phone) { document.getElementById('step1bError').innerHTML = '<div class="error-msg">Please provide at least an email or phone number.</div>'; return; }
   const leadId = 'lead_' + Date.now();
   const lead = {
     id: leadId, timestamp: new Date().toLocaleString(),
@@ -709,6 +713,7 @@ function submitOfflineCapture() {
       <div class="tr-role">${email ? '✉ ' + email : ''}${email && phone ? ' · ' : ''}${phone ? '📱 ' + phone : ''}</div>
     </div>`;
   document.getElementById('sheetStatus').innerHTML = '<div class="status-offline-capture">📶 Saved locally — will auto-analyze and sync when back online.</div>';
+  document.getElementById('openTextBtn').style.display = 'none';
   for (let i = 1; i <= 4; i++) {
     const ps = document.getElementById('ps' + i);
     const pl = document.getElementById('pl' + i);
@@ -717,7 +722,6 @@ function submitOfflineCapture() {
   }
   showStep('step4');
 }
-
 function showStep(stepId) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById(stepId).classList.add('active');
@@ -789,20 +793,16 @@ async function analyzeImage() {
     });
     const parsed = await response.json();
     if (parsed.error) throw new Error(parsed.error);
-
     const firstName = parsed.firstName || '';
     const lastName = parsed.lastName || '';
     document.getElementById('firstName').value = firstName;
     document.getElementById('lastName').value = lastName;
     document.getElementById('trRole').value = parsed.role || '';
-
     const branchVal = parsed.branchName || '';
     const matchedBranch = BRANCH_LIST.find(b => b.toLowerCase() === branchVal.toLowerCase())
       || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
       || 'N/A';
     document.getElementById('branchName').value = matchedBranch;
-
-    // Try sheet lookup to get email + AE
     if (firstName || lastName) {
       try {
         const lookupRes = await fetch('/api/lookup', {
@@ -818,6 +818,7 @@ async function analyzeImage() {
           if (match.branch) document.getElementById('branchName').value = match.branch;
           state.matchedAE = match.assignedAE;
           state.matchedAEEmail = match.aeEmail;
+          state.matchedAEPhone = match.aePhone || null;
           document.getElementById('trSearch').value = match.name;
           ['firstName','lastName','trRole','branchName','region','trEmail'].forEach(id => {
             const el = document.getElementById(id);
@@ -826,13 +827,13 @@ async function analyzeImage() {
           document.getElementById('aiBadge').style.display = 'none';
           document.getElementById('sheetBadge').style.display = 'inline-flex';
         } else {
-          autofillRegionFromBranch(matchedBranch);
+          document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
           ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
           document.getElementById('aiBadge').style.display = 'inline-flex';
           document.getElementById('sheetBadge').style.display = 'none';
         }
       } catch {
-        autofillRegionFromBranch(matchedBranch);
+        document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
         ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
         document.getElementById('aiBadge').style.display = 'inline-flex';
       }
@@ -844,32 +845,6 @@ async function analyzeImage() {
   }
   btn.innerHTML = 'Extract badge Info';
   btn.disabled = false;
-}
-
-function autofillRegionFromBranch(branchVal) {
-  const regionMap = {
-    "AL-Birmingham":"South Central","AR - Little Rock":"South Central","AZ-Mesa":"Western",
-    "CA - East Bay":"Western","CA - Los Angeles":"Western","CA - Sacramento":"Western",
-    "CA - San Diego":"Western","CO - Denver":"Mountain West","FL - Fort Lauderdale":"Southeast",
-    "FL - Orlando":"Southeast","FL - Tampa":"Southeast","GA - Atlanta":"Southeast",
-    "HI - Kapolei":"Western","IA - Des Moines":"Mountain West","IL - Chicago":"Ohio Valley",
-    "IN - Indianapolis":"Ohio Valley","KS - Kansas City":"South Central","KY - Louisville":"Ohio Valley",
-    "LA - New Orleans":"South Central","LA - Shreveport":"South Central","MA - New England":"Northeast",
-    "MD - Baltimore":"Northeast","MI - Greater Michigan":"Ohio Valley","MN - Eagan":"Mountain West",
-    "MO - St Louis":"Ohio Valley","MS - Jackson":"South Central","NC - Charlotte":"Southeast",
-    "NC - Raleigh":"Southeast","ND - Fargo":"Mountain West","NE - Omaha":"Mountain West",
-    "NJ - Totowa":"Northeast","NM - Albuquerque":"South Central","NV - Las Vegas":"Western",
-    "NY - Rochester":"Northeast","OH - Cleveland":"Ohio Valley","OH - Mid-South Ohio":"Ohio Valley",
-    "OK - Oklahoma City":"South Central","OR - Medford":"Mountain West","OR - Portland":"Mountain West",
-    "PA - Philadelphia":"Northeast","PA - Pittsburgh":"Northeast","SC - Charleston":"Southeast",
-    "SC - Columbia":"Southeast","SC - Greenville":"Southeast","TN - Memphis":"Southeast",
-    "TN - Nashville":"Southeast","TX - Austin":"South Central","TX - Dallas Ft Worth":"South Central",
-    "TX - Houston":"South Central","TX - San Antonio":"South Central","UT - Salt Lake City":"Western",
-    "VA - Richmond":"Northeast","WA - Seattle":"Mountain West","WA - Spokane":"Mountain West",
-    "WI - Milwaukee":"Ohio Valley","Corporate":"Corporate","N/A":"N/A"
-  };
-  const region = regionMap[branchVal] || '';
-  if (region) { document.getElementById('region').value = region; }
 }
 
 function filterBranches(val) {
@@ -884,7 +859,7 @@ function renderBranchDropdown(list) {
 }
 function selectBranch(branch) {
   document.getElementById('branchName').value = branch;
-  autofillRegionFromBranch(branch);
+  document.getElementById('region').value = REGION_MAP[branch] || '';
   hideBranchDropdown();
 }
 function showBranchDropdown() { filterBranches(document.getElementById('branchName').value); }
@@ -903,20 +878,28 @@ function matchAE() {
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
   if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
   if (!BRANCH_LIST.includes(branchName)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the dropdown. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
-
-  // Validate email format if provided
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>';
-    return;
-  }
-
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>'; return; }
   document.getElementById('step2Error').innerHTML = '';
 
-  // Use sheet-matched AE if available, otherwise fallback
   const assignedAE = state.matchedAE || FALLBACK_AE;
   const assignedAEEmail = state.matchedAEEmail || FALLBACK_AE_EMAIL;
+  const assignedAEPhone = state.matchedAEPhone || null;
 
-  state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail };
+  state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail, assignedAEPhone };
+
+  // Populate email template
+  const emailSubject = `CandidPro x Patterson — Introduction`;
+  const emailBody = `Hi ${assignedAE} & ${firstName},\n\n[Email body placeholder — to be updated]\n\nBest,\nNASM Booth Team`;
+  document.getElementById('emailSubject').value = emailSubject;
+  document.getElementById('emailBody').value = emailBody;
+
+  // Populate SMS template if phone exists
+  if (phone) {
+    document.getElementById('smsTemplateCard').style.display = 'block';
+    document.getElementById('smsBody').value = `Hi ${assignedAE} & ${firstName}!\n\n[SMS body placeholder — to be updated]\n\n— CandidPro NASM Team`;
+  } else {
+    document.getElementById('smsTemplateCard').style.display = 'none';
+  }
 
   document.getElementById('trSummaryBlock').innerHTML = `
     <div class="tr-card">
@@ -935,47 +918,50 @@ function matchAE() {
       <div class="ae-name">${assignedAE}</div>
     </div>`;
 
-  updateMessagePreview();
   goStep(3);
 }
 
-function toggleNotif(mode) {
-  state.notifMode = mode;
-  document.getElementById('notifEmail').classList.toggle('selected', mode === 'email');
-  document.getElementById('notifSMS').classList.toggle('selected', mode === 'sms');
-  updateMessagePreview();
-}
-
-function updateMessagePreview() {
-  const l = state.currentLead || {};
-  const ae = l.assignedAE || FALLBACK_AE;
-  const content = state.notifMode === 'email'
-    ? `Subject: New Patterson TR Introduction — ${l.firstName} ${l.lastName}\n\nHi ${ae},\n\nGreat news! We connected with ${l.firstName} ${l.lastName} (${l.role}) from the ${l.branchName} branch at NASM.\n\n${l.firstName} is interested in partnering with CandidPro and has been matched to you as their AE contact.\n\nContact details:\n${l.email ? '  Email: ' + l.email + '\n' : ''}${l.phone ? '  Phone: ' + l.phone + '\n' : ''}\nPlease reach out to ${l.firstName} to kick off the introduction and next steps.\n\nGo CandidPro!\nNASM Booth Team`
-    : `Hey ${ae}! New Patterson TR match from NASM:\n\n${l.firstName} ${l.lastName}\n${l.role} — ${l.branchName}\n${l.email ? 'Email: ' + l.email + '\n' : ''}${l.phone ? 'Phone: ' + l.phone : ''}\n\nThey're interested in working with CandidPro — you're their assigned AE. Reach out soon!`;
-  document.getElementById('messagePreviewBlock').innerHTML = `<div class="preview-label">Message preview</div><div class="message-box">${content}</div>`;
+// ─── GROUP TEXT ───────────────────────────────────────────────
+function openGroupText() {
+  const l = state.currentLead;
+  if (!l) return;
+  const smsBody = document.getElementById('smsBody').value;
+  const numbers = [];
+  if (l.phone) numbers.push(l.phone.replace(/\D/g, '').replace(/^1/, '+1'));
+  if (l.assignedAEPhone) numbers.push(l.assignedAEPhone.replace(/\D/g, '').replace(/^1/, '+1'));
+  const to = numbers.join(',');
+  const encoded = encodeURIComponent(smsBody);
+  window.location.href = `sms:${to}&body=${encoded}`;
 }
 
 async function submitLead() {
   const btn = document.getElementById('submitBtn');
-  btn.innerHTML = '<span class="spinner"></span>Logging to Sheets...';
+  btn.innerHTML = '<span class="spinner"></span>Submitting...';
   btn.disabled = true;
+
   const l = state.currentLead;
+  const emailSubject = document.getElementById('emailSubject').value;
+  const emailBody = document.getElementById('emailBody').value;
   const leadId = 'lead_' + Date.now();
   const lead = {
     id: leadId, timestamp: new Date().toLocaleString(),
     firstName: l.firstName, lastName: l.lastName, role: l.role,
     branch: l.branchName, region: l.region, email: l.email, phone: l.phone,
     assignedAE: l.assignedAE, aeEmail: l.assignedAEEmail,
-    notifSent: state.notifMode, status: 'pending'
+    emailSubject, emailBody,
+    notifSent: l.email ? 'email' : 'none',
+    status: 'pending'
   };
   addLead(lead);
+
   let sheetSuccess = false;
   if (navigator.onLine) {
     try { sheetSuccess = await syncLead(lead); updateLeadStatus(leadId, sheetSuccess ? 'synced' : 'failed'); }
     catch { updateLeadStatus(leadId, 'failed'); }
   }
+
   document.getElementById('successTitle').textContent = 'Lead captured!';
-  document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been captured and ${l.assignedAE} is queued for notification via ${state.notifMode === 'email' ? 'email' : 'text message'}.`;
+  document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been logged and ${l.assignedAE} has been notified via email.`;
   document.getElementById('leadSummaryCard').innerHTML = `
     <div class="tr-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -985,20 +971,31 @@ async function submitLead() {
       <div class="tr-role">${l.role} · ${l.branchName}</div>
       <div style="margin-top:8px;font-size:12px;color:var(--gray);">Assigned to <strong style="color:var(--navy);">${l.assignedAE}</strong></div>
     </div>`;
+
   if (!navigator.onLine) {
     document.getElementById('sheetStatus').innerHTML = '<div class="status-queued">📶 No connection — saved locally and will sync when reconnected.</div>';
   } else if (sheetSuccess) {
-    document.getElementById('sheetStatus').innerHTML = '<div class="status-success">✓ Row added to Google Sheets via Zapier</div>';
+    document.getElementById('sheetStatus').innerHTML = '<div class="status-success">✓ Logged to Google Sheets · Email sent via Zapier</div>';
   } else {
     document.getElementById('sheetStatus').innerHTML = '<div class="status-warn">⚠ Could not reach Zapier — saved locally. Tap the menu to retry.</div>';
   }
-  btn.innerHTML = 'Submit lead & log to Sheets';
+
+  // Show group text button if phone captured
+  if (l.phone) {
+    document.getElementById('openTextBtn').style.display = 'block';
+    // Auto-open SMS app
+    setTimeout(() => { openGroupText(); }, 500);
+  } else {
+    document.getElementById('openTextBtn').style.display = 'none';
+  }
+
+  btn.innerHTML = 'Submit lead & send email';
   btn.disabled = false;
   goStep(4);
 }
 
 function resetApp() {
-  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, matchedAEEmail: null, notifMode: 'email', currentLead: null, searchTimeout: null };
+  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, matchedAEEmail: null, matchedAEPhone: null, notifMode: 'email', currentLead: null, searchTimeout: null };
   document.getElementById('previewImg').style.display = 'none';
   document.getElementById('previewImg').src = '';
   document.getElementById('previewImgOffline').style.display = 'none';
@@ -1010,12 +1007,12 @@ function resetApp() {
   document.getElementById('aiBadge').style.display = 'none';
   document.getElementById('sheetBadge').style.display = 'none';
   document.getElementById('successTitle').textContent = 'Lead captured!';
-  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone','offlineEmail','offlinePhone','trSearch'].forEach(id => {
+  document.getElementById('smsTemplateCard').style.display = 'none';
+  document.getElementById('openTextBtn').style.display = 'none';
+  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone','offlineEmail','offlinePhone','trSearch','emailSubject','emailBody','smsBody'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('ai-filled'); el.classList.remove('sheet-filled'); }
   });
-  document.getElementById('notifEmail').classList.add('selected');
-  document.getElementById('notifSMS').classList.remove('selected');
   goStep(1);
 }
 
