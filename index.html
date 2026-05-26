@@ -553,7 +553,8 @@ async function syncLead(lead) {
     notifSent: lead.notifSent || '',
     emailSubject: lead.emailSubject || '',
     emailBody: lead.emailBody || '',
-    captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced'
+    captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced',
+    driveUrl: lead.driveUrl || ''
   };
   const res = await fetch(ZAPIER_WEBHOOK, { method: 'POST', body: JSON.stringify(payload) });
   const data = await res.json();
@@ -1001,6 +1002,22 @@ function openGroupText() {
 }
 
 // ─── SUBMIT ───────────────────────────────────────────────────
+async function uploadToDrive(imageBase64, firstName, lastName, branch) {
+  try {
+    const timestamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
+    const safeName = `${firstName}_${lastName}_${branch.replace(/[^a-zA-Z0-9]/g, '-')}_${timestamp}.jpg`;
+    const res = await fetch('/api/gdrive', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64, fileName: safeName })
+    });
+    const data = await res.json();
+    return data.url || null;
+  } catch {
+    return null;
+  }
+}
+  
 async function submitLead() {
   const btn = document.getElementById('submitBtn');
   btn.innerHTML = '<span class="spinner"></span>Submitting...';
@@ -1021,6 +1038,13 @@ async function submitLead() {
   };
 
   addLead(lead);
+
+// Upload badge photo to Drive in background (non-blocking)
+  let driveUrl = null;
+  if (state.imageBase64 && navigator.onLine) {
+    driveUrl = await uploadToDrive(state.imageBase64, l.firstName, l.lastName, l.branchName);
+    if (driveUrl) lead.driveUrl = driveUrl;
+  }
 
   let sheetSuccess = false;
   if (navigator.onLine) {
