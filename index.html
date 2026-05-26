@@ -33,9 +33,9 @@
 
   .header { background: var(--gray-light); padding: 20px 24px 16px; border-bottom: 1px solid var(--border); text-align: center; position: relative; }
   .logo-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
-  .logo-candid { height: 18px; object-fit: contain; }
+  .logo-candid { height: 28px; object-fit: contain; }
   .logo-divider { width: 1px; height: 28px; background: var(--border); }
-  .logo-patterson { height: 38px; object-fit: contain; }
+  .logo-patterson { height: 28px; object-fit: contain; }
   .header-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); line-height: 1.2; margin-bottom: 4px; }
   .header-sub { font-size: 12px; color: var(--gray); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
 
@@ -116,8 +116,6 @@
   .field-group input.ai-filled { background: var(--red-light); border-color: rgba(232,40,30,0.3); }
   .field-group input.sheet-filled { background: #F0FDF4; border-color: #86EFAC; }
   .field-group input::placeholder { color: #C4C9D4; }
-  .field-group textarea { width: 100%; padding: 11px 14px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; line-height: 1.6; resize: vertical; min-height: 120px; }
-  .field-group textarea:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,40,30,0.08); }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   .search-wrap { position: relative; }
@@ -141,9 +139,6 @@
   .btn-primary:hover { background: var(--red-dark); }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-secondary { width: 100%; padding: 13px; font-size: 14px; font-weight: 600; border-radius: 12px; cursor: pointer; border: 1.5px solid var(--navy); background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
-  .btn-secondary:hover { background: var(--navy); color: white; }
-  .btn-secondary:active { transform: scale(0.98); }
   .btn-ghost { width: 100%; background: none; border: none; font-size: 13px; color: var(--gray); cursor: pointer; padding: 10px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
   .btn-ghost:hover { color: var(--navy); }
 
@@ -155,7 +150,6 @@
   .ae-match-card { background: var(--navy); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
   .ae-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
   .ae-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 4px; }
-  .ae-branch { font-size: 12px; color: rgba(255,255,255,0.6); }
 
   .tr-card { background: var(--gray-light); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; border-left: 3px solid var(--red); }
   .tr-name { font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
@@ -167,11 +161,9 @@
   .tag-green { background: var(--success-bg); color: var(--success); font-weight: 600; }
   .tag-offline { background: var(--offline-bg); color: var(--offline); font-weight: 600; }
 
-  /* MESSAGE TEMPLATES */
   .template-card { background: var(--gray-light); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
   .template-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .template-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); }
-  .template-icon { font-size: 16px; }
   .subject-input { width: 100%; padding: 9px 12px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; margin-bottom: 8px; }
   .subject-input:focus { outline: none; border-color: var(--red); }
   .template-body { width: 100%; padding: 11px 14px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; line-height: 1.6; resize: vertical; min-height: 140px; }
@@ -238,7 +230,7 @@
     <button class="restart-btn" onclick="resetApp()">↺ Start over</button>
   </div>
 
-  <!-- STEP 1: BADGE PHOTO -->
+  <!-- STEP 1 -->
   <div class="step active" id="step1">
     <div class="step-eyebrow">Step 1 of 3</div>
     <div class="step-title">Scan the badge</div>
@@ -260,7 +252,7 @@
     <button class="btn-ghost" style="margin-top:8px;" onclick="skipToManual()">Enter info manually instead</button>
   </div>
 
-  <!-- STEP 1B: OFFLINE CAPTURE -->
+  <!-- STEP 1B: OFFLINE -->
   <div class="step" id="step1b">
     <div class="step-eyebrow">Offline Mode</div>
     <div class="step-title">Collect contact info</div>
@@ -285,7 +277,7 @@
     <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1); resetStep1()">← Retake photo</button>
   </div>
 
-  <!-- STEP 2: REVIEW + CONTACT -->
+  <!-- STEP 2 -->
   <div class="step" id="step2">
     <div class="step-eyebrow">Step 2 of 3</div>
     <div class="step-title">Review & add contact info</div>
@@ -334,15 +326,13 @@
     <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1)">← Retake photo</button>
   </div>
 
-  <!-- STEP 3: CONFIRM + TEMPLATES -->
+  <!-- STEP 3 -->
   <div class="step" id="step3">
     <div class="step-eyebrow">Step 3 of 3</div>
     <div class="step-title">Confirm & send</div>
     <div id="trSummaryBlock"></div>
     <div id="matchBlock"></div>
     <div class="divider"></div>
-
-    <!-- EMAIL TEMPLATE -->
     <div class="template-card">
       <div class="template-header">
         <div class="template-title">✉ Intro email — sent automatically</div>
@@ -351,8 +341,6 @@
       <textarea class="template-body" id="emailBody"></textarea>
       <div class="template-note">This email will be sent automatically via Zapier when you submit.</div>
     </div>
-
-    <!-- SMS TEMPLATE (only if phone captured) -->
     <div class="template-card" id="smsTemplateCard" style="display:none;">
       <div class="template-header">
         <div class="template-title">💬 Group text — you'll send this</div>
@@ -360,13 +348,12 @@
       <textarea class="template-body" id="smsBody" style="min-height:100px;"></textarea>
       <div class="template-note">Tap "Open Group Text" after submitting to send from your phone.</div>
     </div>
-
     <div id="step3Error"></div>
     <button class="btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & send email</button>
     <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(2)">← Edit info</button>
   </div>
 
-  <!-- STEP 4: SUCCESS -->
+  <!-- STEP 4 -->
   <div class="step" id="step4">
     <div class="success-wrap">
       <div class="success-ring">✓</div>
@@ -451,30 +438,69 @@ function getLeads() {
   try { return JSON.parse(localStorage.getItem(LEADS_KEY)) || []; }
   catch { return []; }
 }
-function saveLeads(leads) { localStorage.setItem(LEADS_KEY, JSON.stringify(leads)); }
-function addLead(lead) {
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — getLeads</div>';
-  const leads = getLeads();
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — unshift</div>';
-  leads.unshift(lead);
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — saveLeads</div>';
-  saveLeads(leads);
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — updateMenuBadge</div>';
-  updateMenuBadge();
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: addLead — done</div>';
+
+function saveLeads(leads) {
+  try {
+    const leadsToSave = leads.map(lead => {
+      // Keep image only for offline captures — strip from all online leads
+      if (lead.status === 'offline_capture') return lead;
+      const { imageBase64, imageMediaType, ...rest } = lead;
+      return rest;
+    });
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leadsToSave));
+  } catch(err) {
+    console.log('saveLeads error:', err.message);
+  }
 }
+
+function addLead(lead) {
+  const leads = getLeads();
+  leads.unshift(lead);
+  saveLeads(leads);
+  updateMenuBadge();
+}
+
 function updateLeadStatus(id, status, extraData) {
   const leads = getLeads();
   const idx = leads.findIndex(l => l.id === id);
   if (idx !== -1) { leads[idx].status = status; if (extraData) Object.assign(leads[idx], extraData); saveLeads(leads); }
-  updateMenuBadge(); renderPanel();
+  updateMenuBadge();
+  renderPanel();
 }
+
 function updateMenuBadge() {
   const leads = getLeads();
   const pending = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture').length;
   const badge = document.getElementById('menuBadge');
   if (pending > 0) { badge.textContent = pending; badge.style.display = 'flex'; }
   else { badge.style.display = 'none'; }
+}
+
+// ─── COMPRESSION ─────────────────────────────────────────────
+function compressForStorage(base64) {
+  try {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.6).split(',')[1]);
+      };
+      img.onerror = () => resolve(base64);
+      img.src = 'data:image/jpeg;base64,' + base64;
+    });
+  } catch {
+    return Promise.resolve(base64);
+  }
 }
 
 // ─── PANEL ───────────────────────────────────────────────────
@@ -601,7 +627,7 @@ async function retryAll() {
   renderPanel();
 }
 
-// ─── OFFLINE ─────────────────────────────────────────────────
+// ─── OFFLINE DETECTION ───────────────────────────────────────
 function updateOnlineStatus() {
   const banner = document.getElementById('offlineBanner');
   if (!navigator.onLine) { banner.classList.add('visible'); }
@@ -691,6 +717,7 @@ function handleAnalyzeClick() {
   if (!navigator.onLine) { showOfflineCaptureStep(); }
   else { analyzeImage(); }
 }
+
 function showOfflineCaptureStep() {
   const offlineImg = document.getElementById('previewImgOffline');
   const mainImg = document.getElementById('previewImg');
@@ -700,19 +727,25 @@ function showOfflineCaptureStep() {
   document.getElementById('step1bError').innerHTML = '';
   showStep('step1b');
 }
-function submitOfflineCapture() {
+
+async function submitOfflineCapture() {
   const email = document.getElementById('offlineEmail').value.trim();
   const phone = document.getElementById('offlinePhone').value.trim();
   if (!email && !phone) { document.getElementById('step1bError').innerHTML = '<div class="error-msg">Please provide at least an email or phone number.</div>'; return; }
+
+  // Compress image before saving to localStorage
+  const compressedImage = state.imageBase64 ? await compressForStorage(state.imageBase64) : null;
+
   const leadId = 'lead_' + Date.now();
   const lead = {
     id: leadId, timestamp: new Date().toLocaleString(),
     firstName: '', lastName: '', role: '', branch: '', region: '',
     email, phone, assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL,
     notifSent: '', status: 'offline_capture',
-    imageBase64: state.imageBase64, imageMediaType: state.imageMediaType
+    imageBase64: compressedImage, imageMediaType: 'image/jpeg'
   };
   addLead(lead);
+
   document.getElementById('successTitle').textContent = 'Contact saved!';
   document.getElementById('successMsg').textContent = "Badge photo and contact info saved. Details will be extracted and synced automatically when you're back online.";
   document.getElementById('leadSummaryCard').innerHTML = `
@@ -733,6 +766,7 @@ function submitOfflineCapture() {
   }
   showStep('step4');
 }
+
 function showStep(stepId) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById(stepId).classList.add('active');
@@ -761,7 +795,6 @@ function handleImage(e) {
   reader.onload = function(ev) {
     const img = new Image();
     img.onload = function() {
-      // Compress via canvas
       const canvas = document.createElement('canvas');
       const MAX = 1600;
       let w = img.width;
@@ -918,13 +951,11 @@ function matchAE() {
 
   state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail, assignedAEPhone };
 
-  // Populate email template
   const emailSubject = `CandidPro x Patterson — Introduction`;
   const emailBody = `Hi ${assignedAEFirstName} & ${firstName},\n\n[Email body placeholder — to be updated]\n\nBest,\nNASM Booth Team`;
   document.getElementById('emailSubject').value = emailSubject;
   document.getElementById('emailBody').value = emailBody;
 
-  // Populate SMS template if phone exists
   if (phone) {
     document.getElementById('smsTemplateCard').style.display = 'block';
     document.getElementById('smsBody').value = `Hi ${assignedAEFirstName} & ${firstName}!\n\n[SMS body placeholder — to be updated]\n\n— CandidPro NASM Team`;
@@ -965,17 +996,13 @@ function openGroupText() {
   window.location.href = `sms:/open?addresses=${to}&body=${encoded}`;
 }
 
+// ─── SUBMIT ───────────────────────────────────────────────────
 async function submitLead() {
   const btn = document.getElementById('submitBtn');
   btn.innerHTML = '<span class="spinner"></span>Submitting...';
   btn.disabled = true;
 
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 1 — function started</div>';
-
   const l = state.currentLead;
-
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 2 — lead object created</div>';
-
   const emailSubject = document.getElementById('emailSubject').value;
   const emailBody = document.getElementById('emailBody').value;
   const leadId = 'lead_' + Date.now();
@@ -989,11 +1016,7 @@ async function submitLead() {
     status: 'pending'
   };
 
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 3 — about to addLead</div>';
-
   addLead(lead);
-
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: step 4 — addLead done, checking online status: ' + navigator.onLine + '</div>';
 
   let sheetSuccess = false;
   if (navigator.onLine) {
@@ -1002,13 +1025,10 @@ async function submitLead() {
       const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
       sheetSuccess = await Promise.race([syncPromise, timeoutPromise]);
       updateLeadStatus(leadId, sheetSuccess ? 'synced' : 'failed');
-    } catch(err) {
+    } catch {
       updateLeadStatus(leadId, 'failed');
-      document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: sync error — ' + err.message + '</div>';
     }
   }
-
-  document.getElementById('step3Error').innerHTML = '<div class="error-msg">Debug: sync done, result = ' + sheetSuccess + '</div>';
 
   document.getElementById('successTitle').textContent = 'Lead captured!';
   document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been logged and ${l.assignedAE} has been notified via email.`;
