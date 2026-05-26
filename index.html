@@ -952,7 +952,7 @@ function openGroupText() {
   if (l.assignedAEPhone) numbers.push(l.assignedAEPhone.replace(/\D/g, '').replace(/^1/, '+1'));
   const to = numbers.join(',');
   const encoded = encodeURIComponent(smsBody);
-  window.location.href = `sms:${to}&body=${encoded}`;
+  window.location.href = `sms:/open?addresses=${to}&body=${encoded}`;
 }
 
 async function submitLead() {
