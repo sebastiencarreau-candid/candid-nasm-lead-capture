@@ -693,8 +693,8 @@ function selectTR(idx) {
   if (!tr) return;
   const nameParts = tr.name.trim().split(' ');
   document.getElementById('trSearch').value = tr.name;
-  document.getElementById('firstName').value = nameParts[0] || '';
-  document.getElementById('lastName').value = nameParts.slice(1).join(' ') || '';
+  document.getElementById('firstName').value = toProperCase(nameParts[0] || '');
+  document.getElementById('lastName').value = toProperCase(nameParts.slice(1).join(' ') || '');
   document.getElementById('trEmail').value = tr.email || '';
   document.getElementById('branchName').value = tr.branch || '';
   document.getElementById('region').value = tr.region || '';
@@ -857,8 +857,8 @@ async function analyzeImage() {
     if (parsed.error) throw new Error(parsed.error);
     const firstName = parsed.firstName || '';
     const lastName = parsed.lastName || '';
-    document.getElementById('firstName').value = firstName;
-    document.getElementById('lastName').value = lastName;
+    document.getElementById('firstName').value = toProperCase(firstName);
+    document.getElementById('lastName').value = toProperCase(lastName);
     document.getElementById('trRole').value = parsed.role || '';
     const branchVal = parsed.branchName || '';
     const matchedBranch = BRANCH_LIST.find(b => b.toLowerCase() === branchVal.toLowerCase())
@@ -927,7 +927,11 @@ function selectBranch(branch) {
 }
 function showBranchDropdown() { filterBranches(document.getElementById('branchName').value); }
 function hideBranchDropdown() { document.getElementById('branchDropdown').style.display = 'none'; }
-
+function toProperCase(str) {
+  if (!str) return '';
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+  
 function matchAE() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
