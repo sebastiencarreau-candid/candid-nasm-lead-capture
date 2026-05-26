@@ -1004,8 +1004,6 @@ async function submitLead() {
   // Show group text button if phone captured
   if (l.phone) {
     document.getElementById('openTextBtn').style.display = 'block';
-    // Auto-open SMS app
-    setTimeout(() => { openGroupText(); }, 500);
   } else {
     document.getElementById('openTextBtn').style.display = 'none';
   }
