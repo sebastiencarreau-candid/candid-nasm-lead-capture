@@ -17,13 +17,10 @@ exports.handler = async function(event) {
     const PRIVATE_KEY = process.env.GDRIVE_PRIVATE_KEY.replace(/\\n/g, '\n');
     const FOLDER_ID = process.env.GDRIVE_FOLDER_ID;
 
-    // Get OAuth token
+    // Get OAuth token with full drive scope
     const token = await getAccessToken(CLIENT_EMAIL, PRIVATE_KEY);
 
-    // Upload file to Drive
-    const imageBuffer = Buffer.from(imageBase64, 'base64');
     const boundary = 'nasm_boundary';
-
     const metadata = JSON.stringify({ name: fileName, parents: [FOLDER_ID] });
 
     const body = [
@@ -39,7 +36,7 @@ exports.handler = async function(event) {
       `--${boundary}--`
     ].join('\r\n');
 
-    const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink&supportsAllDrives=true', {
+    const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -55,7 +52,7 @@ exports.handler = async function(event) {
     }
 
     // Make file viewable by anyone with the link
-    await fetch(`https://www.googleapis.com/drive/v3/files/${uploadData.id}/permissions?supportsAllDrives=true`, {
+    await fetch(`https://www.googleapis.com/drive/v3/files/${uploadData.id}/permissions`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -84,7 +81,8 @@ async function getAccessToken(clientEmail, privateKey) {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: clientEmail,
-    scope: 'https://www.googleapis.com/auth/drive.file',
+    // Use full drive scope instead of drive.file to access shared folders
+    scope: 'https://www.googleapis.com/auth/drive',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now
@@ -105,7 +103,8 @@ async function getAccessToken(clientEmail, privateKey) {
 
 async function createJWT(payload, privateKey) {
   const header = { alg: 'RS256', typ: 'JWT' };
-  const encodeBase64Url = str => Buffer.from(str).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const encodeBase64Url = str => Buffer.from(str).toString('base64')
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
   const headerB64 = encodeBase64Url(JSON.stringify(header));
   const payloadB64 = encodeBase64Url(JSON.stringify(payload));
   const signingInput = `${headerB64}.${payloadB64}`;
@@ -113,7 +112,8 @@ async function createJWT(payload, privateKey) {
   const crypto = require('crypto');
   const sign = crypto.createSign('RSA-SHA256');
   sign.update(signingInput);
-  const signature = sign.sign(privateKey, 'base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const signature = sign.sign(privateKey, 'base64')
+    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 
   return `${signingInput}.${signature}`;
 }
