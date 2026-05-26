@@ -57,7 +57,6 @@ const NICKNAME_MAP = {
   'ed': 'edward', 'edward': 'ed',
   'eddie': 'edward', 'edward': 'eddie',
   'ned': 'edward', 'edward': 'ned',
-  'ted': 'edward', 'edward': 'ted',
   'ellie': 'eleanor', 'eleanor': 'ellie',
   'ellen': 'eleanor', 'eleanor': 'ellen',
   'em': 'emily', 'emily': 'em',
@@ -218,7 +217,7 @@ exports.handler = async function(event) {
 
     const SHEET_ID = '1OBliAy-otDBDF8Xnwa1nR2R1X6pnIoTSj9x9qL_L688';
     const API_KEY = process.env.GSHEETS_API_KEY;
-    const RANGE = 'Sheet1!A2:H1000';
+    const RANGE = 'Sheet1!A2:I1000';
 
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
     const res = await fetch(url);
@@ -256,6 +255,7 @@ exports.handler = async function(event) {
       const assignedAE = row[5] || '';
       const aeEmail = row[6] || '';
       const aePhone = row[7] || '';
+      const aeFirstName = row[8] || '';
 
       // Direct match on preferred or alt name
       let matched = preferredName.includes(q) || altName.includes(q);
@@ -291,7 +291,7 @@ exports.handler = async function(event) {
           name: row[0],
           altName: row[1] || null,
           branch, region, email,
-          assignedAE, aeEmail, aePhone
+          assignedAE, aeEmail, aePhone, aeFirstName
         });
       }
       if (matches.length >= 8) break;
