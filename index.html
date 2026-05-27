@@ -51,11 +51,35 @@
   .panel-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--navy); }
   .panel-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray); padding: 4px; }
   .panel-close:hover { color: var(--navy); }
+
+  /* PANEL TABS */
+  .panel-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .panel-tab { flex: 1; padding: 12px; font-size: 12px; font-weight: 600; text-align: center; cursor: pointer; color: var(--gray); border-bottom: 2px solid transparent; transition: all 0.15s; letter-spacing: 0.04em; text-transform: uppercase; background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; }
+  .panel-tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .panel-tab-content { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
+  .panel-tab-content.active { display: flex; }
+
   .panel-actions { padding: 12px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .btn-retry-all { width: 100%; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--red); background: var(--red-light); color: var(--red); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
   .btn-retry-all:hover { background: var(--red); color: white; }
   .panel-list { flex: 1; overflow-y: auto; padding: 12px 0; }
   .panel-empty { padding: 40px 20px; text-align: center; color: var(--gray); font-size: 14px; }
+
+  /* ROSTER SEARCH */
+  .roster-search-wrap { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .roster-search-input { width: 100%; padding: 10px 14px; font-size: 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--gray-light); color: var(--navy); font-family: 'DM Sans', sans-serif; }
+  .roster-search-input:focus { outline: none; border-color: var(--red); background: var(--white); }
+  .roster-list { flex: 1; overflow-y: auto; }
+  .roster-row { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .roster-row:hover { background: var(--red-light); }
+  .roster-row:active { background: var(--red-light); }
+  .roster-tr-name { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .roster-branch { font-size: 11px; color: var(--gray); margin-bottom: 4px; }
+  .roster-ae { font-size: 12px; color: var(--success); font-weight: 600; }
+  .roster-ae-phone { font-size: 11px; color: var(--gray); margin-top: 1px; }
+  .roster-empty { padding: 40px 20px; text-align: center; color: var(--gray); font-size: 14px; }
+  .roster-offline-note { padding: 8px 16px; font-size: 11px; color: var(--offline); background: var(--offline-bg); text-align: center; border-bottom: 1px solid var(--border); flex-shrink: 0; display: none; }
+  .roster-offline-note.visible { display: block; }
 
   .lead-row { border-bottom: 1px solid var(--border); }
   .lead-row-header { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
@@ -126,7 +150,6 @@
   .search-option .opt-name { font-weight: 600; font-size: 14px; }
   .search-option .opt-branch { font-size: 12px; color: var(--gray); margin-top: 2px; }
   .search-option .opt-notfound { font-size: 13px; color: var(--gray); font-style: italic; }
-  .search-spinner { display: none; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--red); border-radius: 50%; animation: spin 0.7s linear infinite; }
   .sheet-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--success); background: var(--success-bg); padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; border: 1px solid rgba(10,124,78,0.2); }
 
   .branch-wrap { position: relative; }
@@ -291,7 +314,6 @@
           <input type="text" id="trSearch" placeholder="Type name to search roster..." autocomplete="off"
             oninput="handleTRSearch(this.value)"
             onblur="setTimeout(hideSearchDropdown, 150)">
-          <div class="search-spinner" id="searchSpinner"></div>
           <div class="search-dropdown" id="searchDropdown"></div>
         </div>
       </div>
@@ -370,25 +392,51 @@
 
 </div>
 
+<!-- PANEL -->
 <div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
 <div class="panel" id="leadPanel">
   <div class="panel-header">
-    <div class="panel-title">Lead Log</div>
+    <div class="panel-title">Menu</div>
     <button class="panel-close" onclick="closePanel()">✕</button>
   </div>
-  <div class="panel-actions" id="panelActions" style="display:none;">
-    <button class="btn-retry-all" onclick="retryAll()">↺ Retry All Pending & Failed</button>
+
+  <!-- TABS -->
+  <div class="panel-tabs">
+    <button class="panel-tab active" id="tabLeadLog" onclick="switchTab('leadlog')">Lead Log</button>
+    <button class="panel-tab" id="tabRoster" onclick="switchTab('roster')">TR Roster</button>
   </div>
-  <div class="panel-list" id="panelList">
-    <div class="panel-empty">No leads captured yet.</div>
+
+  <!-- LEAD LOG TAB -->
+  <div class="panel-tab-content active" id="tabContentLeadLog" style="flex-direction:column;">
+    <div class="panel-actions" id="panelActions" style="display:none;">
+      <button class="btn-retry-all" onclick="retryAll()">↺ Retry All Pending & Failed</button>
+    </div>
+    <div class="panel-list" id="panelList">
+      <div class="panel-empty">No leads captured yet.</div>
+    </div>
+  </div>
+
+  <!-- ROSTER TAB -->
+  <div class="panel-tab-content" id="tabContentRoster" style="flex-direction:column;">
+    <div class="roster-offline-note" id="rosterOfflineNote">📶 Showing cached roster — may not reflect latest changes</div>
+    <div class="roster-search-wrap">
+      <input type="text" class="roster-search-input" id="rosterSearch" placeholder="Search by name or branch..." oninput="filterRoster(this.value)">
+    </div>
+    <div class="roster-list" id="rosterList">
+      <div class="roster-empty">Loading TR roster...</div>
+    </div>
   </div>
 </div>
 
 <script>
 const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 const LEADS_KEY = 'nasm_leads';
+const ROSTER_KEY = 'nasm_roster';
+const BRANCH_MAP_KEY = 'nasm_branch_map';
 const FALLBACK_AE = 'Sebastien Carreau';
 const FALLBACK_AE_EMAIL = 'sebastien.carreau@candidco.com';
+const SHEET_ID = '1OBliAy-otDBDF8Xnwa1nR2R1X6pnIoTSj9x9qL_L688';
+const SHEETS_API_KEY = 'AIzaSyBqcBPOoJhbFrVEgEAx1234PLACEHOLDER'; // Replaced by env via lookup.js — roster fetch uses its own call
 
 const BRANCH_LIST = [
   "AL-Birmingham","AR - Little Rock","AZ-Mesa","CA - East Bay","CA - Los Angeles",
@@ -433,41 +481,173 @@ let state = {
   notifMode: 'email', currentLead: null, searchTimeout: null
 };
 
+// ─── CACHE ───────────────────────────────────────────────────
+function getCachedRoster() {
+  try { return JSON.parse(localStorage.getItem(ROSTER_KEY)) || []; }
+  catch { return []; }
+}
+function getCachedBranchMap() {
+  try { return JSON.parse(localStorage.getItem(BRANCH_MAP_KEY)) || []; }
+  catch { return []; }
+}
+
+async function refreshCaches() {
+  if (!navigator.onLine) return;
+  try {
+    // Fetch TR roster
+    const rosterRes = await fetch('/api/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fetchAll: true })
+    });
+    const rosterData = await rosterRes.json();
+    if (rosterData.roster && rosterData.roster.length > 0) {
+      localStorage.setItem(ROSTER_KEY, JSON.stringify(rosterData.roster));
+    }
+    // Fetch branch map
+    const branchRes = await fetch('/api/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fetchBranchMap: true })
+    });
+    const branchData = await branchRes.json();
+    if (branchData.branchMap && branchData.branchMap.length > 0) {
+      localStorage.setItem(BRANCH_MAP_KEY, JSON.stringify(branchData.branchMap));
+    }
+    renderRoster('');
+  } catch(err) {
+    console.log('Cache refresh error:', err.message);
+  }
+}
+
+// ─── ROSTER SEARCH (from cache) ──────────────────────────────
+function searchRosterCache(query) {
+  const roster = getCachedRoster();
+  if (!query || query.length < 2) return [];
+  const q = query.toLowerCase().trim();
+  const matches = [];
+  for (const tr of roster) {
+    const name = (tr.name || '').toLowerCase();
+    const altName = (tr.altName || '').toLowerCase();
+    const branch = (tr.branch || '').toLowerCase();
+    if (name.includes(q) || altName.includes(q) || branch.includes(q)) {
+      matches.push(tr);
+    }
+    if (matches.length >= 8) break;
+  }
+  return matches;
+}
+
+function getBranchAEFromCache(branch) {
+  const branchMap = getCachedBranchMap();
+  const b = branch.toLowerCase().trim();
+  return branchMap.find(r => (r.branch || '').toLowerCase().trim() === b) || null;
+}
+
+// ─── PANEL TABS ───────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tabLeadLog').classList.toggle('active', tab === 'leadlog');
+  document.getElementById('tabRoster').classList.toggle('active', tab === 'roster');
+  document.getElementById('tabContentLeadLog').classList.toggle('active', tab === 'leadlog');
+  document.getElementById('tabContentRoster').classList.toggle('active', tab === 'roster');
+  if (tab === 'roster') {
+    document.getElementById('rosterOfflineNote').classList.toggle('visible', !navigator.onLine);
+    renderRoster(document.getElementById('rosterSearch').value);
+  }
+}
+
+function renderRoster(query) {
+  const list = document.getElementById('rosterList');
+  const roster = getCachedRoster();
+  if (roster.length === 0) {
+    list.innerHTML = '<div class="roster-empty">No roster data available. Open the app while online to load the TR roster.</div>';
+    return;
+  }
+  let filtered = roster;
+  if (query && query.length >= 1) {
+    const q = query.toLowerCase().trim();
+    filtered = roster.filter(tr =>
+      (tr.name || '').toLowerCase().includes(q) ||
+      (tr.altName || '').toLowerCase().includes(q) ||
+      (tr.branch || '').toLowerCase().includes(q)
+    );
+  }
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="roster-empty">No TRs found for that search.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map((tr, i) => `
+    <div class="roster-row" onclick="captureFromRoster(${i}, '${query}')">
+      <div class="roster-tr-name">${tr.name}${tr.altName ? ' <span style="color:var(--gray);font-size:11px;font-weight:400;">(${tr.altName})</span>' : ''}</div>
+      <div class="roster-branch">${tr.branch}${tr.region ? ' · ' + tr.region : ''}</div>
+      <div class="roster-ae">AE: ${tr.assignedAE || '—'}</div>
+      ${tr.aePhone ? `<div class="roster-ae-phone">📱 ${tr.aePhone}</div>` : ''}
+    </div>`).join('');
+  // Store filtered for click reference
+  window._rosterFiltered = filtered;
+}
+
+function filterRoster(val) {
+  renderRoster(val);
+}
+
+function captureFromRoster(idx, query) {
+  const filtered = window._rosterFiltered || getCachedRoster();
+  const tr = filtered[idx];
+  if (!tr) return;
+  closePanel();
+
+  // Pre-fill Step 2 with TR data
+  const nameParts = (tr.name || '').trim().split(' ');
+  document.getElementById('firstName').value = toProperCase(nameParts[0] || '');
+  document.getElementById('lastName').value = toProperCase(nameParts.slice(1).join(' ') || '');
+  document.getElementById('trRole').value = '';
+  document.getElementById('trEmail').value = tr.email || '';
+  document.getElementById('branchName').value = tr.branch || '';
+  document.getElementById('region').value = tr.region || '';
+  document.getElementById('trSearch').value = tr.name || '';
+  document.getElementById('trPhone').value = '';
+
+  state.matchedAE = tr.assignedAE || FALLBACK_AE;
+  state.matchedAEEmail = tr.aeEmail || FALLBACK_AE_EMAIL;
+  state.matchedAEPhone = tr.aePhone || null;
+  state.matchedAEFirstName = tr.aeFirstName || null;
+  state.imageBase64 = null;
+
+  ['firstName','lastName','trEmail','branchName','region'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
+  });
+
+  document.getElementById('aiBadge').style.display = 'none';
+  document.getElementById('sheetBadge').style.display = 'inline-flex';
+
+  // Skip to Step 2 directly
+  goStep(2);
+}
+
 // ─── STORAGE ─────────────────────────────────────────────────
 function getLeads() {
   try { return JSON.parse(localStorage.getItem(LEADS_KEY)) || []; }
   catch { return []; }
 }
-
 function saveLeads(leads) {
   try {
     const leadsToSave = leads.map(lead => {
-      // Keep image only for offline captures — strip from all online leads
       if (lead.status === 'offline_capture') return lead;
       const { imageBase64, imageMediaType, ...rest } = lead;
       return rest;
     });
     localStorage.setItem(LEADS_KEY, JSON.stringify(leadsToSave));
-  } catch(err) {
-    console.log('saveLeads error:', err.message);
-  }
+  } catch(err) { console.log('saveLeads error:', err.message); }
 }
-
-function addLead(lead) {
-  const leads = getLeads();
-  leads.unshift(lead);
-  saveLeads(leads);
-  updateMenuBadge();
-}
-
+function addLead(lead) { const leads = getLeads(); leads.unshift(lead); saveLeads(leads); updateMenuBadge(); }
 function updateLeadStatus(id, status, extraData) {
   const leads = getLeads();
   const idx = leads.findIndex(l => l.id === id);
   if (idx !== -1) { leads[idx].status = status; if (extraData) Object.assign(leads[idx], extraData); saveLeads(leads); }
-  updateMenuBadge();
-  renderPanel();
+  updateMenuBadge(); renderPanel();
 }
-
 function updateMenuBadge() {
   const leads = getLeads();
   const pending = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture').length;
@@ -478,34 +658,37 @@ function updateMenuBadge() {
 
 // ─── COMPRESSION ─────────────────────────────────────────────
 function compressForStorage(base64) {
-  try {
-    return new Promise((resolve) => {
+  return new Promise((resolve) => {
+    try {
       const img = new Image();
       img.onload = function() {
         const canvas = document.createElement('canvas');
         const MAX = 800;
-        let w = img.width;
-        let h = img.height;
+        let w = img.width, h = img.height;
         if (w > MAX || h > MAX) {
           if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
           else { w = Math.round(w * MAX / h); h = MAX; }
         }
-        canvas.width = w;
-        canvas.height = h;
+        canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
         resolve(canvas.toDataURL('image/jpeg', 0.6).split(',')[1]);
       };
       img.onerror = () => resolve(base64);
       img.src = 'data:image/jpeg;base64,' + base64;
-    });
-  } catch {
-    return Promise.resolve(base64);
-  }
+    } catch { resolve(base64); }
+  });
 }
 
 // ─── PANEL ───────────────────────────────────────────────────
-function openPanel() { renderPanel(); document.getElementById('leadPanel').classList.add('open'); document.getElementById('panelOverlay').classList.add('open'); }
-function closePanel() { document.getElementById('leadPanel').classList.remove('open'); document.getElementById('panelOverlay').classList.remove('open'); }
+function openPanel() {
+  renderPanel();
+  document.getElementById('leadPanel').classList.add('open');
+  document.getElementById('panelOverlay').classList.add('open');
+}
+function closePanel() {
+  document.getElementById('leadPanel').classList.remove('open');
+  document.getElementById('panelOverlay').classList.remove('open');
+}
 
 function renderPanel() {
   const leads = getLeads();
@@ -565,9 +748,8 @@ async function retrySingle(id) {
   const leads = getLeads();
   const lead = leads.find(l => l.id === id);
   if (!lead) return;
-  if (lead.status === 'offline_capture' && lead.imageBase64) {
-    await retryOfflineCapture(lead);
-  } else {
+  if (lead.status === 'offline_capture' && lead.imageBase64) { await retryOfflineCapture(lead); }
+  else {
     updateLeadStatus(id, 'pending');
     try { const ok = await syncLead(lead); updateLeadStatus(id, ok ? 'synced' : 'failed'); }
     catch { updateLeadStatus(id, 'failed'); }
@@ -578,8 +760,7 @@ async function retrySingle(id) {
 async function retryOfflineCapture(lead) {
   try {
     const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64: lead.imageBase64, mediaType: lead.imageMediaType || 'image/jpeg' })
     });
     const parsed = await response.json();
@@ -589,18 +770,14 @@ async function retryOfflineCapture(lead) {
         || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
         || 'N/A';
       let aeInfo = { assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL, region: '', email: lead.email };
-      try {
-        const lookupRes = await fetch('/api/lookup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: `${parsed.firstName} ${parsed.lastName}` })
-        });
-        const lookupData = await lookupRes.json();
-        if (lookupData.results && lookupData.results.length > 0) {
-          const match = lookupData.results[0];
-          aeInfo = { assignedAE: match.assignedAE, aeEmail: match.aeEmail, region: match.region, email: match.email || lead.email };
-        }
-      } catch {}
+      // Try cache first, then API
+      const cachedMatch = searchRosterCache(`${parsed.firstName} ${parsed.lastName}`)[0];
+      if (cachedMatch) {
+        aeInfo = { assignedAE: cachedMatch.assignedAE, aeEmail: cachedMatch.aeEmail, region: cachedMatch.region, email: cachedMatch.email || lead.email };
+      } else {
+        const branchMatch = getBranchAEFromCache(matchedBranch);
+        if (branchMatch) { aeInfo = { assignedAE: branchMatch.assignedAE, aeEmail: branchMatch.aeEmail, region: '', email: lead.email }; }
+      }
       const extraData = {
         firstName: parsed.firstName || '', lastName: parsed.lastName || '',
         role: parsed.role || '', branch: matchedBranch,
@@ -610,10 +787,7 @@ async function retryOfflineCapture(lead) {
       updateLeadStatus(lead.id, 'pending', extraData);
       const updatedLeads = getLeads();
       const updatedLead = updatedLeads.find(l => l.id === lead.id);
-      if (updatedLead) {
-        const ok = await syncLead(updatedLead);
-        updateLeadStatus(lead.id, ok ? 'synced' : 'failed');
-      }
+      if (updatedLead) { const ok = await syncLead(updatedLead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); }
     }
   } catch {}
 }
@@ -647,29 +821,12 @@ async function autoRetryPending() {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-// ─── TR SEARCH ───────────────────────────────────────────────
-let searchTimeout = null;
+// ─── TR SEARCH (from cache) ───────────────────────────────────
 function handleTRSearch(val) {
-  clearTimeout(searchTimeout);
   const dropdown = document.getElementById('searchDropdown');
-  const spinner = document.getElementById('searchSpinner');
   if (val.length < 2) { dropdown.style.display = 'none'; return; }
-  spinner.style.display = 'block';
-  searchTimeout = setTimeout(async () => {
-    try {
-      const res = await fetch('/api/lookup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: val })
-      });
-      const data = await res.json();
-      spinner.style.display = 'none';
-      renderSearchDropdown(data.results || [], val);
-    } catch {
-      spinner.style.display = 'none';
-      dropdown.style.display = 'none';
-    }
-  }, 300);
+  const results = searchRosterCache(val);
+  renderSearchDropdown(results, val);
 }
 
 function renderSearchDropdown(results, query) {
@@ -718,7 +875,6 @@ function handleAnalyzeClick() {
   if (!navigator.onLine) { showOfflineCaptureStep(); }
   else { analyzeImage(); }
 }
-
 function showOfflineCaptureStep() {
   const offlineImg = document.getElementById('previewImgOffline');
   const mainImg = document.getElementById('previewImg');
@@ -728,15 +884,11 @@ function showOfflineCaptureStep() {
   document.getElementById('step1bError').innerHTML = '';
   showStep('step1b');
 }
-
 async function submitOfflineCapture() {
   const email = document.getElementById('offlineEmail').value.trim();
   const phone = document.getElementById('offlinePhone').value.trim();
   if (!email && !phone) { document.getElementById('step1bError').innerHTML = '<div class="error-msg">Please provide at least an email or phone number.</div>'; return; }
-
-  // Compress image before saving to localStorage
   const compressedImage = state.imageBase64 ? await compressForStorage(state.imageBase64) : null;
-
   const leadId = 'lead_' + Date.now();
   const lead = {
     id: leadId, timestamp: new Date().toLocaleString(),
@@ -746,7 +898,6 @@ async function submitOfflineCapture() {
     imageBase64: compressedImage, imageMediaType: 'image/jpeg'
   };
   addLead(lead);
-
   document.getElementById('successTitle').textContent = 'Contact saved!';
   document.getElementById('successMsg').textContent = "Badge photo and contact info saved. Details will be extracted and synced automatically when you're back online.";
   document.getElementById('leadSummaryCard').innerHTML = `
@@ -760,14 +911,12 @@ async function submitOfflineCapture() {
   document.getElementById('sheetStatus').innerHTML = '<div class="status-offline-capture">📶 Saved locally — will auto-analyze and sync when back online.</div>';
   document.getElementById('openTextBtn').style.display = 'none';
   for (let i = 1; i <= 4; i++) {
-    const ps = document.getElementById('ps' + i);
-    const pl = document.getElementById('pl' + i);
+    const ps = document.getElementById('ps' + i); const pl = document.getElementById('pl' + i);
     if (ps) ps.className = 'progress-step' + (i < 4 ? ' done' : ' active');
     if (pl) pl.className = 'progress-label' + (i < 4 ? ' done' : ' active');
   }
   showStep('step4');
 }
-
 function showStep(stepId) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById(stepId).classList.add('active');
@@ -780,8 +929,7 @@ function goStep(n) {
   document.getElementById('step' + n).classList.add('active');
   window.scrollTo(0, 0);
   for (let i = 1; i <= 4; i++) {
-    const ps = document.getElementById('ps' + i);
-    const pl = document.getElementById('pl' + i);
+    const ps = document.getElementById('ps' + i); const pl = document.getElementById('pl' + i);
     if (ps) ps.className = 'progress-step' + (i < n ? ' done' : i === n ? ' active' : '');
     if (pl) pl.className = 'progress-label' + (i < n ? ' done' : i === n ? ' active' : '');
   }
@@ -798,21 +946,18 @@ function handleImage(e) {
     img.onload = function() {
       const canvas = document.createElement('canvas');
       const MAX = 1600;
-      let w = img.width;
-      let h = img.height;
+      let w = img.width, h = img.height;
       if (w > MAX || h > MAX) {
         if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
         else { w = Math.round(w * MAX / h); h = MAX; }
       }
-      canvas.width = w;
-      canvas.height = h;
+      canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       const compressed = canvas.toDataURL('image/jpeg', 0.85);
       state.imageBase64 = compressed.split(',')[1];
       state.imageMediaType = 'image/jpeg';
       const previewImg = document.getElementById('previewImg');
-      previewImg.src = compressed;
-      previewImg.style.display = 'block';
+      previewImg.src = compressed; previewImg.style.display = 'block';
       document.getElementById('uploadZone').style.display = 'none';
       document.getElementById('analyzeBtn').style.display = 'block';
       document.getElementById('skipBtn').style.display = 'block';
@@ -850,8 +995,7 @@ async function analyzeImage() {
   document.getElementById('step1Error').innerHTML = '';
   try {
     const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64: state.imageBase64, mediaType: state.imageMediaType })
     });
     const parsed = await response.json();
@@ -866,56 +1010,39 @@ async function analyzeImage() {
       || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
       || 'N/A';
     document.getElementById('branchName').value = matchedBranch;
+
     if (firstName || lastName) {
-      try {
-        const lookupRes = await fetch('/api/lookup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: `${firstName} ${lastName}`.trim() })
+      // Search cache first
+      const cacheResults = searchRosterCache(`${firstName} ${lastName}`.trim());
+      if (cacheResults.length > 0) {
+        const match = cacheResults[0];
+        document.getElementById('trEmail').value = match.email || '';
+        document.getElementById('region').value = match.region || '';
+        if (match.branch) document.getElementById('branchName').value = match.branch;
+        state.matchedAE = match.assignedAE;
+        state.matchedAEEmail = match.aeEmail;
+        state.matchedAEPhone = match.aePhone || null;
+        state.matchedAEFirstName = match.aeFirstName || null;
+        document.getElementById('trSearch').value = match.name;
+        ['firstName','lastName','trRole','branchName','region','trEmail'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
         });
-        const lookupData = await lookupRes.json();
-        if (lookupData.results && lookupData.results.length > 0) {
-          const match = lookupData.results[0];
-          document.getElementById('trEmail').value = match.email || '';
-          document.getElementById('region').value = match.region || '';
-          if (match.branch) document.getElementById('branchName').value = match.branch;
-          state.matchedAE = match.assignedAE;
-          state.matchedAEEmail = match.aeEmail;
-          state.matchedAEPhone = match.aePhone || null;
-          state.matchedAEFirstName = match.aeFirstName || null;
-          document.getElementById('trSearch').value = match.name;
-          ['firstName','lastName','trRole','branchName','region','trEmail'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
-          });
-          document.getElementById('aiBadge').style.display = 'none';
-          document.getElementById('sheetBadge').style.display = 'inline-flex';
-        } else {
-        // Name not found — try branch fallback
-        try {
-          const branchRes = await fetch('/api/lookup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ branch: matchedBranch })
-          });
-          const branchData = await branchRes.json();
-          if (branchData.results && branchData.results.length > 0) {
-            const match = branchData.results[0];
-            state.matchedAE = match.assignedAE;
-            state.matchedAEEmail = match.aeEmail;
-            state.matchedAEPhone = match.aePhone || null;
-            state.matchedAEFirstName = match.aeFirstName || null;
-          }
-        } catch {}
+        document.getElementById('aiBadge').style.display = 'none';
+        document.getElementById('sheetBadge').style.display = 'inline-flex';
+      } else {
+        // Try branch fallback from cache
+        const branchMatch = getBranchAEFromCache(matchedBranch);
+        if (branchMatch) {
+          state.matchedAE = branchMatch.assignedAE;
+          state.matchedAEEmail = branchMatch.aeEmail;
+          state.matchedAEPhone = branchMatch.aePhone || null;
+          state.matchedAEFirstName = branchMatch.aeFirstName || null;
+        }
         document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
         ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
         document.getElementById('aiBadge').style.display = 'inline-flex';
         document.getElementById('sheetBadge').style.display = 'none';
-      }
-      } catch {
-        document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
-        ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
-        document.getElementById('aiBadge').style.display = 'inline-flex';
       }
     }
     goStep(2);
@@ -944,11 +1071,12 @@ function selectBranch(branch) {
 }
 function showBranchDropdown() { filterBranches(document.getElementById('branchName').value); }
 function hideBranchDropdown() { document.getElementById('branchDropdown').style.display = 'none'; }
+
 function toProperCase(str) {
   if (!str) return '';
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
-  
+
 async function matchAE() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
@@ -965,25 +1093,33 @@ async function matchAE() {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>'; return; }
   document.getElementById('step2Error').innerHTML = '';
 
-    // If no AE matched from name search, try branch fallback
+  // Branch fallback from cache if no name match
   if (!state.matchedAE && branchName && branchName !== 'N/A' && branchName !== 'Corporate') {
-    try {
-      const branchRes = await fetch('/api/lookup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ branch: branchName })
-      });
-      const branchData = await branchRes.json();
-      if (branchData.results && branchData.results.length > 0) {
-        const match = branchData.results[0];
-        state.matchedAE = match.assignedAE;
-        state.matchedAEEmail = match.aeEmail;
-        state.matchedAEPhone = match.aePhone || null;
-        state.matchedAEFirstName = match.aeFirstName || null;
-      }
-    } catch {}
+    const branchMatch = getBranchAEFromCache(branchName);
+    if (branchMatch) {
+      state.matchedAE = branchMatch.assignedAE;
+      state.matchedAEEmail = branchMatch.aeEmail;
+      state.matchedAEPhone = branchMatch.aePhone || null;
+      state.matchedAEFirstName = branchMatch.aeFirstName || null;
+    } else {
+      // Fallback to API if not in cache
+      try {
+        const branchRes = await fetch('/api/lookup', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ branch: branchName })
+        });
+        const branchData = await branchRes.json();
+        if (branchData.results && branchData.results.length > 0) {
+          const match = branchData.results[0];
+          state.matchedAE = match.assignedAE;
+          state.matchedAEEmail = match.aeEmail;
+          state.matchedAEPhone = match.aePhone || null;
+          state.matchedAEFirstName = match.aeFirstName || null;
+        }
+      } catch {}
+    }
   }
-  
+
   const assignedAE = state.matchedAE || FALLBACK_AE;
   const assignedAEEmail = state.matchedAEEmail || FALLBACK_AE_EMAIL;
   const assignedAEPhone = state.matchedAEPhone || null;
@@ -992,16 +1128,16 @@ async function matchAE() {
   state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail, assignedAEPhone };
 
   const emailSubject = `CandidPro x Patterson - NASM Introduction`;
-const emailBody = `Hi ${assignedAEFirstName} and ${firstName},\n\n${firstName} from the ${branchName} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${assignedAEFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
-document.getElementById('emailSubject').value = emailSubject;
-document.getElementById('emailBody').value = emailBody;
+  const emailBody = `Hi ${assignedAEFirstName} and ${firstName},\n\n${firstName} from the ${branchName} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${assignedAEFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
+  document.getElementById('emailSubject').value = emailSubject;
+  document.getElementById('emailBody').value = emailBody;
 
-if (phone) {
-  document.getElementById('smsTemplateCard').style.display = 'block';
-  document.getElementById('smsBody').value = `Hi ${firstName} and ${assignedAEFirstName}! ${firstName} stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro. Wanted to connect you both to get started!`;
-} else {
-  document.getElementById('smsTemplateCard').style.display = 'none';
-}
+  if (phone) {
+    document.getElementById('smsTemplateCard').style.display = 'block';
+    document.getElementById('smsBody').value = `Hi ${firstName} and ${assignedAEFirstName}! ${firstName} stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro. Wanted to connect you both to get started!`;
+  } else {
+    document.getElementById('smsTemplateCard').style.display = 'none';
+  }
 
   document.getElementById('trSummaryBlock').innerHTML = `
     <div class="tr-card">
@@ -1036,23 +1172,21 @@ function openGroupText() {
   window.location.href = `sms:/open?addresses=${to}&body=${encoded}`;
 }
 
-// ─── SUBMIT ───────────────────────────────────────────────────
+// ─── DRIVE UPLOAD ─────────────────────────────────────────────
 async function uploadToDrive(imageBase64, firstName, lastName, branch) {
   try {
     const timestamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
     const safeName = `${firstName}_${lastName}_${branch.replace(/[^a-zA-Z0-9]/g, '-')}_${timestamp}.jpg`;
     const res = await fetch('/api/gdrive', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64, fileName: safeName })
     });
     const data = await res.json();
     return data.url || null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
-  
+
+// ─── SUBMIT ───────────────────────────────────────────────────
 async function submitLead() {
   const btn = document.getElementById('submitBtn');
   btn.innerHTML = '<span class="spinner"></span>Submitting...';
@@ -1074,7 +1208,6 @@ async function submitLead() {
 
   addLead(lead);
 
-// Upload badge photo to Drive in background (non-blocking)
   let driveUrl = null;
   if (state.imageBase64 && navigator.onLine) {
     driveUrl = await uploadToDrive(state.imageBase64, l.firstName, l.lastName, l.branchName);
@@ -1088,9 +1221,7 @@ async function submitLead() {
       const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
       sheetSuccess = await Promise.race([syncPromise, timeoutPromise]);
       updateLeadStatus(leadId, sheetSuccess ? 'synced' : 'failed');
-    } catch {
-      updateLeadStatus(leadId, 'failed');
-    }
+    } catch { updateLeadStatus(leadId, 'failed'); }
   }
 
   document.getElementById('successTitle').textContent = 'Lead captured!';
@@ -1113,11 +1244,8 @@ async function submitLead() {
     document.getElementById('sheetStatus').innerHTML = '<div class="status-warn">⚠ Could not reach Zapier — saved locally. Tap the menu to retry.</div>';
   }
 
-  if (l.phone) {
-    document.getElementById('openTextBtn').style.display = 'block';
-  } else {
-    document.getElementById('openTextBtn').style.display = 'none';
-  }
+  if (l.phone) { document.getElementById('openTextBtn').style.display = 'block'; }
+  else { document.getElementById('openTextBtn').style.display = 'none'; }
 
   btn.innerHTML = 'Submit lead & send email';
   btn.disabled = false;
@@ -1161,6 +1289,7 @@ function formatPhone(input) {
 // Init
 updateOnlineStatus();
 updateMenuBadge();
+refreshCaches();
 </script>
 </body>
 </html>
