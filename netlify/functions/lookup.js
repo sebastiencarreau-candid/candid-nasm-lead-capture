@@ -200,13 +200,63 @@ const NICKNAME_MAP = {
   'zack': 'zachary', 'zachary': 'zack',
 };
 
+const SHEET_ID = '1OBliAy-otDBDF8Xnwa1nR2R1X6pnIoTSj9x9qL_L688';
+
+async function fetchSheet(range, apiKey) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(range)}?key=${apiKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.values || [];
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
-    const { query } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    const API_KEY = process.env.GSHEETS_API_KEY;
+
+    // ── BRANCH LOOKUP MODE ──────────────────────────────────
+    if (body.branch) {
+      const rows = await fetchSheet('Branch Mapping!A2:D200', API_KEY);
+      const branchQ = body.branch.toLowerCase().trim();
+
+      for (const row of rows) {
+        const branchName = (row[0] || '').toLowerCase().trim();
+        if (branchName === branchQ) {
+          return {
+            statusCode: 200,
+            headers: { 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({
+              results: [{
+                name: '',
+                altName: null,
+                branch: row[0] || '',
+                region: '',
+                email: '',
+                assignedAE: row[1] || '',
+                aeEmail: row[2] || '',
+                aePhone: '',
+                aeFirstName: row[3] || ''
+              }]
+            })
+          };
+        }
+      }
+
+      // Branch not found — return empty
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ results: [] })
+      };
+    }
+
+    // ── NAME LOOKUP MODE ────────────────────────────────────
+    const { query } = body;
     if (!query || query.length < 2) {
       return {
         statusCode: 200,
@@ -215,38 +265,15 @@ exports.handler = async function(event) {
       };
     }
 
-    const SHEET_ID = '1OBliAy-otDBDF8Xnwa1nR2R1X6pnIoTSj9x9qL_L688';
-    const API_KEY = process.env.GSHEETS_API_KEY;
-    const RANGE = 'Sheet1!A2:I1000';
-
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
-    const res = await fetch(url);
-    const data = await res.json();
-
-    if (data.error) {
-      return {
-        statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ results: [], error: data.error.message })
-      };
-    }
-
-    if (!data.values) {
-      return {
-        statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ results: [] })
-      };
-    }
+    const rows = await fetchSheet('Sheet1!A2:I1000', API_KEY);
 
     const q = query.toLowerCase().trim();
     const qParts = q.split(' ');
     const qFirst = qParts[0];
     const qFirstExpanded = NICKNAME_MAP[qFirst] || null;
-
     const matches = [];
 
-    for (const row of data.values) {
+    for (const row of rows) {
       const preferredName = (row[0] || '').toLowerCase();
       const altName = (row[1] || '').toLowerCase();
       const branch = row[2] || '';
@@ -257,42 +284,37 @@ exports.handler = async function(event) {
       const aePhone = row[7] || '';
       const aeFirstName = row[8] || '';
 
-      // Direct match on preferred or alt name
+      // Layer 1 — direct match
       let matched = preferredName.includes(q) || altName.includes(q);
 
-      // Nickname expansion — e.g. "jeff" matches "jeffrey johnson"
+      // Layer 2 — nickname expansion (e.g. "jeff" → "jeffrey")
       if (!matched && qFirstExpanded) {
         const qNickname = [qFirstExpanded, ...qParts.slice(1)].join(' ');
         matched = preferredName.includes(qNickname) || altName.includes(qNickname);
       }
 
-      // Reverse nickname — e.g. "jeffrey" matches "jeff johnson"
+      // Layer 3 — reverse nickname (e.g. "jeffrey" matches "jeff johnson")
       if (!matched) {
         const prefFirst = preferredName.split(' ')[0];
-        const prefFirstExpanded = NICKNAME_MAP[prefFirst] || null;
-        if (prefFirstExpanded) {
-          const prefNickname = [prefFirstExpanded, ...preferredName.split(' ').slice(1)].join(' ');
+        const prefExpanded = NICKNAME_MAP[prefFirst] || null;
+        if (prefExpanded) {
+          const prefNickname = [prefExpanded, ...preferredName.split(' ').slice(1)].join(' ');
           matched = prefNickname.includes(q);
         }
       }
 
-      // Alt name nickname check
+      // Layer 4 — alt name nickname check
       if (!matched && altName) {
         const altFirst = altName.split(' ')[0];
-        const altFirstExpanded = NICKNAME_MAP[altFirst] || null;
-        if (altFirstExpanded) {
-          const altNickname = [altFirstExpanded, ...altName.split(' ').slice(1)].join(' ');
+        const altExpanded = NICKNAME_MAP[altFirst] || null;
+        if (altExpanded) {
+          const altNickname = [altExpanded, ...altName.split(' ').slice(1)].join(' ');
           matched = altNickname.includes(q);
         }
       }
 
       if (matched) {
-        matches.push({
-          name: row[0],
-          altName: row[1] || null,
-          branch, region, email,
-          assignedAE, aeEmail, aePhone, aeFirstName
-        });
+        matches.push({ name: row[0], altName: row[1] || null, branch, region, email, assignedAE, aeEmail, aePhone, aeFirstName });
       }
       if (matches.length >= 8) break;
     }
@@ -300,7 +322,7 @@ exports.handler = async function(event) {
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ results: matches, total_rows: data.values.length })
+      body: JSON.stringify({ results: matches, total_rows: rows.length })
     };
 
   } catch(err) {
