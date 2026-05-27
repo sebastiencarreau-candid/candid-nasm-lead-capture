@@ -1,5 +1,4 @@
 const NICKNAME_MAP = {
-  // A
   'al': 'albert', 'albert': 'al',
   'alex': 'alexander', 'alexander': 'alex',
   'allie': 'allison', 'allison': 'allie',
@@ -9,8 +8,6 @@ const NICKNAME_MAP = {
   'anne': 'annie', 'annie': 'anne',
   'andy': 'andrew', 'andrew': 'andy',
   'drew': 'andrew', 'andrew': 'drew',
-
-  // B
   'barb': 'barbara', 'barbara': 'barb',
   'bart': 'bartholomew', 'bartholomew': 'bart',
   'becca': 'rebecca', 'rebecca': 'becca',
@@ -23,8 +20,6 @@ const NICKNAME_MAP = {
   'bob': 'robert', 'robert': 'bob',
   'brad': 'bradley', 'bradley': 'brad',
   'bud': 'william', 'william': 'bud',
-
-  // C
   'cal': 'calvin', 'calvin': 'cal',
   'carl': 'charles', 'charles': 'carl',
   'carrie': 'caroline', 'caroline': 'carrie',
@@ -39,8 +34,6 @@ const NICKNAME_MAP = {
   'cindy': 'cynthia', 'cynthia': 'cindy',
   'connie': 'constance', 'constance': 'connie',
   'curt': 'curtis', 'curtis': 'curt',
-
-  // D
   'dan': 'daniel', 'daniel': 'dan',
   'danny': 'daniel', 'daniel': 'danny',
   'dave': 'david', 'david': 'dave',
@@ -52,8 +45,6 @@ const NICKNAME_MAP = {
   'don': 'donald', 'donald': 'don',
   'donnie': 'donald', 'donald': 'donnie',
   'doug': 'douglas', 'douglas': 'doug',
-
-  // E
   'ed': 'edward', 'edward': 'ed',
   'eddie': 'edward', 'edward': 'eddie',
   'ned': 'edward', 'edward': 'ned',
@@ -61,24 +52,16 @@ const NICKNAME_MAP = {
   'ellen': 'eleanor', 'eleanor': 'ellen',
   'em': 'emily', 'emily': 'em',
   'emmy': 'emily', 'emily': 'emmy',
-
-  // F
   'frank': 'francis', 'francis': 'frank',
   'frankie': 'frances', 'frances': 'frankie',
   'fred': 'frederick', 'frederick': 'fred',
-
-  // G
   'gail': 'abigail', 'abigail': 'gail',
   'gene': 'eugene', 'eugene': 'gene',
   'ginny': 'virginia', 'virginia': 'ginny',
   'greg': 'gregory', 'gregory': 'greg',
   'gus': 'augustus', 'augustus': 'gus',
-
-  // H
   'hal': 'harold', 'harold': 'hal',
   'hank': 'henry', 'henry': 'hank',
-
-  // J
   'jack': 'john', 'john': 'jack',
   'jake': 'jacob', 'jacob': 'jake',
   'jay': 'james', 'james': 'jay',
@@ -98,12 +81,8 @@ const NICKNAME_MAP = {
   'josh': 'joshua', 'joshua': 'josh',
   'jules': 'julia', 'julia': 'jules',
   'julie': 'julia', 'julia': 'julie',
-
-  // K
   'ken': 'kenneth', 'kenneth': 'ken',
   'kim': 'kimberly', 'kimberly': 'kim',
-
-  // L
   'larry': 'lawrence', 'lawrence': 'larry',
   'laurie': 'laura', 'laura': 'laurie',
   'lee': 'leonard', 'leonard': 'lee',
@@ -115,8 +94,6 @@ const NICKNAME_MAP = {
   'beth': 'elizabeth', 'elizabeth': 'beth',
   'lisa': 'elizabeth', 'elizabeth': 'lisa',
   'lucy': 'lucille', 'lucille': 'lucy',
-
-  // M
   'maddie': 'madison', 'madison': 'maddie',
   'mandy': 'amanda', 'amanda': 'mandy',
   'marcy': 'marcia', 'marcia': 'marcy',
@@ -132,12 +109,8 @@ const NICKNAME_MAP = {
   'missy': 'melissa', 'melissa': 'missy',
   'mitch': 'mitchell', 'mitchell': 'mitch',
   'molly': 'mary', 'mary': 'molly',
-
-  // N
   'nick': 'nicholas', 'nicholas': 'nick',
   'nora': 'eleanor', 'eleanor': 'nora',
-
-  // P
   'pat': 'patrick', 'patrick': 'pat',
   'patty': 'patricia', 'patricia': 'patty',
   'trish': 'patricia', 'patricia': 'trish',
@@ -146,8 +119,6 @@ const NICKNAME_MAP = {
   'pete': 'peter', 'peter': 'pete',
   'phil': 'philip', 'philip': 'phil',
   'polly': 'mary', 'mary': 'polly',
-
-  // R
   'rach': 'rachel', 'rachel': 'rach',
   'rae': 'rachel', 'rachel': 'rae',
   'randy': 'randall', 'randall': 'randy',
@@ -159,8 +130,6 @@ const NICKNAME_MAP = {
   'rose': 'rosemary', 'rosemary': 'rose',
   'rosie': 'rosemary', 'rosemary': 'rosie',
   'russ': 'russell', 'russell': 'russ',
-
-  // S
   'sal': 'salvador', 'salvador': 'sal',
   'sam': 'samuel', 'samuel': 'sam',
   'sandy': 'sandra', 'sandra': 'sandy',
@@ -175,8 +144,6 @@ const NICKNAME_MAP = {
   'stu': 'stuart', 'stuart': 'stu',
   'sue': 'susan', 'susan': 'sue',
   'susie': 'susan', 'susan': 'susie',
-
-  // T
   'ted': 'theodore', 'theodore': 'ted',
   'terri': 'theresa', 'theresa': 'terri',
   'terry': 'theresa', 'theresa': 'terry',
@@ -184,18 +151,12 @@ const NICKNAME_MAP = {
   'tina': 'christina', 'christina': 'tina',
   'tom': 'thomas', 'thomas': 'tom',
   'tony': 'anthony', 'anthony': 'tony',
-
-  // V
   'val': 'valerie', 'valerie': 'val',
   'vicki': 'victoria', 'victoria': 'vicki',
   'vicky': 'victoria', 'victoria': 'vicky',
   'vince': 'vincent', 'vincent': 'vince',
-
-  // W
   'walt': 'walter', 'walter': 'walt',
   'will': 'william', 'william': 'will',
-
-  // Z
   'zach': 'zachary', 'zachary': 'zach',
   'zack': 'zachary', 'zachary': 'zack',
 };
@@ -219,11 +180,48 @@ exports.handler = async function(event) {
     const body = JSON.parse(event.body);
     const API_KEY = process.env.GSHEETS_API_KEY;
 
+    // ── FETCH ALL (for client-side cache) ──────────────────
+    if (body.fetchAll) {
+      const rows = await fetchSheet('Sheet1!A2:I1000', API_KEY);
+      const roster = rows.map(row => ({
+        name: row[0] || '',
+        altName: row[1] || null,
+        branch: row[2] || '',
+        region: row[3] || '',
+        email: row[4] || '',
+        assignedAE: row[5] || '',
+        aeEmail: row[6] || '',
+        aePhone: row[7] || '',
+        aeFirstName: row[8] || ''
+      })).filter(r => r.name);
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ roster })
+      };
+    }
+
+    // ── FETCH BRANCH MAP (for client-side cache) ────────────
+    if (body.fetchBranchMap) {
+      const rows = await fetchSheet('Branch Mapping!A2:D200', API_KEY);
+      const branchMap = rows.map(row => ({
+        branch: row[0] || '',
+        assignedAE: row[1] || '',
+        aeEmail: row[2] || '',
+        aeFirstName: row[3] || '',
+        aePhone: ''
+      })).filter(r => r.branch);
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ branchMap })
+      };
+    }
+
     // ── BRANCH LOOKUP MODE ──────────────────────────────────
     if (body.branch) {
       const rows = await fetchSheet('Branch Mapping!A2:D200', API_KEY);
       const branchQ = body.branch.toLowerCase().trim();
-
       for (const row of rows) {
         const branchName = (row[0] || '').toLowerCase().trim();
         if (branchName === branchQ) {
@@ -232,22 +230,15 @@ exports.handler = async function(event) {
             headers: { 'Access-Control-Allow-Origin': '*' },
             body: JSON.stringify({
               results: [{
-                name: '',
-                altName: null,
-                branch: row[0] || '',
-                region: '',
-                email: '',
-                assignedAE: row[1] || '',
-                aeEmail: row[2] || '',
-                aePhone: '',
-                aeFirstName: row[3] || ''
+                name: '', altName: null, branch: row[0] || '',
+                region: '', email: '',
+                assignedAE: row[1] || '', aeEmail: row[2] || '',
+                aePhone: '', aeFirstName: row[3] || ''
               }]
             })
           };
         }
       }
-
-      // Branch not found — return empty
       return {
         statusCode: 200,
         headers: { 'Access-Control-Allow-Origin': '*' },
@@ -266,7 +257,6 @@ exports.handler = async function(event) {
     }
 
     const rows = await fetchSheet('Sheet1!A2:I1000', API_KEY);
-
     const q = query.toLowerCase().trim();
     const qParts = q.split(' ');
     const qFirst = qParts[0];
@@ -284,16 +274,12 @@ exports.handler = async function(event) {
       const aePhone = row[7] || '';
       const aeFirstName = row[8] || '';
 
-      // Layer 1 — direct match
       let matched = preferredName.includes(q) || altName.includes(q);
 
-      // Layer 2 — nickname expansion (e.g. "jeff" → "jeffrey")
       if (!matched && qFirstExpanded) {
         const qNickname = [qFirstExpanded, ...qParts.slice(1)].join(' ');
         matched = preferredName.includes(qNickname) || altName.includes(qNickname);
       }
-
-      // Layer 3 — reverse nickname (e.g. "jeffrey" matches "jeff johnson")
       if (!matched) {
         const prefFirst = preferredName.split(' ')[0];
         const prefExpanded = NICKNAME_MAP[prefFirst] || null;
@@ -302,8 +288,6 @@ exports.handler = async function(event) {
           matched = prefNickname.includes(q);
         }
       }
-
-      // Layer 4 — alt name nickname check
       if (!matched && altName) {
         const altFirst = altName.split(' ')[0];
         const altExpanded = NICKNAME_MAP[altFirst] || null;
