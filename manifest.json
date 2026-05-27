@@ -1,0 +1,18 @@
+{
+  "name": "CandidPro at NASM",
+  "short_name": "CandidPro",
+  "description": "CandidPro TR intake form for NASM 2026",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#E8281E",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/ChatGPT_Image_May_27__2026__02_25_03_PM.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
