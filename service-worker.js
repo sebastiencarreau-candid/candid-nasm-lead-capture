@@ -1,4 +1,4 @@
-const CACHE_NAME = 'candidpro-nasm-v4';
+const CACHE_NAME = 'candidpro-nasm-v5';
 const ASSETS = ['/', '/index.html'];
 
 self.addEventListener('install', event => {
@@ -13,7 +13,6 @@ self.addEventListener('activate', event => {
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
