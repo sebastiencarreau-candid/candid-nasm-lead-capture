@@ -891,11 +891,27 @@ async function analyzeImage() {
           document.getElementById('aiBadge').style.display = 'none';
           document.getElementById('sheetBadge').style.display = 'inline-flex';
         } else {
-          document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
-          ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
-          document.getElementById('aiBadge').style.display = 'inline-flex';
-          document.getElementById('sheetBadge').style.display = 'none';
-        }
+        // Name not found — try branch fallback
+        try {
+          const branchRes = await fetch('/api/lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ branch: matchedBranch })
+          });
+          const branchData = await branchRes.json();
+          if (branchData.results && branchData.results.length > 0) {
+            const match = branchData.results[0];
+            state.matchedAE = match.assignedAE;
+            state.matchedAEEmail = match.aeEmail;
+            state.matchedAEPhone = match.aePhone || null;
+            state.matchedAEFirstName = match.aeFirstName || null;
+          }
+        } catch {}
+        document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
+        ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
+        document.getElementById('aiBadge').style.display = 'inline-flex';
+        document.getElementById('sheetBadge').style.display = 'none';
+      }
       } catch {
         document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
         ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
@@ -933,7 +949,7 @@ function toProperCase(str) {
   return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
   
-function matchAE() {
+async function matchAE() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
   const role = document.getElementById('trRole').value.trim();
@@ -949,6 +965,25 @@ function matchAE() {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>'; return; }
   document.getElementById('step2Error').innerHTML = '';
 
+    // If no AE matched from name search, try branch fallback
+  if (!state.matchedAE && branchName && branchName !== 'N/A' && branchName !== 'Corporate') {
+    try {
+      const branchRes = await fetch('/api/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ branch: branchName })
+      });
+      const branchData = await branchRes.json();
+      if (branchData.results && branchData.results.length > 0) {
+        const match = branchData.results[0];
+        state.matchedAE = match.assignedAE;
+        state.matchedAEEmail = match.aeEmail;
+        state.matchedAEPhone = match.aePhone || null;
+        state.matchedAEFirstName = match.aeFirstName || null;
+      }
+    } catch {}
+  }
+  
   const assignedAE = state.matchedAE || FALLBACK_AE;
   const assignedAEEmail = state.matchedAEEmail || FALLBACK_AE_EMAIL;
   const assignedAEPhone = state.matchedAEPhone || null;
