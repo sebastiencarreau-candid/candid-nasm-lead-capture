@@ -423,12 +423,12 @@
 
   <!-- TABS -->
   <div class="panel-tabs">
-    <button class="panel-tab active" id="tabLeadLog" onclick="switchTab('leadlog')">Lead Log</button>
-    <button class="panel-tab" id="tabRoster" onclick="switchTab('roster')">TR Roster</button>
-  </div>
+  <button class="panel-tab active" id="tabRoster" onclick="switchTab('roster')">TR Roster</button>
+  <button class="panel-tab" id="tabLeadLog" onclick="switchTab('leadlog')">Lead Log</button>
+</div>
 
   <!-- LEAD LOG TAB -->
-  <div class="panel-tab-content active" id="tabContentLeadLog" style="flex-direction:column;">
+  <div class="panel-tab-content" id="tabContentLeadLog" style="flex-direction:column;">
     <div class="panel-actions" id="panelActions" style="display:none;">
       <button class="btn-retry-all" onclick="retryAll()">↺ Retry All Pending & Failed</button>
     </div>
@@ -438,7 +438,7 @@
   </div>
 
   <!-- ROSTER TAB -->
-  <div class="panel-tab-content" id="tabContentRoster" style="flex-direction:column;">
+  <div class="panel-tab-content active" id="tabContentRoster" style="flex-direction:column;">
     <div class="roster-offline-note" id="rosterOfflineNote">📶 Showing cached roster — may not reflect latest changes</div>
     <div class="roster-search-wrap">
       <input type="text" class="roster-search-input" id="rosterSearch" placeholder="Search by name or branch..." oninput="filterRoster(this.value)">
@@ -702,6 +702,7 @@ function compressForStorage(base64) {
 // ─── PANEL ───────────────────────────────────────────────────
 function openPanel() {
   renderPanel();
+  renderRoster(document.getElementById('rosterSearch').value);
   document.getElementById('leadPanel').classList.add('open');
   document.getElementById('panelOverlay').classList.add('open');
 }
