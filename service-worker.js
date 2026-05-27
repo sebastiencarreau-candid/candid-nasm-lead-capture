@@ -1,4 +1,4 @@
-const CACHE_NAME = 'candidpro-nasm-v1';
+const CACHE_NAME = 'candidpro-nasm-v2';
 const ASSETS = ['/', '/index.html'];
 
 self.addEventListener('install', event => {
@@ -35,4 +35,8 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => caches.match(event.request))
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data === 'skipWaiting') self.skipWaiting();
 });
