@@ -291,6 +291,18 @@
     </div>
     <img id="previewImgOffline" class="preview-img" style="display:none;">
     <div class="card">
+    <div class="card-title">Search roster to pull email</div>
+    <div class="field-group">
+      <label>Search TR name</label>
+      <div class="search-wrap">
+        <input type="text" id="offlineRosterSearch" placeholder="Type name to search roster..." autocomplete="off"
+          oninput="handleOfflineRosterSearch(this.value)"
+          onblur="setTimeout(hideOfflineSearchDropdown, 150)">
+        <div class="search-dropdown" id="offlineSearchDropdown"></div>
+      </div>
+    </div>
+    </div>
+    <div class="card">
       <div class="card-title">TR contact info — at least one required</div>
       <div class="field-group">
         <label>Email address</label>
@@ -301,10 +313,10 @@
         <input type="tel" id="offlinePhone" placeholder="+1 (555) 000-0000" oninput="formatPhone(this)" maxlength="17">
       </div>
     </div>
-    <div id="step1bError"></div>
-    <button class="btn-primary" onclick="submitOfflineCapture()">Save for later</button>
-    <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1); resetStep1()">← Retake photo</button>
-  </div>
+      <div id="step1bError"></div>
+      <button class="btn-primary" onclick="submitOfflineCapture()">Save for later</button>
+      <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1); resetStep1()">← Retake photo</button>
+    </div>
 
   <!-- STEP 2 -->
   <div class="step" id="step2">
@@ -889,6 +901,36 @@ function showOfflineCaptureStep() {
   document.getElementById('step1bError').innerHTML = '';
   showStep('step1b');
 }
+function handleOfflineRosterSearch(val) {
+  const dropdown = document.getElementById('offlineSearchDropdown');
+  if (val.length < 2) { dropdown.style.display = 'none'; return; }
+  const results = searchRosterCache(val);
+  if (results.length === 0) {
+    dropdown.innerHTML = `<div class="search-option"><div class="opt-notfound">No match for "${val}" — enter manually below</div></div>`;
+    dropdown.style.display = 'block';
+    return;
+  }
+  dropdown.innerHTML = results.map((r, i) => `
+    <div class="search-option" onmousedown="selectOfflineTR(${i})">
+      <div class="opt-name">${r.name}</div>
+      <div class="opt-branch">${r.branch}</div>
+    </div>`).join('');
+  dropdown.style.display = 'block';
+  window._offlineSearchResults = results;
+}
+
+function selectOfflineTR(idx) {
+  const results = window._offlineSearchResults || [];
+  const tr = results[idx];
+  if (!tr) return;
+  if (tr.email) document.getElementById('offlineEmail').value = tr.email;
+  document.getElementById('offlineRosterSearch').value = tr.name;
+  hideOfflineSearchDropdown();
+}
+
+function hideOfflineSearchDropdown() {
+  document.getElementById('offlineSearchDropdown').style.display = 'none';
+}
 async function submitOfflineCapture() {
   const email = document.getElementById('offlineEmail').value.trim();
   const phone = document.getElementById('offlinePhone').value.trim();
@@ -1272,7 +1314,7 @@ function resetApp() {
   document.getElementById('successTitle').textContent = 'Lead captured!';
   document.getElementById('smsTemplateCard').style.display = 'none';
   document.getElementById('openTextBtn').style.display = 'none';
-  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone','offlineEmail','offlinePhone','trSearch','emailSubject','emailBody','smsBody'].forEach(id => {
+  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone','offlineEmail','offlinePhone','trSearch','offlineRosterSearch','emailSubject','emailBody','smsBody'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('ai-filled'); el.classList.remove('sheet-filled'); }
   });
