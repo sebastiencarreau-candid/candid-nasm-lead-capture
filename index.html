@@ -223,7 +223,10 @@
 <div class="app">
 
   <div class="offline-banner" id="offlineBanner">⚠ No internet connection — leads will be saved and synced when reconnected</div>
-
+  <div id="updateBanner" style="display:none;background:#1A2B4A;border-bottom:1px solid #2D4A7A;padding:8px 20px;font-size:12px;color:white;font-weight:600;text-align:center;cursor:pointer;" onclick="applyUpdate()">
+  ✦ Update available — tap to refresh
+  </div>
+  
   <div class="header">
     <div class="logo-row">
       <img class="logo-candid" src="https://cdn.prod.website-files.com/601a0e7f102ff5b24874c42b/63d9b5ce58edcf6bdd0be3ce_CandidProLogo-red%20(1).png" alt="CandidPro" onerror="this.style.display='none';document.getElementById('logo-text').style.display='block'">
@@ -1341,8 +1344,28 @@ refreshCaches();
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js')
-        .catch(err => console.log('SW registration failed:', err));
+      navigator.serviceWorker.register('/service-worker.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New version available — show update banner
+              const banner = document.getElementById('updateBanner');
+              if (banner) banner.style.display = 'block';
+            }
+          });
+        });
+      }).catch(err => console.log('SW registration failed:', err));
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    });
+  }
+
+  function applyUpdate() {
+    navigator.serviceWorker.ready.then(reg => {
+      if (reg.waiting) reg.waiting.postMessage('skipWaiting');
     });
   }
 </script>
