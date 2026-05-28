@@ -809,6 +809,9 @@ function closePanel() {
 }
 
 function renderPanel() {
+  const expandedIds = new Set(
+    [...document.querySelectorAll('.lead-row.expanded')].map(el => el.id.replace('lead-row-', ''))
+    );
   const leads = getLeads();
   const list = document.getElementById('panelList');
   const actions = document.getElementById('panelActions');
@@ -841,20 +844,29 @@ function renderPanel() {
         </div>
       </div>`;
   }).join('');
+  expandedIds.forEach(id => {
+    const row = document.getElementById('lead-row-' + id);
+    if (row) row.classList.add('expanded');
+  });
 }
 
 function toggleLeadRow(id) { const row = document.getElementById('lead-row-' + id); if (row) row.classList.toggle('expanded'); }
 
 // ─── SYNC ────────────────────────────────────────────────────
 async function syncLead(lead) {
+  const aeFirstName = (lead.assignedAE || FALLBACK_AE).split(' ')[0];
+  const firstName = lead.firstName || '';
+  const branchName = lead.branch || '';
+  const fallbackSubject = `CandidPro x Patterson - NASM Introduction`;
+  const fallbackBody = `Hi ${aeFirstName} and ${firstName},\n\n${firstName} from the ${branchName} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${aeFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
   const payload = {
     timestamp: lead.timestamp, firstName: lead.firstName || '', lastName: lead.lastName || '',
     role: lead.role || '', branch: lead.branch || '', region: lead.region || '',
     email: lead.email || '', phone: lead.phone || '',
     assignedAE: lead.assignedAE || '', aeEmail: lead.aeEmail || '',
     notifSent: lead.notifSent || '',
-    emailSubject: lead.emailSubject || '',
-    emailBody: lead.emailBody || '',
+    emailSubject: lead.emailSubject || fallbackSubject,
+    emailBody: lead.emailBody || fallbackBody,
     captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced',
     driveUrl: lead.driveUrl || '',
     capturedBy: lead.capturedBy || ''
@@ -868,6 +880,7 @@ async function handleRetrySingle(id) {
   const btn = document.getElementById('retry-btn-' + id);
   if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(232,40,30,0.3);border-top-color:var(--red);"></span>Syncing...'; }
   await retrySingle(id);
+  renderPanel();
 }
   
 async function retrySingle(id) {
@@ -880,7 +893,6 @@ async function retrySingle(id) {
     try { const ok = await syncLead(lead); updateLeadStatus(id, ok ? 'synced' : 'failed'); }
     catch { updateLeadStatus(id, 'failed'); }
   }
-  renderPanel();
 }
 
 async function retryOfflineCapture(lead) {
