@@ -873,6 +873,9 @@ async function retrySingle(id) {
 }
 
 async function retryOfflineCapture(lead) {
+  // Guard against double-trigger
+  if (lead.status === 'pending') return;
+  updateLeadStatus(lead.id, 'pending');
   try {
     const response = await fetch('/api/analyze', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
