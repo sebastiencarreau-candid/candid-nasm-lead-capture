@@ -206,6 +206,15 @@
   .status-offline-capture { font-size: 13px; color: var(--offline); background: var(--offline-bg); border-radius: 10px; padding: 12px 16px; border-left: 3px solid var(--offline); }
   .divider { height: 1px; background: var(--border); margin: 16px 0; }
 
+  .user-overlay { position: fixed; inset: 0; background: rgba(26,43,74,0.97); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; }
+  .user-overlay.hidden { display: none; }
+  .user-overlay-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: white; margin-bottom: 8px; text-align: center; }
+  .user-overlay-sub { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 32px; text-align: center; line-height: 1.6; }
+  .user-overlay input { width: 100%; padding: 14px 16px; font-size: 17px; border: none; border-radius: 12px; background: white; color: var(--navy); font-family: 'DM Sans', sans-serif; margin-bottom: 14px; }
+  .user-overlay input:focus { outline: 3px solid var(--red); }
+  .user-chip { position: absolute; top: 20px; left: 20px; font-size: 11px; font-weight: 600; color: var(--gray); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; font-family: 'DM Sans', sans-serif; }
+  .user-chip:hover { color: var(--red); }
+  
   .success-wrap { text-align: center; padding: 20px 0 32px; }
   .success-ring { width: 72px; height: 72px; border-radius: 50%; background: var(--success-bg); border: 2px solid var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
   .success-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 8px; }
@@ -225,7 +234,22 @@
   <div class="offline-banner" id="offlineBanner">⚠ No internet connection — leads will be saved and synced when reconnected</div>
   <div id="updateBanner" style="display:none;background:#1A2B4A;border-bottom:1px solid #2D4A7A;padding:8px 20px;font-size:12px;color:white;font-weight:600;text-align:center;cursor:pointer;" onclick="applyUpdate()">
   ✦ Update available — tap to refresh
-</div>
+  </div>
+
+  <!-- USER NAME OVERLAY -->
+  <div class="user-overlay" id="userOverlay">
+    <div style="font-size:48px;margin-bottom:20px;">👤</div>
+    <div class="user-overlay-title">Welcome to the CandidPro Badge Scanning App for NASM</div>
+    <div class="user-overlay-sub">Please enter your first name before capturing leads.</div>
+    <input type="text" id="userNameInput" placeholder="Your first name" maxlength="30" autocomplete="given-name">
+    <div id="userNameError" style="color:#FCA5A5;font-size:13px;margin-bottom:12px;display:none;">Please enter your name to continue.</div>
+    <button class="btn-primary" onclick="saveUserName()">Get started →</button>
+  </div>
+
+  <!-- USER BAR -->
+  <div style="background:var(--gray-light);padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <div class="user-chip" id="userChip" onclick="editUserName()">👤 <span id="userChipName"></span></div>
+  </div>
   
   <div class="header">
     <div class="logo-row">
@@ -615,6 +639,7 @@ function filterRoster(val) {
 }
 
 function captureFromRoster(idx, query) {
+  if (!guardUserName()) return;
   const filtered = window._rosterFiltered || getCachedRoster();
   const tr = filtered[idx];
   if (!tr) return;
@@ -742,6 +767,7 @@ function renderPanel() {
           <div class="lead-detail-row"><span class="lead-detail-label">Phone</span>${lead.phone || '—'}</div>
           <div class="lead-detail-row"><span class="lead-detail-label">Assigned AE</span>${lead.assignedAE || '—'}</div>
           <div class="lead-detail-row"><span class="lead-detail-label">Captured</span>${lead.timestamp}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Captured by</span>${lead.capturedBy || '—'}</div>
           ${canRetry ? `<button class="btn-retry-single" onclick="retrySingle('${lead.id}')">↺ Retry Sync</button>` : ''}
         </div>
       </div>`;
@@ -761,7 +787,8 @@ async function syncLead(lead) {
     emailSubject: lead.emailSubject || '',
     emailBody: lead.emailBody || '',
     captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced',
-    driveUrl: lead.driveUrl || ''
+    driveUrl: lead.driveUrl || '',
+    capturedBy: lead.capturedBy || ''
   };
   const res = await fetch(ZAPIER_WEBHOOK, { method: 'POST', body: JSON.stringify(payload) });
   const data = await res.json();
@@ -896,6 +923,7 @@ function hideSearchDropdown() { document.getElementById('searchDropdown').style.
 
 // ─── OFFLINE CAPTURE ─────────────────────────────────────────
 function handleAnalyzeClick() {
+  if (!guardUserName()) return;
   if (!navigator.onLine) { showOfflineCaptureStep(); }
   else { analyzeImage(); }
 }
@@ -949,6 +977,7 @@ async function submitOfflineCapture() {
     firstName: '', lastName: '', role: '', branch: '', region: '',
     email, phone, assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL,
     notifSent: '', status: 'offline_capture',
+    capturedBy: getUserName(),
     imageBase64: compressedImage, imageMediaType: 'image/jpeg'
   };
   addLead(lead);
@@ -1032,6 +1061,7 @@ function resetStep1() {
 }
 
 function skipToManual() {
+  if (!guardUserName()) return;
   document.getElementById('aiBadge').style.display = 'none';
   document.getElementById('sheetBadge').style.display = 'none';
   ['firstName','lastName','trRole','branchName','region','trEmail','trSearch'].forEach(id => {
@@ -1257,6 +1287,7 @@ async function submitLead() {
     assignedAE: l.assignedAE, aeEmail: l.assignedAEEmail,
     emailSubject, emailBody,
     notifSent: l.email ? 'email' : 'none',
+    capturedBy: getUserName(),
     status: 'pending'
   };
 
@@ -1340,10 +1371,53 @@ function formatPhone(input) {
   input.value = formatted;
 }
 
+// ─── USER NAME ───────────────────────────────────────────────
+function initUserName() {
+  const name = localStorage.getItem('nasm_user_name');
+  if (!name) {
+    document.getElementById('userOverlay').classList.remove('hidden');
+  } else {
+    document.getElementById('userOverlay').classList.add('hidden');
+    document.getElementById('userChipName').textContent = name;
+  }
+}
+
+function saveUserName() {
+  const input = document.getElementById('userNameInput').value.trim();
+  if (!input) {
+    document.getElementById('userNameError').style.display = 'block';
+    return;
+  }
+  localStorage.setItem('nasm_user_name', input);
+  document.getElementById('userChipName').textContent = input;
+  document.getElementById('userOverlay').classList.add('hidden');
+  document.getElementById('userNameError').style.display = 'none';
+}
+
+function editUserName() {
+  const current = localStorage.getItem('nasm_user_name') || '';
+  document.getElementById('userNameInput').value = current;
+  document.getElementById('userNameError').style.display = 'none';
+  document.getElementById('userOverlay').classList.remove('hidden');
+}
+
+function getUserName() {
+  return localStorage.getItem('nasm_user_name') || '';
+}
+
+function guardUserName() {
+  if (!getUserName()) {
+    document.getElementById('userOverlay').classList.remove('hidden');
+    return false;
+  }
+  return true;
+}
+  
 // Init
 updateOnlineStatus();
 updateMenuBadge();
 refreshCaches();
+initUserName();
 </script>
 <script>
   if ('serviceWorker' in navigator) {
