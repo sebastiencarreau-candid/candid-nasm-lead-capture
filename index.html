@@ -960,6 +960,7 @@ async function retryAll() {
   const leads = getLeads();
   const toRetry = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture');
   for (const lead of toRetry) {
+    if (_retryingLeads.has(lead.id)) continue;
     if (lead.status === 'offline_capture' && lead.imageBase64) { await retryOfflineCapture(lead); }
     else { try { const ok = await syncLead(lead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); } catch {} }
   }
@@ -977,6 +978,7 @@ async function autoRetryPending() {
   const pending = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture');
   if (pending.length === 0) return;
   for (const lead of pending) {
+    if (_retryingLeads.has(lead.id)) continue;
     if (lead.status === 'offline_capture' && lead.imageBase64) { await retryOfflineCapture(lead); }
     else { try { const ok = await syncLead(lead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); } catch {} }
   }
