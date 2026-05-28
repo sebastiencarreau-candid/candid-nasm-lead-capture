@@ -212,7 +212,7 @@
   .user-overlay-sub { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 32px; text-align: center; line-height: 1.6; }
   .user-overlay input { width: 100%; padding: 14px 16px; font-size: 17px; border: none; border-radius: 12px; background: white; color: var(--navy); font-family: 'DM Sans', sans-serif; margin-bottom: 14px; }
   .user-overlay input:focus { outline: 3px solid var(--red); }
-  .user-chip { position: absolute; top: 20px; left: 20px; font-size: 11px; font-weight: 600; color: var(--gray); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; font-family: 'DM Sans', sans-serif; }
+  .user-chip { font-size: 11px; font-weight: 600; color: var(--gray); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; font-family: 'DM Sans', sans-serif; }
   .user-chip:hover { color: var(--red); }
   
   .success-wrap { text-align: center; padding: 20px 0 32px; }
@@ -248,7 +248,7 @@
 
   <!-- USER BAR -->
   <div style="background:var(--gray-light);padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-    <div class="user-chip" id="userChip" onclick="editUserName()">👤 <span id="userChipName"></span></div>
+    <div class="user-chip" id="userChip" onclick="editUserName()">User: <span id="userChipName"></span></div>
   </div>
   
   <div class="header">
