@@ -354,7 +354,9 @@
       <div id="step1bError"></div>
       <button class="btn-primary" onclick="submitOfflineCapture()">Save for later</button>
       <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1); resetStep1()">← Retake photo</button>
-    </div>
+  </div>
+
+  <!-- STEP 2 -->
 
   <!-- STEP 2 -->
   <div class="step" id="step2">
@@ -512,25 +514,64 @@ const BRANCH_LIST = [
 ];
 
 const REGION_MAP = {
-  "AL-Birmingham":"South Central","AR - Little Rock":"South Central","AZ-Mesa":"Western",
-  "CA - East Bay":"Western","CA - Los Angeles":"Western","CA - Sacramento":"Western",
-  "CA - San Diego":"Western","CO - Denver":"Mountain West","FL - Fort Lauderdale":"Southeast",
-  "FL - Orlando":"Southeast","FL - Tampa":"Southeast","GA - Atlanta":"Southeast",
-  "HI - Kapolei":"Western","IA - Des Moines":"Mountain West","IL - Chicago":"Ohio Valley",
-  "IN - Indianapolis":"Ohio Valley","KS - Kansas City":"South Central","KY - Louisville":"Ohio Valley",
-  "LA - New Orleans":"South Central","LA - Shreveport":"South Central","MA - New England":"Northeast",
-  "MD - Baltimore":"Northeast","MI - Greater Michigan":"Ohio Valley","MN - Eagan":"Mountain West",
-  "MO - St Louis":"Ohio Valley","MS - Jackson":"South Central","NC - Charlotte":"Southeast",
-  "NC - Raleigh":"Southeast","ND - Fargo":"Mountain West","NE - Omaha":"Mountain West",
-  "NJ - Totowa":"Northeast","NM - Albuquerque":"South Central","NV - Las Vegas":"Western",
-  "NY - Rochester":"Northeast","OH - Cleveland":"Ohio Valley","OH - Mid-South Ohio":"Ohio Valley",
-  "OK - Oklahoma City":"South Central","OR - Medford":"Mountain West","OR - Portland":"Mountain West",
-  "PA - Philadelphia":"Northeast","PA - Pittsburgh":"Northeast","SC - Charleston":"Southeast",
-  "SC - Columbia":"Southeast","SC - Greenville":"Southeast","TN - Memphis":"Southeast",
-  "TN - Nashville":"Southeast","TX - Austin":"South Central","TX - Dallas Ft Worth":"South Central",
-  "TX - Houston":"South Central","TX - San Antonio":"South Central","UT - Salt Lake City":"Western",
-  "VA - Richmond":"Northeast","WA - Seattle":"Mountain West","WA - Spokane":"Mountain West",
-  "WI - Milwaukee":"Ohio Valley","Corporate":"Corporate","N/A":"N/A"
+  "AL-Birmingham":"South Central",
+  "AR - Little Rock":"South Central",
+  "AZ-Mesa":"Western",
+  "CA - East Bay":"Western",
+  "CA - Los Angeles":"Western",
+  "CA - Sacramento":"Western",
+  "CA - San Diego":"Western",
+  "CO - Denver":"Mountain West",
+  "FL - Fort Lauderdale":"Southeast",
+  "FL - Orlando":"Southeast",
+  "FL - Tampa":"Southeast",
+  "GA - Atlanta":"Southeast",
+  "HI - Kapolei":"Western",
+  "IA - Des Moines":"Mountain West",
+  "IL - Chicago":"Ohio Valley",
+  "IN - Indianapolis":"Ohio Valley",
+  "KS - Kansas City":"South Central",
+  "KY - Louisville":"Ohio Valley",
+  "LA - New Orleans":"South Central",
+  "LA - Shreveport":"South Central",
+  "MA - New England":"Northeast",
+  "MD - Baltimore":"Northeast",
+  "MI - Greater Michigan":"Ohio Valley",
+  "MN - Eagan":"Mountain West",
+  "MN - Eagan Branch":"Mountain West",
+  "MO - St Louis":"Ohio Valley",
+  "MS - Jackson":"South Central",
+  "NC - Charlotte":"Southeast",
+  "NC - Raleigh":"Southeast",
+  "ND - Fargo":"Mountain West",
+  "NE - Omaha":"Mountain West",
+  "NJ - Totowa":"Northeast",
+  "NM - Albuquerque":"South Central",
+  "NV - Las Vegas":"Western",
+  "NY - Rochester":"Northeast",
+  "OH - Cleveland":"Ohio Valley",
+  "OH - Mid-South Ohio":"Ohio Valley",
+  "OK - Oklahoma City":"South Central",
+  "OR - Medford":"Mountain West",
+  "OR - Portland":"Mountain West",
+  "PA - Philadelphia":"Northeast",
+  "PA - Pittsburgh":"Northeast",
+  "SC - Charleston":"Southeast",
+  "SC - Columbia":"Southeast",
+  "SC - Greenville":"Southeast",
+  "TN - Memphis":"Southeast",
+  "TN - Nashville":"Southeast",
+  "TX - Austin":"South Central",
+  "TX - Dallas Ft Worth":"South Central",
+  "TX - Houston":"South Central"
+  ,"TX - San Antonio":"South Central",
+  "UT - Salt Lake City":"Western",
+  "VA - Richmond":"Northeast",
+  "WA - Seattle":"Mountain West",
+  "WA - Spokane":"Mountain West",
+  "WI - Milwaukee":"Ohio Valley",
+  "Corporate":"Corporate",
+  "N/A":"N/A"
 };
 
 let state = {
@@ -846,7 +887,9 @@ async function retryOfflineCapture(lead) {
         firstName: parsed.firstName || '', lastName: parsed.lastName || '',
         role: parsed.role || '', branch: matchedBranch,
         region: aeInfo.region, assignedAE: aeInfo.assignedAE,
-        aeEmail: aeInfo.aeEmail, email: aeInfo.email, status: 'pending'
+        aeEmail: aeInfo.aeEmail, email: aeInfo.email,
+        capturedBy: lead.capturedBy || '',
+        status: 'pending'
       };
       updateLeadStatus(lead.id, 'pending', extraData);
       const updatedLeads = getLeads();
@@ -1155,7 +1198,9 @@ async function analyzeImage() {
 
 function filterBranches(val) {
   const roster = getCachedRoster();
-  const branches = [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate'].sort();
+  const branches = roster.length > 0
+    ? [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate'].sort()
+    : BRANCH_LIST;
   const filtered = val.length === 0 ? branches : branches.filter(b => b.toLowerCase().includes(val.toLowerCase()));
   renderBranchDropdown(filtered);
 }
@@ -1191,7 +1236,9 @@ async function matchAE() {
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
   if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
   const roster = getCachedRoster();
-  const validBranches = [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate'];
+  const validBranches = roster.length > 0
+  ? [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate']
+  : BRANCH_LIST;
   if (branchName && !validBranches.includes(branchName)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the dropdown. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>'; return; }
   document.getElementById('step2Error').innerHTML = '';
