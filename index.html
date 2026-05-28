@@ -580,6 +580,8 @@ const REGION_MAP = {
   "N/A":"N/A"
 };
 
+const _retryingLeads = new Set();
+  
 let state = {
   imageBase64: null, imageMediaType: 'image/jpeg',
   matchedAE: null, matchedAEEmail: null, matchedAEPhone: null, matchedAEFirstName: null,
@@ -873,8 +875,8 @@ async function retrySingle(id) {
 }
 
 async function retryOfflineCapture(lead) {
-  // Guard against double-trigger
-  if (lead.status === 'pending') return;
+  if (_retryingLeads.has(lead.id)) return;
+  _retryingLeads.add(lead.id);
   updateLeadStatus(lead.id, 'pending');
   try {
     const response = await fetch('/api/analyze', {
@@ -930,6 +932,7 @@ async function retryOfflineCapture(lead) {
       if (updatedLead) { const ok = await syncLead(updatedLead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); }
     }
   } catch {}
+  finally { _retryingLeads.delete(lead.id); }
 }
 
 async function retryAll() {
