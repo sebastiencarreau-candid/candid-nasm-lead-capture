@@ -821,7 +821,7 @@ function renderPanel() {
   const statusLabel = { synced: '✓ Synced', pending: '● Pending', failed: '✕ Failed', offline_capture: '📶 Offline Capture' };
   const statusClass = { synced: 'status-synced', pending: 'status-pending', failed: 'status-failed', offline_capture: 'status-offline_capture' };
   list.innerHTML = leads.map(lead => {
-    const canRetry = lead.status === 'pending' || lead.status === 'failed' || lead.status === 'offline_capture';
+    const canRetry = lead.status === 'failed';
     const displayName = lead.firstName && lead.lastName ? `${lead.firstName} ${lead.lastName}` : '— Offline Capture —';
     return `
       <div class="lead-row" id="lead-row-${lead.id}">
