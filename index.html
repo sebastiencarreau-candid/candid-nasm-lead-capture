@@ -464,7 +464,6 @@
   <div class="panel-header">
   <div class="panel-title">Menu</div>
   <div style="display:flex;align-items:center;gap:12px;">
-    <button onclick="debugFillStorage()" style="background:none;border:none;font-size:11px;font-weight:600;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;">⚠ Fill Storage</button>
     <button onclick="checkForUpdate()" style="background:none;border:none;font-size:11px;font-weight:600;color:var(--gray);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;">↺ Check for update</button>
     <button class="panel-close" onclick="closePanel()">✕</button>
   </div>
@@ -1530,11 +1529,6 @@ function clearSyncedLeads() {
   } catch(err) {
     alert('Still unable to free enough space. Please contact Sebastien for assistance.');
   }
-}
-
-// ─── DEBUG ONLY — REMOVE BEFORE GO-LIVE ──────────────────────
-function debugFillStorage() {
-  document.getElementById('storageOverlay').classList.remove('hidden');
 }
   
 // Init
