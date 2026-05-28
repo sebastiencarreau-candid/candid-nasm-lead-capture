@@ -247,15 +247,23 @@
   </div>
 
   <!-- EDIT USER NAME OVERLAY -->
-<div class="user-overlay hidden" id="editUserOverlay">
-  <div style="font-size:48px;margin-bottom:20px;">👤</div>
-  <div class="user-overlay-title">Edit Your Name</div>
-  <div class="user-overlay-sub">Update your first name below.</div>
-  <input type="text" id="editUserNameInput" placeholder="Your first name" maxlength="30" autocomplete="given-name">
-  <div id="editUserNameError" style="color:#FCA5A5;font-size:13px;margin-bottom:12px;display:none;">Please enter your name to continue.</div>
-  <button class="btn-primary" onclick="saveEditUserName()">Save</button>
-  <button class="btn-ghost" style="margin-top:8px;color:rgba(255,255,255,0.6);" onclick="document.getElementById('editUserOverlay').classList.add('hidden')">Cancel</button>
-</div>
+  <div class="user-overlay hidden" id="editUserOverlay">
+    <div style="font-size:48px;margin-bottom:20px;">👤</div>
+    <div class="user-overlay-title">Edit Your Name</div>
+    <div class="user-overlay-sub">Update your first name below.</div>
+    <input type="text" id="editUserNameInput" placeholder="Your first name" maxlength="30" autocomplete="given-name">
+    <div id="editUserNameError" style="color:#FCA5A5;font-size:13px;margin-bottom:12px;display:none;">Please enter your name to continue.</div>
+    <button class="btn-primary" onclick="saveEditUserName()">Save</button>
+    <button class="btn-ghost" style="margin-top:8px;color:rgba(255,255,255,0.6);" onclick="document.getElementById('editUserOverlay').classList.add('hidden')">Cancel</button>
+  </div>
+
+  <!-- STORAGE FULL OVERLAY -->
+  <div class="user-overlay hidden" id="storageOverlay">
+    <div style="font-size:48px;margin-bottom:20px;">💾</div>
+    <div class="user-overlay-title">Storage Full</div>
+    <div class="user-overlay-sub">You've run out of storage. Please clear your synced leads to continue capturing.</div>
+    <button class="btn-primary" onclick="clearSyncedLeads()">Clear Synced Leads</button>
+  </div>
   
   <!-- USER BAR -->
   <div style="background:var(--gray-light);padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
@@ -456,6 +464,7 @@
   <div class="panel-header">
   <div class="panel-title">Menu</div>
   <div style="display:flex;align-items:center;gap:12px;">
+    <button onclick="debugFillStorage()" style="background:none;border:none;font-size:11px;font-weight:600;color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;">⚠ Fill Storage</button>
     <button onclick="checkForUpdate()" style="background:none;border:none;font-size:11px;font-weight:600;color:var(--gray);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;">↺ Check for update</button>
     <button class="panel-close" onclick="closePanel()">✕</button>
   </div>
@@ -739,7 +748,13 @@ function saveLeads(leads) {
       return rest;
     });
     localStorage.setItem(LEADS_KEY, JSON.stringify(leadsToSave));
-  } catch(err) { console.log('saveLeads error:', err.message); }
+  } catch(err) {
+    if (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+      document.getElementById('storageOverlay').classList.remove('hidden');
+    } else {
+      console.log('saveLeads error:', err.message);
+    }
+  }
 }
 function addLead(lead) { const leads = getLeads(); leads.unshift(lead); saveLeads(leads); updateMenuBadge(); }
 function updateLeadStatus(id, status, extraData) {
@@ -1489,6 +1504,47 @@ function guardUserName() {
     return false;
   }
   return true;
+}
+
+  // ─── STORAGE MANAGEMENT ──────────────────────────────────────
+function clearSyncedLeads() {
+  const leads = getLeads();
+  const synced = leads.filter(l => l.status === 'synced');
+  const remaining = leads.filter(l => l.status !== 'synced');
+  if (synced.length === 0) {
+    alert('No synced leads to clear. Your storage is full but all leads are still pending sync — please retry syncing first.');
+    return;
+  }
+  if (!confirm(`This will remove ${synced.length} synced lead${synced.length > 1 ? 's' : ''} to free up space. Leads still pending sync will not be affected.`)) return;
+  try {
+    const leadsToSave = remaining.map(lead => {
+      if (lead.status === 'offline_capture') return lead;
+      const { imageBase64, imageMediaType, ...rest } = lead;
+      return rest;
+    });
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leadsToSave));
+    document.getElementById('storageOverlay').classList.add('hidden');
+    updateMenuBadge();
+    renderPanel();
+    alert(`✓ ${synced.length} synced lead${synced.length > 1 ? 's' : ''} cleared. You can continue capturing.`);
+  } catch(err) {
+    alert('Still unable to free enough space. Please contact Sebastien for assistance.');
+  }
+}
+
+// ─── DEBUG ONLY — REMOVE BEFORE GO-LIVE ──────────────────────
+function debugFillStorage() {
+  try {
+    const junk = 'x'.repeat(1024 * 1024); // 1MB chunks
+    let i = 0;
+    while (true) {
+      localStorage.setItem('debug_junk_' + i, junk);
+      i++;
+    }
+  } catch(err) {
+    // Storage now full — trigger a saveLeads to fire the quota error
+    saveLeads(getLeads());
+  }
 }
   
 // Init
