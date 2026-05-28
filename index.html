@@ -828,8 +828,10 @@ async function retryOfflineCapture(lead) {
     const parsed = await response.json();
     if (!parsed.error) {
       const branchVal = parsed.branchName || '';
-      const matchedBranch = BRANCH_LIST.find(b => b.toLowerCase() === branchVal.toLowerCase())
-        || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
+      const roster = getCachedRoster();
+      const branches = [...new Set(roster.map(tr => tr.branch).filter(Boolean))];
+      const matchedBranch = branches.find(b => b.toLowerCase() === branchVal.toLowerCase())
+        || branches.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
         || 'N/A';
       let aeInfo = { assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL, region: '', email: lead.email };
       // Try cache first, then API
@@ -1101,8 +1103,10 @@ async function analyzeImage() {
     document.getElementById('lastName').value = toProperCase(lastName);
     document.getElementById('trRole').value = parsed.role || '';
     const branchVal = parsed.branchName || '';
-    const matchedBranch = BRANCH_LIST.find(b => b.toLowerCase() === branchVal.toLowerCase())
-      || BRANCH_LIST.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
+    const roster = getCachedRoster();
+    const branches = [...new Set(roster.map(tr => tr.branch).filter(Boolean))];
+    const matchedBranch = branches.find(b => b.toLowerCase() === branchVal.toLowerCase())
+      || branches.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
       || 'N/A';
     document.getElementById('branchName').value = matchedBranch;
 
@@ -1150,7 +1154,9 @@ async function analyzeImage() {
 }
 
 function filterBranches(val) {
-  const filtered = val.length === 0 ? BRANCH_LIST : BRANCH_LIST.filter(b => b.toLowerCase().includes(val.toLowerCase()));
+  const roster = getCachedRoster();
+  const branches = [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate'].sort();
+  const filtered = val.length === 0 ? branches : branches.filter(b => b.toLowerCase().includes(val.toLowerCase()));
   renderBranchDropdown(filtered);
 }
 function renderBranchDropdown(list) {
@@ -1184,7 +1190,9 @@ async function matchAE() {
   if (!firstName || !lastName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least a first and last name.</div>'; return; }
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
   if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
-  if (!BRANCH_LIST.includes(branchName)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the dropdown. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
+  const roster = getCachedRoster();
+  const validBranches = [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate'];
+  if (branchName && !validBranches.includes(branchName)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the dropdown. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>'; return; }
   document.getElementById('step2Error').innerHTML = '';
 
