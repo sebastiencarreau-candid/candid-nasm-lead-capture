@@ -1,4 +1,4 @@
-const CACHE_NAME = 'candidpro-nasm-v21';
+const CACHE_NAME = 'candidpro-nasm-v22';
 const ASSETS = ['/', '/index.html'];
 
 self.addEventListener('install', event => {
