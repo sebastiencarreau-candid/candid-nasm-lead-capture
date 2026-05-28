@@ -1534,17 +1534,7 @@ function clearSyncedLeads() {
 
 // ─── DEBUG ONLY — REMOVE BEFORE GO-LIVE ──────────────────────
 function debugFillStorage() {
-  try {
-    const junk = 'x'.repeat(1024 * 1024); // 1MB chunks
-    let i = 0;
-    while (true) {
-      localStorage.setItem('debug_junk_' + i, junk);
-      i++;
-    }
-  } catch(err) {
-    // Storage now full — trigger a saveLeads to fire the quota error
-    saveLeads(getLeads());
-  }
+  document.getElementById('storageOverlay').classList.remove('hidden');
 }
   
 // Init
