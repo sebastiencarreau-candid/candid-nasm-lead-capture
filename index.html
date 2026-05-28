@@ -1447,16 +1447,23 @@ initUserName();
   }
 
   function checkForUpdate() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(reg => {
-        reg.update().then(() => {
-          if (!reg.waiting) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.update().then(() => {
+        // Give the browser a moment to detect the new worker
+       setTimeout(() => {
+          if (reg.waiting) {
+            if (confirm('Update available! Tap OK to refresh and apply the update.')) {
+              applyUpdate();
+            }
+          } else {
             alert('You\'re on the latest version!');
           }
-        });
+        }, 1000);
       });
-    }
+    });
   }
+}
 </script>
 </body>
 </html>
