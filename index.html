@@ -271,6 +271,7 @@
   <!-- USER BAR -->
   <div style="background:var(--gray-light);padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
     <div class="user-chip" id="userChip" onclick="editUserName()">User: <span id="userChipName"></span></div>
+    <div id="appVersion" style="font-size:10px;color:var(--border);font-family:'DM Sans',sans-serif;"></div>
   </div>
   
   <div class="header">
@@ -457,7 +458,6 @@
     </div>
   </div>
 
-  <div id="appVersion" style="text-align:right;padding:8px 16px;font-size:10px;color:var(--border);font-family:'DM Sans',sans-serif;"></div>
 </div>
 
 <!-- PANEL -->
@@ -500,7 +500,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v22';
+const APP_VERSION = 'v23';
 const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 const LEADS_KEY = 'nasm_leads';
 const ROSTER_KEY = 'nasm_roster';
