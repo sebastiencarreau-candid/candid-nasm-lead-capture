@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#E8281E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CandidPro">
+<link rel="apple-touch-icon" href="/TR_capture_NASM_app-icon.png">
 <title>NASM - CandidPro Intake</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
@@ -20,18 +26,87 @@
     --success-bg: #ECFDF5;
     --warning-bg: #FFFBEB;
     --warning: #92400E;
+    --pending: #D97706;
+    --pending-bg: #FEF3C7;
+    --failed: #DC2626;
+    --failed-bg: #FEE2E2;
+    --offline: #7C3AED;
+    --offline-bg: #EDE9FE;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: var(--gray-light); min-height: 100vh; }
-  .app { max-width: 460px; margin: 0 auto; min-height: 100vh; background: var(--white); box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+  .app { max-width: 460px; margin: 0 auto; min-height: 100vh; background: var(--white); box-shadow: 0 0 40px rgba(0,0,0,0.08); position: relative; }
 
-  .header { background: var(--gray-light); padding: 20px 24px 16px; border-bottom: 1px solid var(--border); text-align: center; }
+  .header { background: var(--gray-light); padding: 20px 24px 16px; border-bottom: 1px solid var(--border); text-align: center; position: relative; }
   .logo-row { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 14px; }
-  .logo-candid { height: 18px; object-fit: contain; }
+  .logo-candid { height: 20px; object-fit: contain; }
   .logo-divider { width: 1px; height: 28px; background: var(--border); }
-  .logo-patterson { height: 38px; object-fit: contain; }
+  .logo-patterson { height: 60px; object-fit: contain; }
   .header-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--navy); line-height: 1.2; margin-bottom: 4px; }
   .header-sub { font-size: 12px; color: var(--gray); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; }
+
+  .menu-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-direction: column; gap: 5px; z-index: 10; }
+  .menu-btn span { display: block; width: 22px; height: 2px; background: var(--navy); border-radius: 2px; }
+  .menu-badge { position: absolute; top: -4px; right: -4px; background: var(--red); color: white; font-size: 10px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; line-height: 1; }
+
+  .panel-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .panel-overlay.open { opacity: 1; pointer-events: all; }
+  .panel { position: fixed; top: 0; right: -100%; width: min(360px, 100vw); height: 100vh; background: var(--white); z-index: 101; transition: right 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+  .panel.open { right: 0; }
+  .panel-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .panel-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--navy); }
+  .panel-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--gray); padding: 4px; }
+  .panel-close:hover { color: var(--navy); }
+
+  /* PANEL TABS */
+  .panel-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .panel-tab { flex: 1; padding: 12px; font-size: 12px; font-weight: 600; text-align: center; cursor: pointer; color: var(--gray); border-bottom: 2px solid transparent; transition: all 0.15s; letter-spacing: 0.04em; text-transform: uppercase; background: none; border-top: none; border-left: none; border-right: none; font-family: 'DM Sans', sans-serif; }
+  .panel-tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .panel-tab-content { display: none; flex: 1; overflow-y: auto; flex-direction: column; }
+  .panel-tab-content.active { display: flex; }
+
+  .panel-actions { padding: 12px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .btn-retry-all { width: 100%; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer; border: 1.5px solid var(--red); background: var(--red-light); color: var(--red); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .btn-retry-all:hover { background: var(--red); color: white; }
+  .panel-list { flex: 1; overflow-y: auto; padding: 12px 0; }
+  .panel-empty { padding: 40px 20px; text-align: center; color: var(--gray); font-size: 14px; }
+
+  /* ROSTER SEARCH */
+  .roster-search-wrap { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .roster-search-input { width: 100%; padding: 10px 14px; font-size: 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--gray-light); color: var(--navy); font-family: 'DM Sans', sans-serif; }
+  .roster-search-input:focus { outline: none; border-color: var(--red); background: var(--white); }
+  .roster-list { flex: 1; overflow-y: auto; }
+  .roster-row { padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .roster-row:hover { background: var(--red-light); }
+  .roster-row:active { background: var(--red-light); }
+  .roster-tr-name { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
+  .roster-branch { font-size: 11px; color: var(--gray); margin-bottom: 4px; }
+  .roster-ae { font-size: 12px; color: var(--success); font-weight: 600; }
+  .roster-ae-phone { font-size: 11px; color: var(--gray); margin-top: 1px; }
+  .roster-empty { padding: 40px 20px; text-align: center; color: var(--gray); font-size: 14px; }
+  .roster-offline-note { padding: 8px 16px; font-size: 11px; color: var(--offline); background: var(--offline-bg); text-align: center; border-bottom: 1px solid var(--border); flex-shrink: 0; display: none; }
+  .roster-offline-note.visible { display: block; }
+
+  .lead-row { border-bottom: 1px solid var(--border); }
+  .lead-row-header { padding: 12px 20px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
+  .lead-row-header:hover { background: var(--gray-light); }
+  .lead-chevron { font-size: 11px; color: var(--gray); transition: transform 0.2s; flex-shrink: 0; }
+  .lead-row.expanded .lead-chevron { transform: rotate(90deg); }
+  .lead-name { font-size: 14px; font-weight: 600; color: var(--navy); flex: 1; }
+  .status-badge { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+  .status-synced { background: var(--success-bg); color: var(--success); }
+  .status-pending { background: var(--pending-bg); color: var(--pending); }
+  .status-failed { background: var(--failed-bg); color: var(--failed); }
+  .status-offline_capture { background: var(--offline-bg); color: var(--offline); }
+  .lead-row-details { display: none; padding: 0 20px 14px; background: var(--gray-light); border-top: 1px solid var(--border); }
+  .lead-row.expanded .lead-row-details { display: block; }
+  .lead-detail-row { font-size: 12px; color: var(--gray); padding: 4px 0; display: flex; gap: 6px; }
+  .lead-detail-label { font-weight: 600; color: var(--navy); min-width: 80px; }
+  .btn-retry-single { margin-top: 10px; width: 100%; padding: 9px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; border: 1.5px solid var(--red); background: white; color: var(--red); font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .btn-retry-single:hover { background: var(--red); color: white; }
+  .btn-retry-single:disabled { opacity: 0.7; cursor: not-allowed; }
+  .btn-retry-single .spinner { border-color: rgba(232,40,30,0.3); border-top-color: var(--red); }
+  .btn-retry-single:hover .spinner { border-color: rgba(255,255,255,0.3); border-top-color: white; }
 
   .progress-wrap { padding: 16px 24px 0; background: var(--white); }
   .progress-labels { display: flex; margin-bottom: 8px; }
@@ -59,6 +134,10 @@
   .upload-zone p { font-size: 13px; color: var(--gray); }
   .preview-img { width: 100%; border-radius: 12px; margin-bottom: 16px; max-height: 260px; object-fit: contain; border: 1px solid var(--border); background: var(--gray-light); }
 
+  .offline-card { background: var(--offline-bg); border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; border-left: 3px solid var(--offline); }
+  .offline-card-title { font-size: 13px; font-weight: 600; color: var(--offline); margin-bottom: 4px; }
+  .offline-card-sub { font-size: 12px; color: var(--gray); line-height: 1.5; }
+
   .card { background: var(--gray-light); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
   .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); margin-bottom: 14px; }
 
@@ -68,8 +147,19 @@
   .field-group input { width: 100%; padding: 11px 14px; font-size: 15px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; transition: border-color 0.2s; }
   .field-group input:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,40,30,0.08); }
   .field-group input.ai-filled { background: var(--red-light); border-color: rgba(232,40,30,0.3); }
+  .field-group input.sheet-filled { background: #F0FDF4; border-color: #86EFAC; }
   .field-group input::placeholder { color: #C4C9D4; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .search-wrap { position: relative; }
+  .search-dropdown { display: none; position: absolute; z-index: 100; background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; max-height: 240px; overflow-y: auto; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-top: 4px; }
+  .search-option { padding: 10px 14px; font-size: 14px; cursor: pointer; color: var(--navy); border-bottom: 1px solid var(--border); }
+  .search-option:last-child { border-bottom: none; }
+  .search-option:hover { background: var(--red-light); color: var(--red); }
+  .search-option .opt-name { font-weight: 600; font-size: 14px; }
+  .search-option .opt-branch { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .search-option .opt-notfound { font-size: 13px; color: var(--gray); font-style: italic; }
+  .sheet-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--success); background: var(--success-bg); padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; font-weight: 600; border: 1px solid rgba(10,124,78,0.2); }
 
   .branch-wrap { position: relative; }
   .branch-dropdown { display: none; position: absolute; z-index: 100; background: var(--white); border: 1.5px solid var(--border); border-radius: 10px; max-height: 200px; overflow-y: auto; width: 100%; box-shadow: 0 4px 16px rgba(0,0,0,0.1); margin-top: 4px; }
@@ -92,8 +182,6 @@
   .ae-match-card { background: var(--navy); border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
   .ae-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
   .ae-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--white); margin-bottom: 4px; }
-  .ae-branch { font-size: 12px; color: rgba(255,255,255,0.6); }
-  .ae-unmatched { font-size: 12px; color: #FCA5A5; margin-top: 4px; }
 
   .tr-card { background: var(--gray-light); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; border-left: 3px solid var(--red); }
   .tr-name { font-size: 18px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
@@ -103,35 +191,89 @@
   .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
   .tag-navy { background: var(--navy-light); color: var(--navy); }
   .tag-green { background: var(--success-bg); color: var(--success); font-weight: 600; }
+  .tag-offline { background: var(--offline-bg); color: var(--offline); font-weight: 600; }
 
-  .notif-option { border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; background: var(--white); display: flex; align-items: center; gap: 14px; }
-  .notif-option:hover { border-color: var(--navy); }
-  .notif-option.selected { border-color: var(--red); background: var(--red-light); }
-  .notif-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--gray-light); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .notif-option.selected .notif-icon { background: rgba(232,40,30,0.12); }
-  .notif-text h4 { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
-  .notif-text p { font-size: 12px; color: var(--gray); }
-  .notif-check { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .notif-option.selected .notif-check { background: var(--red); border-color: var(--red); }
-  .notif-option.selected .notif-check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
-
-  .preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; margin-top: 16px; }
-  .message-box { background: var(--gray-light); border-radius: 12px; padding: 14px; font-size: 12px; line-height: 1.7; color: var(--navy); white-space: pre-wrap; border: 1px solid var(--border); margin-bottom: 16px; max-height: 180px; overflow-y: auto; }
+  .template-card { background: var(--gray-light); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .template-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .template-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray); }
+  .subject-input { width: 100%; padding: 9px 12px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; margin-bottom: 8px; }
+  .subject-input:focus { outline: none; border-color: var(--red); }
+  .template-body { width: 100%; padding: 11px 14px; font-size: 13px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-family: 'DM Sans', sans-serif; line-height: 1.6; resize: vertical; min-height: 140px; }
+  .template-body:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,40,30,0.08); }
+  .template-note { font-size: 11px; color: var(--gray); margin-top: 6px; font-style: italic; }
 
   .error-msg { color: #991B1B; font-size: 13px; padding: 10px 14px; background: #FEE2E2; border-radius: 10px; margin-bottom: 12px; border-left: 3px solid var(--red); }
   .status-success { font-size: 13px; color: var(--success); background: var(--success-bg); border-radius: 10px; padding: 12px 16px; border-left: 3px solid var(--success); }
   .status-warn { font-size: 13px; color: var(--warning); background: var(--warning-bg); border-radius: 10px; padding: 12px 16px; }
+  .status-queued { font-size: 13px; color: var(--pending); background: var(--pending-bg); border-radius: 10px; padding: 12px 16px; border-left: 3px solid var(--pending); }
+  .status-offline-capture { font-size: 13px; color: var(--offline); background: var(--offline-bg); border-radius: 10px; padding: 12px 16px; border-left: 3px solid var(--offline); }
   .divider { height: 1px; background: var(--border); margin: 16px 0; }
 
+  .user-overlay { position: fixed; inset: 0; background: rgba(26,43,74,0.97); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; }
+  .user-overlay.hidden { display: none; }
+  .user-overlay-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: white; margin-bottom: 8px; text-align: center; }
+  .user-overlay-sub { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 32px; text-align: center; line-height: 1.6; }
+  .user-overlay input { width: 100%; padding: 14px 16px; font-size: 17px; border: none; border-radius: 12px; background: white; color: var(--navy); font-family: 'DM Sans', sans-serif; margin-bottom: 14px; }
+  .user-overlay input:focus { outline: 3px solid var(--red); }
+  .user-chip { font-size: 11px; font-weight: 600; color: var(--gray); cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; font-family: 'DM Sans', sans-serif; }
+  .user-chip:hover { color: var(--red); }
+  
   .success-wrap { text-align: center; padding: 20px 0 32px; }
   .success-ring { width: 72px; height: 72px; border-radius: 50%; background: var(--success-bg); border: 2px solid var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 28px; }
   .success-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 8px; }
   .success-sub { font-size: 14px; color: var(--gray); margin-bottom: 28px; line-height: 1.6; }
+
+  .offline-banner { background: var(--pending-bg); border-bottom: 1px solid #FDE68A; padding: 8px 20px; font-size: 12px; color: var(--pending); font-weight: 600; text-align: center; display: none; }
+  .offline-banner.visible { display: block; }
+
+  .sms-btn { width: 100%; padding: 15px; font-size: 15px; font-weight: 600; border-radius: 12px; cursor: pointer; border: none; background: #22C55E; color: white; font-family: 'DM Sans', sans-serif; transition: background 0.2s, transform 0.1s; margin-top: 10px; }
+  .sms-btn:hover { background: #16A34A; }
+  .sms-btn:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
 <div class="app">
 
+  <div class="offline-banner" id="offlineBanner">⚠ No internet connection — leads will be saved and synced when reconnected</div>
+  <div id="updateBanner" style="display:none;background:#1A2B4A;border-bottom:1px solid #2D4A7A;padding:8px 20px;font-size:12px;color:white;font-weight:600;text-align:center;cursor:pointer;" onclick="applyUpdate()">
+  ✦ Update available — tap to refresh
+  </div>
+
+  <!-- USER NAME OVERLAY -->
+  <div class="user-overlay" id="userOverlay">
+    <div style="font-size:48px;margin-bottom:20px;">👤</div>
+    <div class="user-overlay-title">Welcome to the CandidPro Badge Scanning App for NASM</div>
+    <div class="user-overlay-sub">Please enter your first name before capturing leads.</div>
+    <input type="text" id="userNameInput" placeholder="Your first name" maxlength="30" autocomplete="given-name">
+    <div id="userNameError" style="color:#FCA5A5;font-size:13px;margin-bottom:12px;display:none;">Please enter your name to continue.</div>
+    <button class="btn-primary" onclick="saveUserName()">Get started →</button>
+  </div>
+
+  <!-- EDIT USER NAME OVERLAY -->
+  <div class="user-overlay hidden" id="editUserOverlay">
+    <div style="font-size:48px;margin-bottom:20px;">👤</div>
+    <div class="user-overlay-title">Edit Your Name</div>
+    <div class="user-overlay-sub">Update your first name below.</div>
+    <input type="text" id="editUserNameInput" placeholder="Your first name" maxlength="30" autocomplete="given-name">
+    <div id="editUserNameError" style="color:#FCA5A5;font-size:13px;margin-bottom:12px;display:none;">Please enter your name to continue.</div>
+    <button class="btn-primary" onclick="saveEditUserName()">Save</button>
+    <button class="btn-ghost" style="margin-top:8px;color:rgba(255,255,255,0.6);" onclick="document.getElementById('editUserOverlay').classList.add('hidden')">Cancel</button>
+  </div>
+
+  <!-- STORAGE FULL OVERLAY -->
+  <div class="user-overlay hidden" id="storageOverlay">
+    <div style="font-size:48px;margin-bottom:20px;">💾</div>
+    <div class="user-overlay-title">Storage Full</div>
+    <div class="user-overlay-sub">You've run out of storage. Please clear your synced leads to continue capturing.</div>
+    <button class="btn-primary" onclick="clearSyncedLeads()">Clear Synced Leads</button>
+  </div>
+  
+  <!-- USER BAR -->
+  <div style="background:var(--gray-light);padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <div class="user-chip" id="userChip" onclick="editUserName()">User: <span id="userChipName"></span></div>
+    <div id="appVersion" style="font-size:10px;color:var(--border);font-family:'DM Sans',sans-serif;"></div>
+  </div>
+  
   <div class="header">
     <div class="logo-row">
       <img class="logo-candid" src="https://cdn.prod.website-files.com/601a0e7f102ff5b24874c42b/63d9b5ce58edcf6bdd0be3ce_CandidProLogo-red%20(1).png" alt="CandidPro" onerror="this.style.display='none';document.getElementById('logo-text').style.display='block'">
@@ -142,6 +284,10 @@
     </div>
     <div class="header-title">CandidPro at NASM</div>
     <div class="header-sub">Interested TR Intake Form · 2026</div>
+    <button class="menu-btn" id="menuBtn" onclick="openPanel()" aria-label="Lead log">
+      <span></span><span></span><span></span>
+      <div class="menu-badge" id="menuBadge" style="display:none;">0</div>
+    </button>
   </div>
 
   <div class="progress-wrap">
@@ -175,7 +321,7 @@
     <input type="file" id="badgeInput" accept="image/*" onchange="handleImage(event)" style="display:none;">
     <img id="previewImg" class="preview-img" style="display:none;">
     <div id="step1Error"></div>
-    <button class="btn-primary" id="analyzeBtn" style="display:none;margin-top:16px;" onclick="analyzeImage()">Extract badge Info</button>
+    <button class="btn-primary" id="analyzeBtn" style="display:none;margin-top:16px;" onclick="handleAnalyzeClick()">Extract badge Info</button>
     <button class="btn-ghost" id="skipBtn" style="display:none;margin-top:4px;" onclick="skipToManual()">Enter info manually instead</button>
     <div style="display:flex;align-items:center;gap:10px;margin-top:16px;">
       <div style="flex:1;height:1px;background:var(--border);"></div>
@@ -185,13 +331,62 @@
     <button class="btn-ghost" style="margin-top:8px;" onclick="skipToManual()">Enter info manually instead</button>
   </div>
 
+  <!-- STEP 1B: OFFLINE -->
+  <div class="step" id="step1b">
+    <div class="step-eyebrow">Offline Mode</div>
+    <div class="step-title">Collect contact info</div>
+    <div class="offline-card">
+      <div class="offline-card-title">📶 You're offline</div>
+      <div class="offline-card-sub">Badge photo saved. Please collect the TR's contact info — their details will be extracted and synced automatically when you're back online.</div>
+    </div>
+    <img id="previewImgOffline" class="preview-img" style="display:none;">
+    <div class="card">
+    <div class="card-title">Search roster to pull email</div>
+    <div class="field-group">
+      <label>Search TR name</label>
+      <div class="search-wrap">
+        <input type="text" id="offlineRosterSearch" placeholder="Type name to search roster..." autocomplete="off"
+          oninput="handleOfflineRosterSearch(this.value)"
+          onblur="setTimeout(hideOfflineSearchDropdown, 150)">
+        <div class="search-dropdown" id="offlineSearchDropdown"></div>
+      </div>
+    </div>
+    </div>
+    <div class="card">
+      <div class="card-title">TR contact info — at least one required</div>
+      <div class="field-group">
+        <label>Email address</label>
+        <input type="email" id="offlineEmail" placeholder="name@pattersondental.com">
+      </div>
+      <div class="field-group">
+        <label>Mobile phone</label>
+        <input type="tel" id="offlinePhone" placeholder="+1 (555) 000-0000" oninput="formatPhone(this)" maxlength="17">
+      </div>
+    </div>
+      <div id="step1bError"></div>
+      <button class="btn-primary" onclick="submitOfflineCapture()">Save for later</button>
+      <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(1); resetStep1()">← Retake photo</button>
+  </div>
+
   <!-- STEP 2 -->
   <div class="step" id="step2">
     <div class="step-eyebrow">Step 2 of 3</div>
     <div class="step-title">Review & add contact info</div>
-    <div class="ai-pill" id="aiBadge">✦ AI extracted — please confirm</div>
+    <div class="ai-pill" id="aiBadge" style="display:none;">✦ AI extracted — please confirm</div>
+    <div class="sheet-pill" id="sheetBadge" style="display:none;">✓ Matched from TR list — please confirm</div>
     <div class="card">
-      <div class="card-title">Badge information</div>
+      <div class="card-title">Search TR roster or enter manually</div>
+      <div class="field-group">
+        <label>Search TR name</label>
+        <div class="search-wrap">
+          <input type="text" id="trSearch" placeholder="Type name to search roster..." autocomplete="off"
+            oninput="handleTRSearch(this.value)"
+            onblur="setTimeout(hideSearchDropdown, 150)">
+          <div class="search-dropdown" id="searchDropdown"></div>
+        </div>
+      </div>
+      <div class="divider" style="margin:8px 0 12px;"></div>
+      <div class="card-title" style="margin-bottom:10px;">Badge information — editable</div>
       <div class="two-col">
         <div class="field-group"><label>First name</label><input type="text" id="firstName"></div>
         <div class="field-group"><label>Last name</label><input type="text" id="lastName"></div>
@@ -203,8 +398,8 @@
           <div class="branch-wrap">
             <input type="text" id="branchName" placeholder="Type to search..." autocomplete="off"
               oninput="filterBranches(this.value)"
-              onfocus="showDropdown()"
-              onblur="setTimeout(hideDropdown, 150)">
+              onfocus="showBranchDropdown()"
+              onblur="setTimeout(hideBranchDropdown, 150)">
             <div class="branch-dropdown" id="branchDropdown"></div>
           </div>
         </div>
@@ -212,7 +407,7 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-title">Contact info — collected in conversation</div>
+      <div class="card-title">Contact info</div>
       <div class="field-group"><label>Email address</label><input type="email" id="trEmail" placeholder="name@pattersondental.com"></div>
       <div class="field-group"><label>Mobile phone</label><input type="tel" id="trPhone" placeholder="+1 (555) 000-0000" oninput="formatPhone(this)" maxlength="17"></div>
     </div>
@@ -228,20 +423,23 @@
     <div id="trSummaryBlock"></div>
     <div id="matchBlock"></div>
     <div class="divider"></div>
-    <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray);margin-bottom:10px;">Notify via</div>
-    <div id="notifEmail" class="notif-option selected" onclick="toggleNotif('email')">
-      <div class="notif-icon">✉️</div>
-      <div class="notif-text"><h4>Email</h4><p>Intro email draft for AE → TR</p></div>
-      <div class="notif-check"></div>
+    <div class="template-card">
+      <div class="template-header">
+        <div class="template-title">✉ Intro email — sent automatically</div>
+      </div>
+      <input type="text" class="subject-input" id="emailSubject" placeholder="Email subject">
+      <textarea class="template-body" id="emailBody"></textarea>
+      <div class="template-note">This email will be sent automatically via Zapier when you submit.</div>
     </div>
-    <div id="notifSMS" class="notif-option" onclick="toggleNotif('sms')">
-      <div class="notif-icon">💬</div>
-      <div class="notif-text"><h4>Text message</h4><p>SMS to AE with TR details</p></div>
-      <div class="notif-check"></div>
+    <div class="template-card" id="smsTemplateCard" style="display:none;">
+      <div class="template-header">
+        <div class="template-title">💬 Group text — you'll send this</div>
+      </div>
+      <textarea class="template-body" id="smsBody" style="min-height:100px;"></textarea>
+      <div class="template-note">Tap "Open Group Text" after submitting to send from your phone.</div>
     </div>
-    <div id="messagePreviewBlock"></div>
     <div id="step3Error"></div>
-    <button class="btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & log to Sheets</button>
+    <button class="btn-primary" id="submitBtn" onclick="submitLead()">Submit lead & send email</button>
     <button class="btn-ghost" style="margin-top:6px;" onclick="goStep(2)">← Edit info</button>
   </div>
 
@@ -249,77 +447,67 @@
   <div class="step" id="step4">
     <div class="success-wrap">
       <div class="success-ring">✓</div>
-      <div class="success-title">Lead captured!</div>
+      <div class="success-title" id="successTitle">Lead captured!</div>
       <p class="success-sub" id="successMsg"></p>
       <div id="leadSummaryCard" style="margin-bottom:14px;text-align:left;"></div>
-      <div id="sheetStatus" style="margin-bottom:24px;text-align:left;"></div>
-      <button class="btn-primary" onclick="resetApp()">Capture another lead</button>
+      <div id="sheetStatus" style="margin-bottom:16px;text-align:left;"></div>
+      <button class="sms-btn" id="openTextBtn" style="display:none;" onclick="openGroupText()">💬 Open Group Text</button>
+      <div style="margin-top:16px;">
+        <button class="btn-primary" onclick="resetApp()">Capture another lead</button>
+      </div>
     </div>
   </div>
 
 </div>
-<script>
-const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 
-const AE_MAP = [
-  {city:"Louisville",branch:"KY - Louisville",ae:"Adam Young",region:"Ohio Valley"},
-  {city:"Cleveland",branch:"OH - Cleveland",ae:"Adam Young",region:"Ohio Valley"},
-  {city:"Columbus",branch:"OH - Mid-South Ohio",ae:"Adam Young",region:"Ohio Valley"},
-  {city:"East Bay",branch:"CA - East Bay",ae:"Alex Cagle-Sanchez",region:"Western"},
-  {city:"Sacramento",branch:"CA - Sacramento",ae:"Alex Cagle-Sanchez",region:"Western"},
-  {city:"South Florida",branch:"FL - Fort Lauderdale",ae:"Anthony Sena",region:"Southeast"},
-  {city:"Atlanta",branch:"GA - Atlanta",ae:"Ashley Klanac",region:"Southeast"},
-  {city:"Nashville",branch:"TN - Nashville",ae:"Ashley Klanac",region:"Southeast"},
-  {city:"Denver",branch:"CO - Denver",ae:"Bailey Binnebose",region:"Mountain West"},
-  {city:"Albuquerque",branch:"NM - Albuquerque",ae:"Bailey Binnebose",region:"South Central"},
-  {city:"Salt Lake City",branch:"UT - Salt Lake City",ae:"Bobbie Holmes",region:"Western"},
-  {city:"Raleigh",branch:"NC - Raleigh",ae:"Caity Rutty",region:"Southeast"},
-  {city:"New England",branch:"MA - New England",ae:"Chris Rocci",region:"Northeast"},
-  {city:"Medford",branch:"OR - Medford",ae:"Christa Skinner",region:"Mountain West"},
-  {city:"Portland",branch:"OR - Portland",ae:"Christa Skinner",region:"Mountain West"},
-  {city:"Spokane",branch:"WA - Spokane",ae:"Josh Marks",region:"Mountain West"},
-  {city:"San Diego",branch:"CA - San Diego",ae:"Greg Haskins",region:"Western"},
-  {city:"Las Vegas",branch:"NV - Las Vegas",ae:"Greg Haskins",region:"Western"},
-  {city:"Indianapolis",branch:"IN - Indianapolis",ae:"Hunter Ackerman",region:"Ohio Valley"},
-  {city:"Greater Michigan",branch:"MI - Greater Michigan",ae:"Hunter Ackerman",region:"Ohio Valley"},
-  {city:"Baltimore",branch:"MD - Baltimore",ae:"Jess Parker",region:"Northeast"},
-  {city:"Richmond",branch:"VA - Richmond",ae:"Jess Parker",region:"Northeast"},
-  {city:"Austin",branch:"TX - Austin",ae:"Jill Straetker",region:"South Central"},
-  {city:"San Antonio",branch:"TX - San Antonio",ae:"Jill Straetker",region:"South Central"},
-  {city:"Philadelphia",branch:"PA - Philadelphia",ae:"Jim DiQuattro",region:"Northeast"},
-  {city:"Pittsburgh",branch:"PA - Pittsburgh",ae:"Jim DiQuattro",region:"Northeast"},
-  {city:"Birmingham",branch:"AL-Birmingham",ae:"Josh Marks",region:"South Central"},
-  {city:"Little Rock",branch:"AR - Little Rock",ae:"Josh Marks",region:"South Central"},
-  {city:"Hawaii",branch:"HI - Kapolei",ae:"Josh Marks",region:"Western"},
-  {city:"Des Moines",branch:"IA - Des Moines",ae:"Josh Marks",region:"Mountain West"},
-  {city:"New Orleans",branch:"LA - New Orleans",ae:"Josh Marks",region:"South Central"},
-  {city:"Shreveport",branch:"LA - Shreveport",ae:"Josh Marks",region:"South Central"},
-  {city:"Jackson",branch:"MS - Jackson",ae:"Josh Marks",region:"South Central"},
-  {city:"Omaha",branch:"NE - Omaha",ae:"Josh Marks",region:"Mountain West"},
-  {city:"Rochester",branch:"NY - Rochester",ae:"Josh Marks",region:"Northeast"},
-  {city:"Memphis",branch:"TN - Memphis",ae:"Josh Marks",region:"Southeast"},
-  {city:"Kansas City",branch:"KS - Kansas City",ae:"Kate Quaka",region:"South Central"},
-  {city:"St Louis",branch:"MO - St Louis",ae:"Kate Quaka",region:"Ohio Valley"},
-  {city:"Orlando",branch:"FL - Orlando",ae:"Kelley Richardson",region:"Southeast"},
-  {city:"Tampa",branch:"FL - Tampa",ae:"Kelley Richardson",region:"Southeast"},
-  {city:"Oklahoma City",branch:"OK - Oklahoma City",ae:"Kendra Curry",region:"South Central"},
-  {city:"Dallas",branch:"TX - Dallas Ft Worth",ae:"Kendra Curry",region:"South Central"},
-  {city:"Minnesota",branch:"MN - Eagan",ae:"Kyle Walker",region:"Mountain West"},
-  {city:"Fargo",branch:"ND - Fargo",ae:"Kyle Walker",region:"Mountain West"},
-  {city:"Seattle",branch:"WA - Seattle",ae:"Landon Moeller",region:"Mountain West"},
-  {city:"Los Angeles",branch:"CA - Los Angeles",ae:"Leah Maiman",region:"Western"},
-  {city:"Chicago",branch:"IL - Chicago",ae:"Linda Ehlers",region:"Ohio Valley"},
-  {city:"Milwaukee",branch:"WI - Milwaukee",ae:"Linda Ehlers",region:"Ohio Valley"},
-  {city:"Houston",branch:"TX - Houston",ae:"Sam Moore",region:"South Central"},
-  {city:"Charlotte",branch:"NC - Charlotte",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Charleston",branch:"SC - Charleston",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Columbia",branch:"SC - Columbia",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Greenville",branch:"SC - Greenville",ae:"Shara Hamrick",region:"Southeast"},
-  {city:"Mesa",branch:"AZ-Mesa",ae:"Ryan Serrano",region:"Western"},
-  {city:"Metro NY/NJ",branch:"NJ - Totowa",ae:"TBD",region:"Northeast"},
-  {city:"Corporate",branch:"Corporate",ae:"Sebastien Carreau",region:"Corporate"},
-  {city:"N/A",branch:"N/A",ae:"Sebastien Carreau",region:"N/A"},
-];
+<!-- PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="panel" id="leadPanel">
+  <div class="panel-header">
+  <div class="panel-title">Menu</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button onclick="checkForUpdate()" style="background:none;border:none;font-size:11px;font-weight:600;color:var(--gray);cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;">↺ Check for update</button>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+</div>
+
+  <!-- TABS -->
+  <div class="panel-tabs">
+  <button class="panel-tab active" id="tabRoster" onclick="switchTab('roster')">TR Roster</button>
+  <button class="panel-tab" id="tabLeadLog" onclick="switchTab('leadlog')">Lead Log</button>
+</div>
+
+  <!-- LEAD LOG TAB -->
+  <div class="panel-tab-content" id="tabContentLeadLog" style="flex-direction:column;">
+    <div class="panel-actions" id="panelActions" style="display:none;">
+      <button class="btn-retry-all" onclick="retryAll()">↺ Retry All Pending & Failed</button>
+    </div>
+    <div class="panel-list" id="panelList">
+      <div class="panel-empty">No leads captured yet.</div>
+    </div>
+  </div>
+
+  <!-- ROSTER TAB -->
+  <div class="panel-tab-content active" id="tabContentRoster" style="flex-direction:column;">
+    <div class="roster-offline-note" id="rosterOfflineNote">📶 Showing cached roster — may not reflect latest changes</div>
+    <div class="roster-search-wrap">
+      <input type="text" class="roster-search-input" id="rosterSearch" placeholder="Search by name or branch..." oninput="filterRoster(this.value)">
+    </div>
+    <div class="roster-list" id="rosterList">
+      <div class="roster-empty">Loading TR roster...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const APP_VERSION = 'v24';
+const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
+const LEADS_KEY = 'nasm_leads';
+const ROSTER_KEY = 'nasm_roster';
+const BRANCH_MAP_KEY = 'nasm_branch_map';
+const FALLBACK_AE = 'Sebastien Carreau';
+const FALLBACK_AE_EMAIL = 'sebastien.carreau@candidco.com';
+const SHEET_ID = '1OBliAy-otDBDF8Xnwa1nR2R1X6pnIoTSj9x9qL_L688';
 
 const BRANCH_LIST = [
   "AL-Birmingham","AR - Little Rock","AZ-Mesa","CA - East Bay","CA - Los Angeles",
@@ -336,15 +524,613 @@ const BRANCH_LIST = [
   "VA - Richmond","WA - Seattle","WA - Spokane","WI - Milwaukee","Corporate","N/A"
 ];
 
-let state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
+const REGION_MAP = {
+  "AL-Birmingham":"South Central",
+  "AR - Little Rock":"South Central",
+  "AZ-Mesa":"Western",
+  "CA - East Bay":"Western",
+  "CA - Los Angeles":"Western",
+  "CA - Sacramento":"Western",
+  "CA - San Diego":"Western",
+  "CO - Denver":"Mountain West",
+  "FL - Fort Lauderdale":"Southeast",
+  "FL - Orlando":"Southeast",
+  "FL - Tampa":"Southeast",
+  "GA - Atlanta":"Southeast",
+  "HI - Kapolei":"Western",
+  "IA - Des Moines":"Mountain West",
+  "IL - Chicago":"Ohio Valley",
+  "IN - Indianapolis":"Ohio Valley",
+  "KS - Kansas City":"South Central",
+  "KY - Louisville":"Ohio Valley",
+  "LA - New Orleans":"South Central",
+  "LA - Shreveport":"South Central",
+  "MA - New England":"Northeast",
+  "MD - Baltimore":"Northeast",
+  "MI - Greater Michigan":"Ohio Valley",
+  "MN - Eagan":"Mountain West",
+  "MN - Eagan Branch":"Mountain West",
+  "MO - St Louis":"Ohio Valley",
+  "MS - Jackson":"South Central",
+  "NC - Charlotte":"Southeast",
+  "NC - Raleigh":"Southeast",
+  "ND - Fargo":"Mountain West",
+  "NE - Omaha":"Mountain West",
+  "NJ - Totowa":"Northeast",
+  "NM - Albuquerque":"South Central",
+  "NV - Las Vegas":"Western",
+  "NY - Rochester":"Northeast",
+  "OH - Cleveland":"Ohio Valley",
+  "OH - Mid-South Ohio":"Ohio Valley",
+  "OK - Oklahoma City":"South Central",
+  "OR - Medford":"Mountain West",
+  "OR - Portland":"Mountain West",
+  "PA - Philadelphia":"Northeast",
+  "PA - Pittsburgh":"Northeast",
+  "SC - Charleston":"Southeast",
+  "SC - Columbia":"Southeast",
+  "SC - Greenville":"Southeast",
+  "TN - Memphis":"Southeast",
+  "TN - Nashville":"Southeast",
+  "TX - Austin":"South Central",
+  "TX - Dallas Ft Worth":"South Central",
+  "TX - Houston":"South Central"
+  ,"TX - San Antonio":"South Central",
+  "UT - Salt Lake City":"Western",
+  "VA - Richmond":"Northeast",
+  "WA - Seattle":"Mountain West",
+  "WA - Spokane":"Mountain West",
+  "WI - Milwaukee":"Ohio Valley",
+  "Corporate":"Corporate",
+  "N/A":"N/A"
+};
 
+const _retryingLeads = new Set();
+  
+let state = {
+  imageBase64: null, imageMediaType: 'image/jpeg',
+  matchedAE: null, matchedAEEmail: null, matchedAEPhone: null, matchedAEFirstName: null,
+  notifMode: 'email', currentLead: null, searchTimeout: null
+};
+
+// ─── CACHE ───────────────────────────────────────────────────
+function getCachedRoster() {
+  try { return JSON.parse(localStorage.getItem(ROSTER_KEY)) || []; }
+  catch { return []; }
+}
+function getCachedBranchMap() {
+  try { return JSON.parse(localStorage.getItem(BRANCH_MAP_KEY)) || []; }
+  catch { return []; }
+}
+
+async function refreshCaches() {
+  if (!navigator.onLine) return;
+  try {
+    // Fetch TR roster
+    const rosterRes = await fetch('/api/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fetchAll: true })
+    });
+    const rosterData = await rosterRes.json();
+    if (rosterData.roster && rosterData.roster.length > 0) {
+      localStorage.setItem(ROSTER_KEY, JSON.stringify(rosterData.roster));
+    }
+    // Fetch branch map
+    const branchRes = await fetch('/api/lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fetchBranchMap: true })
+    });
+    const branchData = await branchRes.json();
+    if (branchData.branchMap && branchData.branchMap.length > 0) {
+      localStorage.setItem(BRANCH_MAP_KEY, JSON.stringify(branchData.branchMap));
+    }
+    renderRoster('');
+  } catch(err) {
+    console.log('Cache refresh error:', err.message);
+  }
+}
+
+// ─── ROSTER SEARCH (from cache) ──────────────────────────────
+function searchRosterCache(query) {
+  const roster = getCachedRoster();
+  if (!query || query.length < 2) return [];
+  const q = query.toLowerCase().trim();
+  const matches = [];
+  for (const tr of roster) {
+    const name = (tr.name || '').toLowerCase();
+    const altName = (tr.altName || '').toLowerCase();
+    const branch = (tr.branch || '').toLowerCase();
+    if (name.includes(q) || altName.includes(q) || branch.includes(q)) {
+      matches.push(tr);
+    }
+    if (matches.length >= 8) break;
+  }
+  return matches;
+}
+
+function getBranchAEFromCache(branch) {
+  const branchMap = getCachedBranchMap();
+  const b = branch.toLowerCase().trim();
+  return branchMap.find(r => (r.branch || '').toLowerCase().trim() === b) || null;
+}
+
+// ─── PANEL TABS ───────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('tabLeadLog').classList.toggle('active', tab === 'leadlog');
+  document.getElementById('tabRoster').classList.toggle('active', tab === 'roster');
+  document.getElementById('tabContentLeadLog').classList.toggle('active', tab === 'leadlog');
+  document.getElementById('tabContentRoster').classList.toggle('active', tab === 'roster');
+  if (tab === 'roster') {
+    document.getElementById('rosterOfflineNote').classList.toggle('visible', !navigator.onLine);
+    renderRoster(document.getElementById('rosterSearch').value);
+  }
+}
+
+function renderRoster(query) {
+  const list = document.getElementById('rosterList');
+  const roster = getCachedRoster();
+  if (roster.length === 0) {
+    list.innerHTML = '<div class="roster-empty">No roster data available. Open the app while online to load the TR roster.</div>';
+    return;
+  }
+  let filtered = roster;
+  if (query && query.length >= 1) {
+    const q = query.toLowerCase().trim();
+    filtered = roster.filter(tr =>
+      (tr.name || '').toLowerCase().includes(q) ||
+      (tr.altName || '').toLowerCase().includes(q) ||
+      (tr.branch || '').toLowerCase().includes(q)
+    );
+  }
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="roster-empty">No TRs found for that search.</div>';
+    return;
+  }
+  list.innerHTML = filtered.map((tr, i) => `
+    <div class="roster-row" onclick="captureFromRoster(${i}, '${query}')">
+      <div class="roster-tr-name">${tr.name}${tr.altName ? ` <span style="color:var(--gray);font-size:11px;font-weight:400;">(${tr.altName})</span>` : ''}</div>
+      <div class="roster-branch">${tr.branch}${tr.region ? ' · ' + tr.region : ''}</div>
+      <div class="roster-ae">AE: ${tr.assignedAE || '—'}</div>
+      ${tr.aePhone ? `<div class="roster-ae-phone">📱 ${tr.aePhone}</div>` : ''}
+    </div>`).join('');
+  // Store filtered for click reference
+  window._rosterFiltered = filtered;
+}
+
+function filterRoster(val) {
+  renderRoster(val);
+}
+
+function captureFromRoster(idx, query) {
+  if (!guardUserName()) return;
+  const filtered = window._rosterFiltered || getCachedRoster();
+  const tr = filtered[idx];
+  if (!tr) return;
+  closePanel();
+
+  // Pre-fill Step 2 with TR data
+  const nameParts = (tr.name || '').trim().split(' ');
+  document.getElementById('firstName').value = toProperCase(nameParts[0] || '');
+  document.getElementById('lastName').value = toProperCase(nameParts.slice(1).join(' ') || '');
+  document.getElementById('trRole').value = 'Territory Representative';
+  document.getElementById('trEmail').value = tr.email || '';
+  document.getElementById('branchName').value = tr.branch || '';
+  document.getElementById('region').value = tr.region || '';
+  document.getElementById('trSearch').value = tr.name || '';
+  document.getElementById('trPhone').value = '';
+
+  state.matchedAE = tr.assignedAE || FALLBACK_AE;
+  state.matchedAEEmail = tr.aeEmail || FALLBACK_AE_EMAIL;
+  state.matchedAEPhone = tr.aePhone || null;
+  state.matchedAEFirstName = tr.aeFirstName || null;
+  state.imageBase64 = null;
+
+  ['firstName','lastName','trEmail','branchName','region'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
+  });
+
+  document.getElementById('aiBadge').style.display = 'none';
+  document.getElementById('sheetBadge').style.display = 'inline-flex';
+
+  // Skip to Step 2 directly
+  goStep(2);
+}
+
+// ─── STORAGE ─────────────────────────────────────────────────
+function getLeads() {
+  try { return JSON.parse(localStorage.getItem(LEADS_KEY)) || []; }
+  catch { return []; }
+}
+function saveLeads(leads) {
+  try {
+    const leadsToSave = leads.map(lead => {
+      if (lead.status === 'offline_capture') return lead;
+      const { imageBase64, imageMediaType, ...rest } = lead;
+      return rest;
+    });
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leadsToSave));
+  } catch(err) {
+    if (err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+      document.getElementById('storageOverlay').classList.remove('hidden');
+    } else {
+      console.log('saveLeads error:', err.message);
+    }
+  }
+}
+function addLead(lead) { const leads = getLeads(); leads.unshift(lead); saveLeads(leads); updateMenuBadge(); }
+function updateLeadStatus(id, status, extraData) {
+  const leads = getLeads();
+  const idx = leads.findIndex(l => l.id === id);
+  if (idx !== -1) { leads[idx].status = status; if (extraData) Object.assign(leads[idx], extraData); saveLeads(leads); }
+  updateMenuBadge(); renderPanel();
+}
+function updateMenuBadge() {
+  const leads = getLeads();
+  const pending = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture').length;
+  const badge = document.getElementById('menuBadge');
+  if (pending > 0) { badge.textContent = pending; badge.style.display = 'flex'; }
+  else { badge.style.display = 'none'; }
+}
+
+// ─── COMPRESSION ─────────────────────────────────────────────
+function compressForStorage(base64) {
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX = 800;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.6).split(',')[1]);
+      };
+      img.onerror = () => resolve(base64);
+      img.src = 'data:image/jpeg;base64,' + base64;
+    } catch { resolve(base64); }
+  });
+}
+
+// ─── PANEL ───────────────────────────────────────────────────
+function openPanel() {
+  renderPanel();
+  renderRoster(document.getElementById('rosterSearch').value);
+  document.getElementById('leadPanel').classList.add('open');
+  document.getElementById('panelOverlay').classList.add('open');
+}
+function closePanel() {
+  document.getElementById('leadPanel').classList.remove('open');
+  document.getElementById('panelOverlay').classList.remove('open');
+}
+
+function renderPanel() {
+  const expandedIds = new Set(
+    [...document.querySelectorAll('.lead-row.expanded')].map(el => el.id.replace('lead-row-', ''))
+    );
+  const leads = getLeads();
+  const list = document.getElementById('panelList');
+  const actions = document.getElementById('panelActions');
+  const pendingCount = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture').length;
+  actions.style.display = pendingCount > 1 ? 'block' : 'none';
+  if (leads.length === 0) { list.innerHTML = '<div class="panel-empty">No leads captured yet.</div>'; return; }
+  const statusLabel = { synced: '✓ Synced', pending: '● Pending', failed: '✕ Failed', offline_capture: '📶 Offline Capture' };
+  const statusClass = { synced: 'status-synced', pending: 'status-pending', failed: 'status-failed', offline_capture: 'status-offline_capture' };
+  list.innerHTML = leads.map(lead => {
+    const canRetry = lead.status === 'failed';
+    const displayName = lead.firstName && lead.lastName ? `${lead.firstName} ${lead.lastName}` : '— Offline Capture —';
+    return `
+      <div class="lead-row" id="lead-row-${lead.id}">
+        <div class="lead-row-header" onclick="toggleLeadRow('${lead.id}')">
+          <span class="lead-chevron">▶</span>
+          <span class="lead-name">${displayName}</span>
+          <span class="status-badge ${statusClass[lead.status] || 'status-pending'}">${statusLabel[lead.status] || lead.status}</span>
+        </div>
+        <div class="lead-row-details">
+          ${lead.status === 'offline_capture' ? '<div class="lead-detail-row" style="color:var(--offline);font-weight:600;margin-bottom:4px;">⏳ Awaiting AI analysis when back online</div>' : ''}
+          <div class="lead-detail-row"><span class="lead-detail-label">Role</span>${lead.role || '—'}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Branch</span>${lead.branch || '—'}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Region</span>${lead.region || '—'}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Email</span>${lead.email || '—'}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Phone</span>${lead.phone || '—'}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Assigned AE</span>${lead.assignedAE || '—'}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Captured</span>${lead.timestamp}</div>
+          <div class="lead-detail-row"><span class="lead-detail-label">Captured by</span>${lead.capturedBy || '—'}</div>
+          ${canRetry ? `<button class="btn-retry-single" id="retry-btn-${lead.id}" onclick="handleRetrySingle('${lead.id}')">↺ Retry Sync</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  expandedIds.forEach(id => {
+    const row = document.getElementById('lead-row-' + id);
+    if (row) row.classList.add('expanded');
+  });
+}
+
+function toggleLeadRow(id) { const row = document.getElementById('lead-row-' + id); if (row) row.classList.toggle('expanded'); }
+
+// ─── SYNC ────────────────────────────────────────────────────
+async function syncLead(lead) {
+  const aeFirstName = (lead.assignedAE || FALLBACK_AE).split(' ')[0];
+  const firstName = lead.firstName || '';
+  const branchName = lead.branch || '';
+  const fallbackSubject = `CandidPro x Patterson - NASM Introduction`;
+  const fallbackBody = `Hi ${aeFirstName} and ${firstName},\n\n${firstName} from the ${branchName} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${aeFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
+  const payload = {
+    timestamp: lead.timestamp, firstName: lead.firstName || '', lastName: lead.lastName || '',
+    role: lead.role || '', branch: lead.branch || '', region: lead.region || '',
+    email: lead.email || '', phone: lead.phone || '',
+    assignedAE: lead.assignedAE || '', aeEmail: lead.aeEmail || '',
+    notifSent: lead.notifSent || '',
+    emailSubject: lead.emailSubject || fallbackSubject,
+    emailBody: lead.emailBody || fallbackBody,
+    captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced',
+    driveUrl: lead.driveUrl || '',
+    capturedBy: lead.capturedBy || ''
+  };
+  const res = await fetch(ZAPIER_WEBHOOK, { method: 'POST', body: JSON.stringify(payload) });
+  const data = await res.json();
+  return data.status === 'success';
+}
+
+async function handleRetrySingle(id) {
+  const btn = document.getElementById('retry-btn-' + id);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner" style="border-color:rgba(232,40,30,0.3);border-top-color:var(--red);"></span>Syncing...'; }
+  await retrySingle(id);
+  renderPanel();
+}
+  
+async function retrySingle(id) {
+  const leads = getLeads();
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+  if (lead.status === 'offline_capture' && lead.imageBase64) { await retryOfflineCapture(lead); }
+  else {
+    updateLeadStatus(id, 'pending');
+    try { const ok = await syncLead(lead); updateLeadStatus(id, ok ? 'synced' : 'failed'); }
+    catch { updateLeadStatus(id, 'failed'); }
+  }
+}
+
+async function retryOfflineCapture(lead) {
+  if (_retryingLeads.has(lead.id)) return;
+  _retryingLeads.add(lead.id);
+  updateLeadStatus(lead.id, 'pending');
+  try {
+    const response = await fetch('/api/analyze', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: lead.imageBase64, mediaType: lead.imageMediaType || 'image/jpeg' })
+    });
+    const parsed = await response.json();
+    if (!parsed.error) {
+      const branchVal = parsed.branchName || '';
+      const roster = getCachedRoster();
+      const branches = [...new Set(roster.map(tr => tr.branch).filter(Boolean))];
+      const matchedBranch = branches.find(b => b.toLowerCase() === branchVal.toLowerCase())
+        || branches.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
+        || 'N/A';
+      let aeInfo = { assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL, region: '', email: lead.email };
+      // Try cache first, then API
+      const cachedMatch = searchRosterCache(`${parsed.firstName} ${parsed.lastName}`)[0];
+      if (cachedMatch) {
+        aeInfo = { assignedAE: cachedMatch.assignedAE, aeEmail: cachedMatch.aeEmail, aeFirstName: cachedMatch.aeFirstName || '', region: cachedMatch.region, email: cachedMatch.email || lead.email };
+      } else {
+        const branchMatch = getBranchAEFromCache(matchedBranch);
+        if (branchMatch) { aeInfo = { assignedAE: branchMatch.assignedAE, aeEmail: branchMatch.aeEmail, aeFirstName: branchMatch.aeFirstName || '', region: '', email: lead.email }; }
+      }
+      const firstName = toProperCase(parsed.firstName || '');
+      const lastName = toProperCase(parsed.lastName || '');
+      const assignedAEFirstName = aeInfo.aeFirstName || aeInfo.assignedAE.split(' ')[0];
+      const emailSubject = `CandidPro x Patterson - NASM Introduction`;
+      const emailBody = `Hi ${assignedAEFirstName} and ${firstName},\n\n${firstName} from the ${matchedBranch} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${assignedAEFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
+      
+      // Upload to Drive
+      let driveUrl = '';
+      if (lead.imageBase64) {
+        try {
+          driveUrl = await uploadToDrive(lead.imageBase64, firstName, lastName, matchedBranch) || '';
+        } catch {}
+      }
+      
+      const extraData = {
+        firstName, lastName,
+        role: parsed.role || 'Territory Representative',
+        branch: matchedBranch,
+        region: aeInfo.region, assignedAE: aeInfo.assignedAE,
+        aeEmail: aeInfo.aeEmail, email: aeInfo.email,
+        capturedBy: lead.capturedBy || '',
+        emailSubject, emailBody,
+        notifSent: aeInfo.email ? 'email' : 'none',
+        driveUrl,
+        status: 'pending'
+      };
+      updateLeadStatus(lead.id, 'pending', extraData);
+      const updatedLeads = getLeads();
+      const updatedLead = updatedLeads.find(l => l.id === lead.id);
+      if (updatedLead) { const ok = await syncLead(updatedLead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); }
+    }
+  } catch {}
+  finally { _retryingLeads.delete(lead.id); }
+}
+
+async function retryAll() {
+  const leads = getLeads();
+  const toRetry = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture');
+  for (const lead of toRetry) {
+    if (_retryingLeads.has(lead.id)) continue;
+    if (lead.status === 'offline_capture' && lead.imageBase64) { await retryOfflineCapture(lead); }
+    else { try { const ok = await syncLead(lead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); } catch {} }
+  }
+  renderPanel();
+}
+
+// ─── OFFLINE DETECTION ───────────────────────────────────────
+function updateOnlineStatus() {
+  const banner = document.getElementById('offlineBanner');
+  if (!navigator.onLine) { banner.classList.add('visible'); }
+  else { banner.classList.remove('visible'); autoRetryPending(); }
+}
+async function autoRetryPending() {
+  const leads = getLeads();
+  const pending = leads.filter(l => l.status === 'pending' || l.status === 'failed' || l.status === 'offline_capture');
+  if (pending.length === 0) return;
+  for (const lead of pending) {
+    if (_retryingLeads.has(lead.id)) continue;
+    if (lead.status === 'offline_capture' && lead.imageBase64) { await retryOfflineCapture(lead); }
+    else { try { const ok = await syncLead(lead); updateLeadStatus(lead.id, ok ? 'synced' : 'failed'); } catch {} }
+  }
+  renderPanel();
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ─── TR SEARCH (from cache) ───────────────────────────────────
+function handleTRSearch(val) {
+  const dropdown = document.getElementById('searchDropdown');
+  if (val.length < 2) { dropdown.style.display = 'none'; return; }
+  const results = searchRosterCache(val);
+  renderSearchDropdown(results, val);
+}
+
+function renderSearchDropdown(results, query) {
+  const dropdown = document.getElementById('searchDropdown');
+  if (results.length === 0) {
+    dropdown.innerHTML = `<div class="search-option"><div class="opt-notfound">No match for "${query}" — fill in manually below</div></div>`;
+    dropdown.style.display = 'block';
+    return;
+  }
+  dropdown.innerHTML = results.map((r, i) => `
+    <div class="search-option" onmousedown="selectTR(${i})">
+      <div class="opt-name">${r.name}${r.altName ? ' <span style="color:var(--gray);font-weight:400;font-size:12px;">('+r.altName+')</span>' : ''}</div>
+      <div class="opt-branch">${r.branch} · ${r.region}</div>
+    </div>`).join('');
+  dropdown.style.display = 'block';
+  window._searchResults = results;
+}
+
+function selectTR(idx) {
+  const results = window._searchResults || [];
+  const tr = results[idx];
+  if (!tr) return;
+  const nameParts = tr.name.trim().split(' ');
+  document.getElementById('trSearch').value = tr.name;
+  document.getElementById('firstName').value = toProperCase(nameParts[0] || '');
+  document.getElementById('lastName').value = toProperCase(nameParts.slice(1).join(' ') || '');
+  document.getElementById('trRole').value = 'Territory Representative';
+  document.getElementById('trEmail').value = tr.email || '';
+  document.getElementById('branchName').value = tr.branch || '';
+  document.getElementById('region').value = tr.region || '';
+  state.matchedAE = tr.assignedAE || FALLBACK_AE;
+  state.matchedAEEmail = tr.aeEmail || FALLBACK_AE_EMAIL;
+  state.matchedAEPhone = tr.aePhone || null;
+  state.matchedAEFirstName = tr.aeFirstName || null;
+  ['firstName','lastName','trEmail','branchName','region'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
+  });
+  document.getElementById('aiBadge').style.display = 'none';
+  document.getElementById('sheetBadge').style.display = 'inline-flex';
+  hideSearchDropdown();
+}
+function hideSearchDropdown() { document.getElementById('searchDropdown').style.display = 'none'; }
+
+// ─── OFFLINE CAPTURE ─────────────────────────────────────────
+function handleAnalyzeClick() {
+  if (!guardUserName()) return;
+  if (!navigator.onLine) { showOfflineCaptureStep(); }
+  else { analyzeImage(); }
+}
+function showOfflineCaptureStep() {
+  const offlineImg = document.getElementById('previewImgOffline');
+  const mainImg = document.getElementById('previewImg');
+  if (mainImg.src) { offlineImg.src = mainImg.src; offlineImg.style.display = 'block'; }
+  document.getElementById('offlineEmail').value = '';
+  document.getElementById('offlinePhone').value = '';
+  document.getElementById('step1bError').innerHTML = '';
+  showStep('step1b');
+}
+function handleOfflineRosterSearch(val) {
+  const dropdown = document.getElementById('offlineSearchDropdown');
+  if (val.length < 2) { dropdown.style.display = 'none'; return; }
+  const results = searchRosterCache(val);
+  if (results.length === 0) {
+    dropdown.innerHTML = `<div class="search-option"><div class="opt-notfound">No match for "${val}" — enter manually below</div></div>`;
+    dropdown.style.display = 'block';
+    return;
+  }
+  dropdown.innerHTML = results.map((r, i) => `
+    <div class="search-option" onmousedown="selectOfflineTR(${i})">
+      <div class="opt-name">${r.name}</div>
+      <div class="opt-branch">${r.branch}</div>
+    </div>`).join('');
+  dropdown.style.display = 'block';
+  window._offlineSearchResults = results;
+}
+
+function selectOfflineTR(idx) {
+  const results = window._offlineSearchResults || [];
+  const tr = results[idx];
+  if (!tr) return;
+  if (tr.email) document.getElementById('offlineEmail').value = tr.email;
+  document.getElementById('offlineRosterSearch').value = tr.name;
+  hideOfflineSearchDropdown();
+}
+
+function hideOfflineSearchDropdown() {
+  document.getElementById('offlineSearchDropdown').style.display = 'none';
+}
+async function submitOfflineCapture() {
+  const email = document.getElementById('offlineEmail').value.trim();
+  const phone = document.getElementById('offlinePhone').value.trim();
+  if (!email && !phone) { document.getElementById('step1bError').innerHTML = '<div class="error-msg">Please provide at least an email or phone number.</div>'; return; }
+  const compressedImage = state.imageBase64 ? await compressForStorage(state.imageBase64) : null;
+  const leadId = 'lead_' + Date.now();
+  const lead = {
+    id: leadId, timestamp: new Date().toLocaleString(),
+    firstName: '', lastName: '', role: '', branch: '', region: '',
+    email, phone, assignedAE: FALLBACK_AE, aeEmail: FALLBACK_AE_EMAIL,
+    notifSent: '', status: 'offline_capture',
+    capturedBy: getUserName(),
+    imageBase64: compressedImage, imageMediaType: 'image/jpeg'
+  };
+  addLead(lead);
+  document.getElementById('successTitle').textContent = 'Contact saved!';
+  document.getElementById('successMsg').textContent = "Badge photo and contact info saved. Details will be extracted and synced automatically when you're back online.";
+  document.getElementById('leadSummaryCard').innerHTML = `
+    <div class="tr-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div class="tr-name">Offline Capture</div>
+        <span class="tag tag-offline">📶 Queued</span>
+      </div>
+      <div class="tr-role">${email ? '✉ ' + email : ''}${email && phone ? ' · ' : ''}${phone ? '📱 ' + phone : ''}</div>
+    </div>`;
+  document.getElementById('sheetStatus').innerHTML = '<div class="status-offline-capture">📶 Saved locally — will auto-analyze and sync when back online.</div>';
+  document.getElementById('openTextBtn').style.display = 'none';
+  for (let i = 1; i <= 4; i++) {
+    const ps = document.getElementById('ps' + i); const pl = document.getElementById('pl' + i);
+    if (ps) ps.className = 'progress-step' + (i < 4 ? ' done' : ' active');
+    if (pl) pl.className = 'progress-label' + (i < 4 ? ' done' : ' active');
+  }
+  showStep('step4');
+}
+function showStep(stepId) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(stepId).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ─── MAIN FLOW ───────────────────────────────────────────────
 function goStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
   document.getElementById('step' + n).classList.add('active');
   window.scrollTo(0, 0);
   for (let i = 1; i <= 4; i++) {
-    const ps = document.getElementById('ps' + i);
-    const pl = document.getElementById('pl' + i);
+    const ps = document.getElementById('ps' + i); const pl = document.getElementById('pl' + i);
     if (ps) ps.className = 'progress-step' + (i < n ? ' done' : i === n ? ' active' : '');
     if (pl) pl.className = 'progress-label' + (i < n ? ' done' : i === n ? ' active' : '');
   }
@@ -357,23 +1143,48 @@ function handleImage(e) {
   state.imageMediaType = mediaType === 'image/heic' ? 'image/jpeg' : mediaType;
   const reader = new FileReader();
   reader.onload = function(ev) {
-    state.imageBase64 = ev.target.result.split(',')[1];
-    const img = document.getElementById('previewImg');
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 1600;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL('image/jpeg', 0.85);
+      state.imageBase64 = compressed.split(',')[1];
+      state.imageMediaType = 'image/jpeg';
+      const previewImg = document.getElementById('previewImg');
+      previewImg.src = compressed; previewImg.style.display = 'block';
+      document.getElementById('uploadZone').style.display = 'none';
+      document.getElementById('analyzeBtn').style.display = 'block';
+      document.getElementById('skipBtn').style.display = 'block';
+    };
     img.src = ev.target.result;
-    img.style.display = 'block';
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('analyzeBtn').style.display = 'block';
-    document.getElementById('skipBtn').style.display = 'block';
   };
   reader.readAsDataURL(file);
 }
 
+function resetStep1() {
+  document.getElementById('previewImg').style.display = 'none';
+  document.getElementById('previewImg').src = '';
+  document.getElementById('analyzeBtn').style.display = 'none';
+  document.getElementById('skipBtn').style.display = 'none';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('badgeInput').value = '';
+  state.imageBase64 = null;
+}
+
 function skipToManual() {
+  if (!guardUserName()) return;
   document.getElementById('aiBadge').style.display = 'none';
-  ['firstName','lastName','trRole','branchName','region'].forEach(id => {
+  document.getElementById('sheetBadge').style.display = 'none';
+  ['firstName','lastName','trRole','branchName','region','trEmail','trSearch'].forEach(id => {
     const el = document.getElementById(id);
-    el.value = '';
-    el.classList.remove('ai-filled');
+    if (el) { el.value = ''; el.classList.remove('ai-filled'); el.classList.remove('sheet-filled'); }
   });
   goStep(2);
 }
@@ -386,72 +1197,95 @@ async function analyzeImage() {
   document.getElementById('step1Error').innerHTML = '';
   try {
     const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64: state.imageBase64, mediaType: state.imageMediaType })
     });
     const parsed = await response.json();
     if (parsed.error) throw new Error(parsed.error);
-    document.getElementById('firstName').value = parsed.firstName || '';
-    document.getElementById('lastName').value = parsed.lastName || '';
+    const firstName = parsed.firstName || '';
+    const lastName = parsed.lastName || '';
+    document.getElementById('firstName').value = toProperCase(firstName);
+    document.getElementById('lastName').value = toProperCase(lastName);
     document.getElementById('trRole').value = parsed.role || '';
-
     const branchVal = parsed.branchName || '';
-    document.getElementById('branchName').value = branchVal;
-    autofillRegion(branchVal);
-    ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
-    document.getElementById('aiBadge').style.display = 'inline-flex';
+    const roster = getCachedRoster();
+    const branches = [...new Set(roster.map(tr => tr.branch).filter(Boolean))];
+    const matchedBranch = branches.find(b => b.toLowerCase() === branchVal.toLowerCase())
+      || branches.find(b => b.toLowerCase().includes(branchVal.toLowerCase()) || branchVal.toLowerCase().includes(b.toLowerCase()))
+      || 'N/A';
+    document.getElementById('branchName').value = matchedBranch;
+
+    if (firstName || lastName) {
+      // Search cache first
+      const cacheResults = searchRosterCache(`${firstName} ${lastName}`.trim());
+      if (cacheResults.length > 0) {
+        const match = cacheResults[0];
+        document.getElementById('trEmail').value = match.email || '';
+        document.getElementById('region').value = match.region || '';
+        if (match.branch) document.getElementById('branchName').value = match.branch;
+        state.matchedAE = match.assignedAE;
+        state.matchedAEEmail = match.aeEmail;
+        state.matchedAEPhone = match.aePhone || null;
+        state.matchedAEFirstName = match.aeFirstName || null;
+        document.getElementById('trSearch').value = match.name;
+        ['firstName','lastName','trRole','branchName','region','trEmail'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.value) { el.classList.remove('ai-filled'); el.classList.add('sheet-filled'); }
+        });
+        document.getElementById('aiBadge').style.display = 'none';
+        document.getElementById('sheetBadge').style.display = 'inline-flex';
+      } else {
+        // Try branch fallback from cache
+        const branchMatch = getBranchAEFromCache(matchedBranch);
+        if (branchMatch) {
+          state.matchedAE = branchMatch.assignedAE;
+          state.matchedAEEmail = branchMatch.aeEmail;
+          state.matchedAEPhone = branchMatch.aePhone || null;
+          state.matchedAEFirstName = branchMatch.aeFirstName || null;
+        }
+        document.getElementById('region').value = REGION_MAP[matchedBranch] || '';
+        ['firstName','lastName','trRole','branchName','region'].forEach(id => document.getElementById(id).classList.add('ai-filled'));
+        document.getElementById('aiBadge').style.display = 'inline-flex';
+        document.getElementById('sheetBadge').style.display = 'none';
+      }
+    }
     goStep(2);
   } catch(err) {
     document.getElementById('step1Error').innerHTML = '<div class="error-msg">Could not analyze image: ' + err.message + '. Try manually instead.</div>';
     document.getElementById('skipBtn').style.display = 'block';
   }
-  btn.innerHTML = 'Extract badge info with AI';
+  btn.innerHTML = 'Extract badge Info';
   btn.disabled = false;
 }
 
-function autofillRegion(branchVal) {
-  const bl = branchVal.toLowerCase();
-  const match = AE_MAP.find(r => r.branch.toLowerCase() === bl)
-    || AE_MAP.find(r => bl.includes(r.branch.toLowerCase()) || r.branch.toLowerCase().includes(bl));
-  if (match && match.region) {
-    const regionField = document.getElementById('region');
-    regionField.value = match.region;
-    regionField.classList.add('ai-filled');
-  }
-}
-
 function filterBranches(val) {
-  const filtered = val.length === 0
-    ? BRANCH_LIST
-    : BRANCH_LIST.filter(b => b.toLowerCase().includes(val.toLowerCase()));
-  renderDropdown(filtered);
+  const roster = getCachedRoster();
+  const branches = roster.length > 0
+    ? [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate'].sort()
+    : BRANCH_LIST;
+  const filtered = val.length === 0 ? branches : branches.filter(b => b.toLowerCase().includes(val.toLowerCase()));
+  renderBranchDropdown(filtered);
 }
-
-function renderDropdown(list) {
+function renderBranchDropdown(list) {
   const dropdown = document.getElementById('branchDropdown');
   if (list.length === 0) { dropdown.style.display = 'none'; return; }
-  dropdown.innerHTML = list.map(b =>
-    `<div class="branch-option" onmousedown="selectBranch('${b}')">${b}</div>`
-  ).join('');
+  dropdown.innerHTML = list.map(b => `<div class="branch-option" onmousedown="selectBranch('${b}')">${b}</div>`).join('');
   dropdown.style.display = 'block';
 }
-
 function selectBranch(branch) {
   document.getElementById('branchName').value = branch;
-  autofillRegion(branch);
-  hideDropdown();
+  document.getElementById('region').value = REGION_MAP[branch] || '';
+  hideBranchDropdown();
+}
+function showBranchDropdown() { filterBranches(document.getElementById('branchName').value); }
+function hideBranchDropdown() { document.getElementById('branchDropdown').style.display = 'none'; }
+
+function toProperCase(str) {
+  if (!str) return '';
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function showDropdown() {
-  filterBranches(document.getElementById('branchName').value);
-}
-
-function hideDropdown() {
-  document.getElementById('branchDropdown').style.display = 'none';
-}
-
-function matchAE() {
+async function matchAE() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
   const role = document.getElementById('trRole').value.trim();
@@ -463,26 +1297,65 @@ function matchAE() {
   if (!firstName || !lastName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least a first and last name.</div>'; return; }
   if (!email && !phone) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter at least an email or phone number.</div>'; return; }
   if (!branchName) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the list. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
-
-  const validBranch = BRANCH_LIST.includes(branchName);
-  if (!validBranch) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Branch must match the provided list. Please select from the dropdown or choose "N/A".</div>'; return; }
-
+  const roster = getCachedRoster();
+  const validBranches = roster.length > 0
+  ? [...new Set(roster.map(tr => tr.branch).filter(Boolean)), 'N/A', 'Corporate']
+  : BRANCH_LIST;
+  if (branchName && !validBranches.includes(branchName)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please select a branch from the dropdown. If the branch isn\'t available or not applicable, select "N/A".</div>'; return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('step2Error').innerHTML = '<div class="error-msg">Please enter a valid email address.</div>'; return; }
   document.getElementById('step2Error').innerHTML = '';
 
-  const bl = branchName.toLowerCase();
-  let match = AE_MAP.find(r => r.branch.toLowerCase() === bl);
-  if (!match) match = AE_MAP.find(r => bl.includes(r.city.toLowerCase()) || r.city.toLowerCase().includes(bl));
-  if (!match) match = AE_MAP.find(r => { const p = bl.split(' - ').pop(); return r.branch.toLowerCase().includes(p) || bl.includes(r.branch.toLowerCase().split(' - ').pop()); });
+  // Branch fallback from cache if no name match
+  if (!state.matchedAE && branchName && branchName !== 'N/A' && branchName !== 'Corporate') {
+    const branchMatch = getBranchAEFromCache(branchName);
+    if (branchMatch) {
+      state.matchedAE = branchMatch.assignedAE;
+      state.matchedAEEmail = branchMatch.aeEmail;
+      state.matchedAEPhone = branchMatch.aePhone || null;
+      state.matchedAEFirstName = branchMatch.aeFirstName || null;
+    } else {
+      // Fallback to API if not in cache
+      try {
+        const branchRes = await fetch('/api/lookup', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ branch: branchName })
+        });
+        const branchData = await branchRes.json();
+        if (branchData.results && branchData.results.length > 0) {
+          const match = branchData.results[0];
+          state.matchedAE = match.assignedAE;
+          state.matchedAEEmail = match.aeEmail;
+          state.matchedAEPhone = match.aePhone || null;
+          state.matchedAEFirstName = match.aeFirstName || null;
+        }
+      } catch {}
+    }
+  }
 
-  state.matchedAE = match ? match.ae : 'Sebastien Carreau';
-  state.matchedRegion = match ? match.region : region;
-  state.currentLead = { firstName, lastName, role, branchName, region: match ? match.region : region, email, phone };
+  const assignedAE = state.matchedAE || FALLBACK_AE;
+  const assignedAEEmail = state.matchedAEEmail || FALLBACK_AE_EMAIL;
+  const assignedAEPhone = state.matchedAEPhone || null;
+  const assignedAEFirstName = state.matchedAEFirstName || assignedAE.split(' ')[0];
+
+  state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail, assignedAEPhone };
+
+  const emailSubject = `CandidPro x Patterson - NASM Introduction`;
+  const emailBody = `Hi ${assignedAEFirstName} and ${firstName},\n\n${firstName} from the ${branchName} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${assignedAEFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
+  document.getElementById('emailSubject').value = emailSubject;
+  document.getElementById('emailBody').value = emailBody;
+
+  if (phone) {
+    document.getElementById('smsTemplateCard').style.display = 'block';
+    document.getElementById('smsBody').value = `Hi ${firstName} and ${assignedAEFirstName}! ${firstName} stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro. Wanted to connect you both to get started!`;
+  } else {
+    document.getElementById('smsTemplateCard').style.display = 'none';
+  }
 
   document.getElementById('trSummaryBlock').innerHTML = `
     <div class="tr-card">
       <div class="tr-name">${firstName} ${lastName}</div>
       <div class="tr-role">${role}</div>
-      <div class="tr-branch">${branchName}${state.matchedRegion ? ' · ' + state.matchedRegion : ''}</div>
+      <div class="tr-branch">${branchName}${region ? ' · ' + region : ''}</div>
       <div class="contact-tags">
         ${email ? '<span class="tag tag-navy">✉ ' + email + '</span>' : ''}
         ${phone ? '<span class="tag tag-navy">📱 ' + phone + '</span>' : ''}
@@ -492,99 +1365,272 @@ function matchAE() {
   document.getElementById('matchBlock').innerHTML = `
     <div class="ae-match-card">
       <div class="ae-label">Assigned CandidPro AE</div>
-      <div class="ae-name">${state.matchedAE}</div>
-      ${match
-        ? '<div class="ae-branch">' + match.branch + ' · ' + match.region + '</div>'
-        : '<div class="ae-unmatched">⚠ Branch not matched — please verify</div>'}
+      <div class="ae-name">${assignedAE}</div>
+      ${assignedAEPhone ? `<div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;">📱 ${assignedAEPhone}</div>` : ''}
     </div>`;
 
-  updateMessagePreview();
   goStep(3);
 }
 
-function toggleNotif(mode) {
-  state.notifMode = mode;
-  document.getElementById('notifEmail').classList.toggle('selected', mode === 'email');
-  document.getElementById('notifSMS').classList.toggle('selected', mode === 'sms');
-  updateMessagePreview();
+// ─── GROUP TEXT ───────────────────────────────────────────────
+function openGroupText() {
+  const l = state.currentLead;
+  if (!l) return;
+  const smsBody = document.getElementById('smsBody').value;
+  const numbers = [];
+  if (l.phone) numbers.push(l.phone.replace(/\D/g, '').replace(/^1/, '+1'));
+  if (l.assignedAEPhone) numbers.push(l.assignedAEPhone.replace(/\D/g, '').replace(/^1/, '+1'));
+  const to = numbers.join(',');
+  const encoded = encodeURIComponent(smsBody);
+  window.location.href = `sms:/open?addresses=${to}&body=${encoded}`;
 }
 
-function updateMessagePreview() {
-  const l = state.currentLead || {};
-  const ae = state.matchedAE || 'AE';
-  const content = state.notifMode === 'email'
-    ? `Subject: New Patterson TR Introduction — ${l.firstName} ${l.lastName}\n\nHi ${ae},\n\nGreat news! We connected with ${l.firstName} ${l.lastName} (${l.role}) from the ${l.branchName} branch at NASM.\n\n${l.firstName} is interested in partnering with CandidPro and has been matched to you as their AE contact.\n\nContact details:\n${l.email ? '  Email: ' + l.email + '\n' : ''}${l.phone ? '  Phone: ' + l.phone + '\n' : ''}\nPlease reach out to ${l.firstName} to kick off the introduction and next steps.\n\nGo CandidPro!\nNASM Booth Team`
-    : `Hey ${ae}! New Patterson TR match from NASM:\n\n${l.firstName} ${l.lastName}\n${l.role} — ${l.branchName}\n${l.email ? 'Email: ' + l.email + '\n' : ''}${l.phone ? 'Phone: ' + l.phone : ''}\n\nThey're interested in working with CandidPro — you're their assigned AE. Reach out soon!`;
-  document.getElementById('messagePreviewBlock').innerHTML = `
-    <div class="preview-label">Message preview</div>
-    <div class="message-box">${content}</div>`;
+// ─── DRIVE UPLOAD ─────────────────────────────────────────────
+async function uploadToDrive(imageBase64, firstName, lastName, branch) {
+  try {
+    const timestamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(':', '-');
+    const safeName = `${firstName}_${lastName}_${branch.replace(/[^a-zA-Z0-9]/g, '-')}_${timestamp}.jpg`;
+    const res = await fetch('/api/gdrive', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64, fileName: safeName })
+    });
+    const data = await res.json();
+    return data.url || null;
+  } catch { return null; }
 }
 
+// ─── SUBMIT ───────────────────────────────────────────────────
 async function submitLead() {
   const btn = document.getElementById('submitBtn');
-  btn.innerHTML = '<span class="spinner"></span>Logging to Sheets...';
+  btn.innerHTML = '<span class="spinner"></span>Submitting...';
   btn.disabled = true;
-  const l = state.currentLead;
-  const payload = { timestamp: new Date().toLocaleString(), firstName: l.firstName, lastName: l.lastName, role: l.role, branch: l.branchName, region: l.region, email: l.email, phone: l.phone, assignedAE: state.matchedAE, notifSent: state.notifMode };
-  let sheetSuccess = false;
-  try {
-    const res = await fetch(ZAPIER_WEBHOOK, { method: 'POST', body: JSON.stringify(payload) });
-    const data = await res.json();
-    sheetSuccess = data.status === 'success';
-  } catch(err) { sheetSuccess = false; }
 
-  document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been captured and ${state.matchedAE} is queued for notification via ${state.notifMode === 'email' ? 'email' : 'text message'}.`;
+  const l = state.currentLead;
+  const emailSubject = document.getElementById('emailSubject').value;
+  const emailBody = document.getElementById('emailBody').value;
+  const leadId = 'lead_' + Date.now();
+  const lead = {
+    id: leadId, timestamp: new Date().toLocaleString(),
+    firstName: l.firstName, lastName: l.lastName, role: l.role,
+    branch: l.branchName, region: l.region, email: l.email, phone: l.phone,
+    assignedAE: l.assignedAE, aeEmail: l.assignedAEEmail,
+    emailSubject, emailBody,
+    notifSent: l.email ? 'email' : 'none',
+    capturedBy: getUserName(),
+    status: 'pending'
+  };
+
+  addLead(lead);
+
+  let driveUrl = null;
+  if (state.imageBase64 && navigator.onLine) {
+    driveUrl = await uploadToDrive(state.imageBase64, l.firstName, l.lastName, l.branchName);
+    if (driveUrl) lead.driveUrl = driveUrl;
+  }
+
+  let sheetSuccess = false;
+  if (navigator.onLine) {
+    try {
+      const syncPromise = syncLead(lead);
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+      sheetSuccess = await Promise.race([syncPromise, timeoutPromise]);
+      updateLeadStatus(leadId, sheetSuccess ? 'synced' : 'failed');
+    } catch { updateLeadStatus(leadId, 'failed'); }
+  }
+
+  document.getElementById('successTitle').textContent = 'Lead captured!';
+  document.getElementById('successMsg').textContent = `${l.firstName} ${l.lastName} has been logged and ${l.assignedAE} has been notified via email.`;
   document.getElementById('leadSummaryCard').innerHTML = `
     <div class="tr-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
         <div class="tr-name">${l.firstName} ${l.lastName}</div>
-        <span class="tag tag-green">✓ Logged</span>
+        <span class="tag tag-green">✓ Captured</span>
       </div>
       <div class="tr-role">${l.role} · ${l.branchName}</div>
-      <div style="margin-top:8px;font-size:12px;color:var(--gray);">Assigned to <strong style="color:var(--navy);">${state.matchedAE}</strong></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--gray);">Assigned to <strong style="color:var(--navy);">${l.assignedAE}</strong></div>
     </div>`;
-  document.getElementById('sheetStatus').innerHTML = sheetSuccess
-    ? '<div class="status-success">✓ Row added to Google Sheets via Zapier</div>'
-    : '<div class="status-warn">⚠ Could not reach Zapier — check your connection.</div>';
-  btn.innerHTML = 'Submit lead & log to Sheets';
+
+  if (!navigator.onLine) {
+    document.getElementById('sheetStatus').innerHTML = '<div class="status-queued">📶 No connection — saved locally and will sync when reconnected.</div>';
+  } else if (sheetSuccess) {
+    document.getElementById('sheetStatus').innerHTML = '<div class="status-success">✓ Logged to Google Sheets · Email sent via Zapier</div>';
+  } else {
+    document.getElementById('sheetStatus').innerHTML = '<div class="status-warn">⚠ Could not reach Zapier — saved locally. Tap the menu to retry.</div>';
+  }
+
+  if (l.phone) { document.getElementById('openTextBtn').style.display = 'block'; }
+  else { document.getElementById('openTextBtn').style.display = 'none'; }
+
+  btn.innerHTML = 'Submit lead & send email';
   btn.disabled = false;
   goStep(4);
 }
 
 function resetApp() {
-  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, notifMode: 'email', currentLead: null };
+  state = { imageBase64: null, imageMediaType: 'image/jpeg', matchedAE: null, matchedAEEmail: null, matchedAEPhone: null, matchedAEFirstName: null, notifMode: 'email', currentLead: null, searchTimeout: null };
   document.getElementById('previewImg').style.display = 'none';
   document.getElementById('previewImg').src = '';
+  document.getElementById('previewImgOffline').style.display = 'none';
+  document.getElementById('previewImgOffline').src = '';
   document.getElementById('analyzeBtn').style.display = 'none';
   document.getElementById('skipBtn').style.display = 'none';
   document.getElementById('uploadZone').style.display = 'block';
   document.getElementById('badgeInput').value = '';
-  document.getElementById('aiBadge').style.display = 'inline-flex';
-  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone'].forEach(id => {
+  document.getElementById('aiBadge').style.display = 'none';
+  document.getElementById('sheetBadge').style.display = 'none';
+  document.getElementById('successTitle').textContent = 'Lead captured!';
+  document.getElementById('smsTemplateCard').style.display = 'none';
+  document.getElementById('openTextBtn').style.display = 'none';
+  ['firstName','lastName','trRole','branchName','region','trEmail','trPhone','offlineEmail','offlinePhone','trSearch','offlineRosterSearch','emailSubject','emailBody','smsBody'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.value = ''; el.classList.remove('ai-filled'); }
+    if (el) { el.value = ''; el.classList.remove('ai-filled'); el.classList.remove('sheet-filled'); }
   });
-  document.getElementById('notifEmail').classList.add('selected');
-  document.getElementById('notifSMS').classList.remove('selected');
   goStep(1);
 }
 
-  function formatPhone(input) {
+function formatPhone(input) {
   let digits = input.value.replace(/\D/g, '');
   if (digits.startsWith('1')) digits = digits.substring(1);
   let formatted = '';
-  if (digits.length === 0) {
-    formatted = '';
-  } else if (digits.length <= 3) {
-    formatted = `+1 (${digits}`;
-  } else if (digits.length <= 6) {
-    formatted = `+1 (${digits.slice(0,3)}) ${digits.slice(3)}`;
-  } else if (digits.length <= 10) {
-    formatted = `+1 (${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
-  } else {
-    formatted = `+1 (${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6,10)}`;
-  }
+  if (digits.length === 0) { formatted = ''; }
+  else if (digits.length <= 3) { formatted = `+1 (${digits}`; }
+  else if (digits.length <= 6) { formatted = `+1 (${digits.slice(0,3)}) ${digits.slice(3)}`; }
+  else if (digits.length <= 10) { formatted = `+1 (${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`; }
+  else { formatted = `+1 (${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6,10)}`; }
   input.value = formatted;
+}
+
+// ─── USER NAME ───────────────────────────────────────────────
+function initUserName() {
+  const name = localStorage.getItem('nasm_user_name');
+  if (!name) {
+    document.getElementById('userOverlay').classList.remove('hidden');
+  } else {
+    document.getElementById('userOverlay').classList.add('hidden');
+    document.getElementById('userChipName').textContent = name;
+  }
+}
+
+function saveUserName() {
+  const input = document.getElementById('userNameInput').value.trim();
+  if (!input) {
+    document.getElementById('userNameError').style.display = 'block';
+    return;
+  }
+  localStorage.setItem('nasm_user_name', input);
+  document.getElementById('userChipName').textContent = input;
+  document.getElementById('userOverlay').classList.add('hidden');
+  document.getElementById('userNameError').style.display = 'none';
+}
+
+function editUserName() {
+  const current = localStorage.getItem('nasm_user_name') || '';
+  document.getElementById('editUserNameInput').value = current;
+  document.getElementById('editUserNameError').style.display = 'none';
+  document.getElementById('editUserOverlay').classList.remove('hidden');
+}
+
+function saveEditUserName() {
+  const input = document.getElementById('editUserNameInput').value.trim();
+  if (!input) {
+    document.getElementById('editUserNameError').style.display = 'block';
+    return;
+  }
+  localStorage.setItem('nasm_user_name', input);
+  document.getElementById('userChipName').textContent = input;
+  document.getElementById('editUserOverlay').classList.add('hidden');
+  document.getElementById('editUserNameError').style.display = 'none';
+}
+
+function getUserName() {
+  return localStorage.getItem('nasm_user_name') || '';
+}
+
+function guardUserName() {
+  if (!getUserName()) {
+    document.getElementById('userOverlay').classList.remove('hidden');
+    return false;
+  }
+  return true;
+}
+
+  // ─── STORAGE MANAGEMENT ──────────────────────────────────────
+function clearSyncedLeads() {
+  const leads = getLeads();
+  const synced = leads.filter(l => l.status === 'synced');
+  const remaining = leads.filter(l => l.status !== 'synced');
+  if (synced.length === 0) {
+    alert('No synced leads to clear. Your storage is full but all leads are still pending sync — please retry syncing first.');
+    return;
+  }
+  if (!confirm(`This will remove ${synced.length} synced lead${synced.length > 1 ? 's' : ''} to free up space. Leads still pending sync will not be affected.`)) return;
+  try {
+    const leadsToSave = remaining.map(lead => {
+      if (lead.status === 'offline_capture') return lead;
+      const { imageBase64, imageMediaType, ...rest } = lead;
+      return rest;
+    });
+    localStorage.setItem(LEADS_KEY, JSON.stringify(leadsToSave));
+    document.getElementById('storageOverlay').classList.add('hidden');
+    updateMenuBadge();
+    renderPanel();
+    alert(`✓ ${synced.length} synced lead${synced.length > 1 ? 's' : ''} cleared. You can continue capturing.`);
+  } catch(err) {
+    alert('Still unable to free enough space. Please contact Sebastien for assistance.');
+  }
+}
+  
+// Init
+updateOnlineStatus();
+updateMenuBadge();
+refreshCaches();
+initUserName();
+document.getElementById('appVersion').textContent = APP_VERSION;
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              const banner = document.getElementById('updateBanner');
+              if (banner) banner.style.display = 'block';
+            }
+          });
+        });
+      }).catch(err => console.log('SW registration failed:', err));
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+    });
+  }
+
+  function applyUpdate() {
+    navigator.serviceWorker.ready.then(reg => {
+      if (reg.waiting) reg.waiting.postMessage('skipWaiting');
+    });
+  }
+
+  function checkForUpdate() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.update().then(() => {
+        // Give the browser a moment to detect the new worker
+       setTimeout(() => {
+          if (reg.waiting) {
+            if (confirm('Update available! Tap OK to refresh and apply the update.')) {
+              applyUpdate();
+            }
+          } else {
+            alert('You\'re on the latest version!');
+          }
+        }, 1000);
+      });
+    });
+  }
 }
 </script>
 </body>
