@@ -267,6 +267,22 @@
     <div class="user-overlay-sub">You've run out of storage. Please clear your synced leads to continue capturing.</div>
     <button class="btn-primary" onclick="clearSyncedLeads()">Clear Synced Leads</button>
   </div>
+
+  <!-- CANADA MODAL -->
+  <div id="canadaModalBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;" onclick="closeCanadaModal()">
+    <div style="background:white;border-radius:20px;padding:28px 24px;margin:24px;max-width:360px;width:100%;text-align:center;" onclick="event.stopPropagation()">
+      <div style="font-size:48px;margin-bottom:12px;">🇨🇦</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);margin-bottom:16px;">Canadian Territory Rep</div>
+      <div style="font-size:14px;color:var(--gray);line-height:1.6;margin-bottom:20px;">
+        This TR is based in Canada where CandidPro isn't available yet.<br>
+        We'll add them to our interest list and reach out when we expand.
+      </div>
+      <div style="background:var(--success-bg);border:1.5px solid var(--success);border-radius:12px;padding:12px 16px;margin-bottom:20px;">
+        <div style="font-size:15px;font-weight:700;color:var(--success);">✓ Added to interest list</div>
+      </div>
+      <button class="btn-primary" onclick="closeCanadaModal()">Capture another lead →</button>
+    </div>
+  </div>
   
   <!-- USER BAR -->
   <div style="background:var(--gray-light);padding:6px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
@@ -500,7 +516,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v24';
+const APP_VERSION = 'v25';
 const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 const LEADS_KEY = 'nasm_leads';
 const ROSTER_KEY = 'nasm_roster';
@@ -869,7 +885,7 @@ async function syncLead(lead) {
     notifSent: lead.notifSent || '',
     emailSubject: lead.emailSubject || fallbackSubject,
     emailBody: lead.emailBody || fallbackBody,
-    captureStatus: lead.status === 'offline_capture' ? 'offline_capture' : 'synced',
+    captureStatus: lead.captureStatus || (lead.status === 'offline_capture' ? 'offline_capture' : 'synced'),
     driveUrl: lead.driveUrl || '',
     capturedBy: lead.capturedBy || ''
   };
@@ -1339,6 +1355,34 @@ async function matchAE() {
 
   state.currentLead = { firstName, lastName, role, branchName, region, email, phone, assignedAE, assignedAEEmail, assignedAEPhone };
 
+  // Canada flow — log lead but skip email/SMS
+  if (isCanadian(region)) {
+    const leadId = 'lead_' + Date.now();
+    const lead = {
+      id: leadId, timestamp: new Date().toLocaleString(),
+      firstName, lastName, role,
+      branch: branchName, region,
+      email, phone,
+      assignedAE: '', aeEmail: '',
+      emailSubject: '', emailBody: '',
+      notifSent: 'none',
+      capturedBy: getUserName(),
+      captureStatus: 'canada_interest',
+      status: 'pending'
+    };
+    addLead(lead);
+    if (navigator.onLine) {
+      try {
+        const syncPromise = syncLead(lead);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+        const ok = await Promise.race([syncPromise, timeoutPromise]);
+        updateLeadStatus(leadId, ok ? 'synced' : 'failed');
+      } catch { updateLeadStatus(leadId, 'failed'); }
+    }
+    showCanadaModal();
+    return;
+  }
+
   const emailSubject = `CandidPro x Patterson - NASM Introduction`;
   const emailBody = `Hi ${assignedAEFirstName} and ${firstName},\n\n${firstName} from the ${branchName} branch stopped by the CandidPro booth at NASM and is interested in growing their accounts with CandidPro so I wanted to make sure you two are connected!\n\n${firstName}, if you haven't connected yet, meet ${assignedAEFirstName} who is your CandidPro point of contact for your Patterson accounts.\n\nIf you want to learn more about CandidPro or the Patterson partnership in the meantime, check out this page: https://www.candidpro.com/candidpro-for-patterson-dental-territory-representatives\n\nLooking forward to you two working together!\n\nSebastien Carreau, CandidPro`;
   document.getElementById('emailSubject').value = emailSubject;
@@ -1579,6 +1623,22 @@ function clearSyncedLeads() {
     alert('Still unable to free enough space. Please contact Sebastien for assistance.');
   }
 }
+
+  // ─── CANADA FLOW ─────────────────────────────────────────────
+function isCanadian(region) {
+  return (region || '').trim().toLowerCase() === 'canada';
+}
+
+function showCanadaModal() {
+  const backdrop = document.getElementById('canadaModalBackdrop');
+  backdrop.style.display = 'flex';
+}
+
+function closeCanadaModal() {
+  document.getElementById('canadaModalBackdrop').style.display = 'none';
+  resetApp();
+}
+
   
 // Init
 updateOnlineStatus();
