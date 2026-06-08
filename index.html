@@ -232,7 +232,15 @@
 </style>
 </head>
 <body>
-<div class="app">
+
+  <!-- DEACTIVATION SCREEN -->
+<div style="position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;text-align:center;">
+  <img src="https://cdn.prod.website-files.com/601a0e7f102ff5b24874c42b/63d9b5ce58edcf6bdd0be3ce_CandidProLogo-red%20(1).png" style="height:24px;margin-bottom:32px;">
+  <div style="font-family:'DM Serif Display',serif;font-size:28px;color:white;margin-bottom:12px;">Thanks for a great NASM 2026!</div>
+  <div style="font-size:15px;color:rgba(255,255,255,0.6);line-height:1.7;max-width:300px;">The lead capture app is no longer active.<br>We'll see you at the next event!</div>
+</div>
+  
+  <div class="app">
 
   <div class="offline-banner" id="offlineBanner">⚠ No internet connection — leads will be saved and synced when reconnected</div>
   <div id="updateBanner" style="display:none;background:#1A2B4A;border-bottom:1px solid #2D4A7A;padding:8px 20px;font-size:12px;color:white;font-weight:600;text-align:center;cursor:pointer;" onclick="applyUpdate()">
@@ -516,7 +524,7 @@
 </div>
 
 <script>
-const APP_VERSION = 'v26';
+const APP_VERSION = 'v27';
 const ZAPIER_WEBHOOK = "https://hooks.zapier.com/hooks/catch/11566901/ujco5lf/";
 const LEADS_KEY = 'nasm_leads';
 const ROSTER_KEY = 'nasm_roster';
